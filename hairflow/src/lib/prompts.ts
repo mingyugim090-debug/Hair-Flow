@@ -1,0 +1,90 @@
+// AI 시술 레시피 프롬프트 - GPT-4o Vision
+export const RECIPE_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너이자 모발 과학 전문가입니다.
+두 장의 사진(고객의 현재 모발 상태 + 원하는 레퍼런스 스타일)을 비교 분석하여,
+주니어 헤어 디자이너도 따라할 수 있는 정확한 시술 레시피를 제공합니다.
+
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
+
+export const RECIPE_USER_PROMPT = `첫 번째 사진은 고객의 현재 모발 상태이고, 두 번째 사진은 고객이 원하는 레퍼런스 스타일입니다.
+
+두 사진을 정밀 비교 분석하여 아래 JSON 형식으로 시술 레시피를 작성해주세요:
+
+{
+  "currentAnalysis": {
+    "baseLevel": "현재 모발의 레벨 (1-10 숫자와 설명)",
+    "damageLevel": "손상도 (1-5 단계와 상세 설명)",
+    "hairType": "모질 특성 (직모/곱슬/웨이브 등)",
+    "hairVolume": "모량 (적은/보통/많은)",
+    "summary": "현재 모발 상태 종합 요약 (2-3문장)"
+  },
+  "targetAnalysis": {
+    "colorGap": "현재와 목표 컬러 차이 분석",
+    "lengthDiff": "길이 차이 분석",
+    "textureDiff": "텍스처/볼륨 차이 분석",
+    "summary": "목표 스타일 도달을 위한 핵심 과제 요약"
+  },
+  "procedure": {
+    "type": "시술 종류 (color/cut/perm/mixed 중 하나)",
+    "description": "전체 시술 개요 (3-4문장)"
+  },
+  "chemicals": {
+    "brand": "추천 약제 브랜드 (한국 시장 기준: 웰라, 로레알, 밀본 등)",
+    "formula": "약제 배합 공식 (예: 6N + 7A 1:1)",
+    "ratio": "배합 비율 상세 (옥시 농도 포함)",
+    "applicationOrder": "도포 순서 (예: 후두부→측두부→전두부→모근)",
+    "processingTime": "방치 시간 (예: 상온 30분 또는 가온 20분)"
+  },
+  "steps": [
+    {
+      "order": 1,
+      "action": "단계명 (예: 프리라이트닝)",
+      "duration": "소요 시간",
+      "details": "상세 방법 설명"
+    }
+  ],
+  "cautions": [
+    "주의사항 1 (예: 기존 염색 잔여분 확인 필요)",
+    "주의사항 2",
+    "주의사항 3"
+  ]
+}`;
+
+// AI 미래 타임라인 분석 프롬프트 - GPT-4o Vision
+export const TIMELINE_ANALYSIS_SYSTEM_PROMPT = `당신은 모발 과학 전문가입니다. 시술 완료된 모발 사진을 분석하여 시간 경과에 따른 변화를 예측합니다.`;
+
+export function getTimelineAnalysisPrompt(treatmentType: 'color' | 'cut' | 'perm'): string {
+  const typeLabel = { color: '염색', cut: '커트', perm: '펌' }[treatmentType];
+  const timePoints = {
+    color: [1, 2, 4, 6, 8],
+    cut: [2, 4, 8],
+    perm: [1, 4, 8, 12],
+  }[treatmentType];
+
+  return `이 사진은 ${typeLabel} 시술이 완료된 직후의 모발 사진입니다.
+
+1. 현재 모발 상태를 분석해주세요 (컬러 레벨, 톤, 질감, 스타일 특성)
+2. ${timePoints.map(w => `${w}주 후`).join(', ')} 각 시점에서 모발이 어떻게 변할지 예측해주세요
+3. 최적의 재방문 시점과 그 이유를 알려주세요
+
+반드시 아래 JSON 형식으로만 응답하세요:
+{
+  "currentAnalysis": "현재 모발 상태 상세 분석 (3-4문장)",
+  "predictions": [
+    ${timePoints.map(w => `{
+      "week": ${w},
+      "label": "${w}주 후",
+      "description": "${w}주 후 예상되는 변화 상세 설명 (2-3문장)",
+      "dallePrompt": "DALL-E 3에서 ${w}주 후 모발 변화를 생성하기 위한 영어 프롬프트 (현재 사진 기반, 사실적 묘사)"
+    }`).join(',\n    ')}
+  ],
+  "revisitRecommendation": {
+    "week": "추천 재방문 주차 (숫자)",
+    "reason": "재방문 추천 이유 (2-3문장)"
+  }
+}`;
+}
+
+// DALL-E 3 이미지 생성 프롬프트 래퍼
+export function getDallePrompt(baseDescription: string, weekLabel: string): string {
+  return `A realistic close-up photograph of hair showing natural changes after ${weekLabel}. ${baseDescription}. Professional hair salon photography style, natural lighting, high detail, photorealistic. Do not include any text or watermarks.`;
+}
