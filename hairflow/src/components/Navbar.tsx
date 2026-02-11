@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -28,8 +29,9 @@ export function Navbar() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-charcoal/95 backdrop-blur-md border-b border-gold/10 hidden md:block">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-12">
-            <Link href="/dashboard" className="font-heading text-[22px] font-light tracking-[6px] text-white">
-              HAIRFLOW
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <Image src="/logo.png" alt="HairFlow" width={36} height={36} className="object-contain" />
+              <span className="font-heading text-[18px] font-light tracking-[4px] text-white">HAIRFLOW</span>
             </Link>
             <div className="flex items-center gap-8">
               {navItems.map((item) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 const fadeUp = {
@@ -17,8 +18,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-charcoal text-white overflow-hidden">
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-[60px] py-6 flex items-center justify-between">
-        <Link href="/" className="font-heading text-[28px] font-light tracking-[6px] text-white">
-          HAIRFLOW
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/logo.png" alt="HairFlow" width={40} height={40} className="object-contain" />
+          <span className="font-heading text-[24px] font-light tracking-[4px] text-white">HAIRFLOW</span>
         </Link>
         <div className="hidden md:flex items-center gap-10">
           <a href="#about" className="text-[13px] font-light tracking-[2px] uppercase text-white/80 hover:text-gold transition-colors">소개</a>
@@ -196,7 +198,10 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-charcoal py-20 px-6 text-center">
-        <div className="font-heading text-[32px] font-light tracking-[8px] text-white mb-8">HAIRFLOW</div>
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <Image src="/logo.png" alt="HairFlow" width={48} height={48} className="object-contain" />
+          <span className="font-heading text-[32px] font-light tracking-[8px] text-white">HAIRFLOW</span>
+        </div>
         <div className="flex justify-center gap-8 mb-12">
           <Link href="/pricing" className="text-[12px] tracking-[3px] text-white/50 uppercase hover:text-gold transition-colors">Pricing</Link>
           <span className="text-[12px] tracking-[3px] text-white/50 uppercase hover:text-gold transition-colors cursor-pointer">Terms</span>

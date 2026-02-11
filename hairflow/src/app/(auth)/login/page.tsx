@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -24,8 +25,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-16">
-          <Link href="/">
-            <h1 className="font-heading text-[32px] font-light tracking-[8px] text-white">
+          <Link href="/" className="inline-flex flex-col items-center gap-4">
+            <Image src="/logo.png" alt="HairFlow" width={72} height={72} className="object-contain" />
+            <h1 className="font-heading text-[28px] font-light tracking-[8px] text-white">
               HAIRFLOW
             </h1>
           </Link>
