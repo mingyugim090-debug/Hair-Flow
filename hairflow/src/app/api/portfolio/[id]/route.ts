@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { ApiResponse } from '@/types';
 
+interface PortfolioWork {
+  url: string;
+  caption: string;
+  createdAt: string;
+}
+
 interface PortfolioData {
   designer: {
     id: string;
@@ -12,6 +18,7 @@ interface PortfolioData {
     specialties: string[];
     bio: string | null;
     avatarUrl: string | null;
+    portfolioWorks: PortfolioWork[];
   };
   timelines: {
     id: string;
@@ -33,7 +40,7 @@ export async function GET(
     // 디자이너 프로필 조회
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, name, designer_name, shop_name, instagram_id, specialties, bio, avatar_url, is_onboarded')
+      .select('id, name, designer_name, shop_name, instagram_id, specialties, bio, avatar_url, is_onboarded, portfolio_works')
       .eq('id', id)
       .single();
 
@@ -63,6 +70,7 @@ export async function GET(
         specialties: profile.specialties ?? [],
         bio: profile.bio,
         avatarUrl: profile.avatar_url,
+        portfolioWorks: (profile.portfolio_works as PortfolioWork[]) ?? [],
       },
       timelines: (timelines ?? []).map((t) => ({
         id: t.id,

@@ -69,6 +69,7 @@ function mapProfile(row: Record<string, unknown>): UserProfile {
     plan: (row.plan as 'free' | 'basic' | 'pro') ?? 'free',
     dailyUsage: (row.daily_usage as number) ?? 0,
     lastUsageDate: (row.last_usage_date as string) ?? null,
+    portfolioWorks: (row.portfolio_works as { url: string; caption: string; createdAt: string }[]) ?? [],
     createdAt: row.created_at as string,
   };
 }

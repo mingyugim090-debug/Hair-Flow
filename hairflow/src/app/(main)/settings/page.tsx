@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+
+interface PortfolioWork {
+  url: string;
+  caption: string;
+  createdAt: string;
+}
 
 interface ProfileData {
   id: string;
@@ -16,6 +23,8 @@ interface ProfileData {
   email: string;
   plan: string;
   createdAt: string;
+  avatarUrl: string | null;
+  portfolioWorks: PortfolioWork[];
 }
 
 const SPECIALTY_OPTIONS = [
@@ -23,13 +32,18 @@ const SPECIALTY_OPTIONS = [
   "클리닉", "두피케어", "업스타일", "남성컷", "키즈컷",
 ];
 
-export default function SettingsPage() {
+export default function ProfilePage() {
   const [data, setData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [workUploading, setWorkUploading] = useState(false);
+  const [workCaption, setWorkCaption] = useState("");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const workInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,6 +61,8 @@ export default function SettingsPage() {
           email: result.data.email,
           plan: result.data.plan,
           createdAt: result.data.createdAt,
+          avatarUrl: result.data.avatarUrl ?? null,
+          portfolioWorks: result.data.portfolioWorks ?? [],
         });
       }
       setLoading(false);
@@ -92,6 +108,109 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !data) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("5MB 이하의 이미지만 업로드 가능합니다.");
+      return;
+    }
+
+    setAvatarUploading(true);
+    const supabase = createClient();
+    const path = `designers/${data.id}/avatar.jpg`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("hairflow")
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      alert("업로드에 실패했습니다.");
+      setAvatarUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("hairflow")
+      .getPublicUrl(path);
+
+    const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+    await supabase
+      .from("profiles")
+      .update({ avatar_url: avatarUrl })
+      .eq("id", data.id);
+
+    setData((prev) => prev ? { ...prev, avatarUrl } : prev);
+    setAvatarUploading(false);
+  };
+
+  const handleWorkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !data) return;
+
+    if (data.portfolioWorks.length >= 10) {
+      alert("최대 10장까지 업로드 가능합니다.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("10MB 이하의 이미지만 업로드 가능합니다.");
+      return;
+    }
+
+    setWorkUploading(true);
+    const supabase = createClient();
+    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const path = `designers/${data.id}/works/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("hairflow")
+      .upload(path, file, { contentType: file.type });
+
+    if (uploadError) {
+      alert("업로드에 실패했습니다.");
+      setWorkUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("hairflow")
+      .getPublicUrl(path);
+
+    const newWork: PortfolioWork = {
+      url: urlData.publicUrl,
+      caption: workCaption || "",
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedWorks = [...data.portfolioWorks, newWork];
+
+    await supabase
+      .from("profiles")
+      .update({ portfolio_works: updatedWorks })
+      .eq("id", data.id);
+
+    setData((prev) => prev ? { ...prev, portfolioWorks: updatedWorks } : prev);
+    setWorkCaption("");
+    setWorkUploading(false);
+    if (workInputRef.current) workInputRef.current.value = "";
+  };
+
+  const handleDeleteWork = async (index: number) => {
+    if (!data) return;
+    const updated = data.portfolioWorks.filter((_, i) => i !== index);
+    const supabase = createClient();
+
+    await supabase
+      .from("profiles")
+      .update({ portfolio_works: updated })
+      .eq("id", data.id);
+
+    setData((prev) => prev ? { ...prev, portfolioWorks: updated } : prev);
+  };
+
   const handleCopyPortfolioUrl = async () => {
     if (!data) return;
     const url = `${window.location.origin}/portfolio/${data.id}`;
@@ -118,7 +237,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-10 max-w-xl mx-auto">
+    <div className="space-y-10 max-w-2xl mx-auto">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <span className="section-label">Profile</span>
@@ -130,7 +249,7 @@ export default function SettingsPage() {
         </p>
       </motion.div>
 
-      {/* ── Profile Preview Card ── */}
+      {/* ── Profile Preview Card with Avatar Upload ── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -142,10 +261,44 @@ export default function SettingsPage() {
         <div className="p-8">
           {/* Avatar + Name */}
           <div className="flex items-start gap-5 mb-6">
-            <div className="w-16 h-16 rounded-full border border-gold/20 flex items-center justify-center bg-gold/5 flex-shrink-0">
-              <span className="text-gold text-[24px] font-heading font-light">
-                {(data?.designerName || "D")[0]}
-              </span>
+            <div className="relative group">
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+              {data?.avatarUrl ? (
+                <Image
+                  src={data.avatarUrl}
+                  alt="프로필"
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-gold/20"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full border border-gold/20 flex items-center justify-center bg-gold/5">
+                  <span className="text-gold text-[28px] font-heading font-light">
+                    {(data?.designerName || "D")[0]}
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              >
+                {avatarUploading ? (
+                  <div className="w-5 h-5 border border-white/40 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                  </svg>
+                )}
+              </button>
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-heading text-[22px] font-light text-white truncate">
@@ -153,6 +306,9 @@ export default function SettingsPage() {
               </h2>
               <p className="text-[13px] text-gold/70 tracking-[1px] truncate">
                 {data?.shopName || "매장명 미설정"}
+              </p>
+              <p className="text-[11px] text-white/25 font-light mt-1">
+                사진을 클릭하여 프로필 사진 변경
               </p>
             </div>
           </div>
@@ -209,6 +365,102 @@ export default function SettingsPage() {
         <div className="h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
       </motion.div>
 
+      {/* ── Portfolio Works Upload ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-[11px] tracking-[3px] text-gold uppercase">대표 시술 작품</h2>
+            <p className="text-[12px] text-white/30 font-light mt-1">
+              포트폴리오에 전시할 작품 ({data?.portfolioWorks.length ?? 0}/10)
+            </p>
+          </div>
+          {data && data.portfolioWorks.length < 10 && (
+            <button
+              onClick={() => workInputRef.current?.click()}
+              disabled={workUploading}
+              className="text-[11px] tracking-[1px] text-gold/60 hover:text-gold border border-gold/20 px-4 py-2 hover:border-gold/40 transition-all"
+            >
+              {workUploading ? "업로드 중..." : "+ 작품 추가"}
+            </button>
+          )}
+        </div>
+
+        <input
+          ref={workInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleWorkUpload}
+        />
+
+        {data && data.portfolioWorks.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <AnimatePresence>
+              {data.portfolioWorks.map((work, i) => (
+                <motion.div
+                  key={work.url}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="relative group aspect-[3/4] border border-gold/10 overflow-hidden bg-charcoal"
+                >
+                  <Image
+                    src={work.url}
+                    alt={work.caption || `작품 ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      {work.caption && (
+                        <p className="text-[11px] text-white/80 font-light mb-2 line-clamp-2">{work.caption}</p>
+                      )}
+                      <button
+                        onClick={() => handleDeleteWork(i)}
+                        className="text-[10px] text-red-400/70 hover:text-red-400 tracking-[1px] uppercase transition-colors"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                  <div className="absolute top-2 right-2 bg-black/50 px-2 py-0.5 text-[9px] text-gold/60 tracking-[1px]">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="border border-dashed border-gold/15 p-12 text-center">
+            <div className="text-gold/20 mb-3">
+              <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+              </svg>
+            </div>
+            <p className="text-[13px] text-white/25 font-light mb-1">아직 작품이 없습니다</p>
+            <p className="text-[11px] text-white/15 font-light">
+              시술 작품을 추가하여 포트폴리오를 완성하세요
+            </p>
+          </div>
+        )}
+
+        {/* Work Caption Input (shown when upload button clicked, optional) */}
+        <div className="mt-3">
+          <input
+            type="text"
+            value={workCaption}
+            onChange={(e) => setWorkCaption(e.target.value)}
+            placeholder="다음 업로드할 작품의 설명 (선택)"
+            className="w-full bg-transparent border border-gold/10 px-4 py-3 text-[13px] font-light text-white placeholder:text-white/15 focus:border-gold/30 focus:outline-none transition-colors"
+          />
+        </div>
+      </motion.div>
+
       {/* ── Portfolio Share ── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -263,62 +515,41 @@ export default function SettingsPage() {
 
         {editMode ? (
           <div className="space-y-6">
-            {/* Shop Name */}
             <div>
-              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">
-                매장명
-              </label>
+              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">매장명</label>
               <input
                 type="text"
                 value={data?.shopName ?? ""}
-                onChange={(e) =>
-                  setData((prev) => prev ? { ...prev, shopName: e.target.value } : prev)
-                }
+                onChange={(e) => setData((prev) => prev ? { ...prev, shopName: e.target.value } : prev)}
                 placeholder="예: 헤어플로우 강남점"
                 className="w-full bg-transparent border border-gold/20 px-5 py-4 text-[15px] font-light text-white placeholder:text-white/20 focus:border-gold/50 focus:outline-none transition-colors"
               />
             </div>
-
-            {/* Designer Name */}
             <div>
-              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">
-                디자이너명
-              </label>
+              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">디자이너명</label>
               <input
                 type="text"
                 value={data?.designerName ?? ""}
-                onChange={(e) =>
-                  setData((prev) => prev ? { ...prev, designerName: e.target.value } : prev)
-                }
+                onChange={(e) => setData((prev) => prev ? { ...prev, designerName: e.target.value } : prev)}
                 placeholder="예: 김헤어"
                 className="w-full bg-transparent border border-gold/20 px-5 py-4 text-[15px] font-light text-white placeholder:text-white/20 focus:border-gold/50 focus:outline-none transition-colors"
               />
             </div>
-
-            {/* Instagram */}
             <div>
-              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">
-                인스타그램 아이디
-              </label>
+              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">인스타그램 아이디</label>
               <div className="relative">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-white/30 text-[15px]">@</span>
                 <input
                   type="text"
                   value={data?.instagramId ?? ""}
-                  onChange={(e) =>
-                    setData((prev) => prev ? { ...prev, instagramId: e.target.value.replace(/^@/, "") } : prev)
-                  }
+                  onChange={(e) => setData((prev) => prev ? { ...prev, instagramId: e.target.value.replace(/^@/, "") } : prev)}
                   placeholder="instagram_id"
                   className="w-full bg-transparent border border-gold/20 pl-10 pr-5 py-4 text-[15px] font-light text-white placeholder:text-white/20 focus:border-gold/50 focus:outline-none transition-colors"
                 />
               </div>
             </div>
-
-            {/* Specialties */}
             <div>
-              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">
-                전문 분야
-              </label>
+              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">전문 분야</label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {SPECIALTY_OPTIONS.map((s) => (
                   <button
@@ -335,17 +566,11 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
-
-            {/* Bio */}
             <div>
-              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">
-                한 줄 소개
-              </label>
+              <label className="text-[11px] tracking-[3px] text-white/40 uppercase block mb-3">한 줄 소개</label>
               <textarea
                 value={data?.bio ?? ""}
-                onChange={(e) =>
-                  setData((prev) => prev ? { ...prev, bio: e.target.value } : prev)
-                }
+                onChange={(e) => setData((prev) => prev ? { ...prev, bio: e.target.value } : prev)}
                 placeholder="예: 10년 경력 컬러 전문 디자이너"
                 rows={2}
                 maxLength={100}
@@ -355,8 +580,6 @@ export default function SettingsPage() {
                 {(data?.bio ?? "").length}/100
               </p>
             </div>
-
-            {/* Action Buttons */}
             <div className="flex gap-3">
               <button
                 onClick={() => setEditMode(false)}
@@ -398,9 +621,7 @@ export default function SettingsPage() {
               {data && data.specialties.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {data.specialties.map((s) => (
-                    <span key={s} className="px-2.5 py-1 bg-gold/5 text-gold/60 text-[11px] tracking-[0.5px]">
-                      {s}
-                    </span>
+                    <span key={s} className="px-2.5 py-1 bg-gold/5 text-gold/60 text-[11px] tracking-[0.5px]">{s}</span>
                   ))}
                 </div>
               ) : (
@@ -423,38 +644,25 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-4">
-          계정 정보
-        </h2>
+        <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-4">계정 정보</h2>
         <div className="border border-gold/10 divide-y divide-gold/10">
           <div className="px-5 py-4 flex items-center justify-between">
             <span className="text-[13px] text-white/40 font-light">이메일</span>
-            <span className="text-[13px] text-white/70 font-light">
-              {data?.email}
-            </span>
+            <span className="text-[13px] text-white/70 font-light">{data?.email}</span>
           </div>
           <div className="px-5 py-4 flex items-center justify-between">
             <span className="text-[13px] text-white/40 font-light">현재 플랜</span>
             <div className="flex items-center gap-3">
-              <span className="text-[13px] text-white/70 font-light">
-                {planLabel}
-              </span>
+              <span className="text-[13px] text-white/70 font-light">{planLabel}</span>
               {data?.plan === "free" && (
-                <Link
-                  href="/pricing"
-                  className="text-[11px] tracking-[1px] text-gold hover:underline"
-                >
-                  업그레이드
-                </Link>
+                <Link href="/pricing" className="text-[11px] tracking-[1px] text-gold hover:underline">업그레이드</Link>
               )}
             </div>
           </div>
           <div className="px-5 py-4 flex items-center justify-between">
             <span className="text-[13px] text-white/40 font-light">가입일</span>
             <span className="text-[13px] text-white/70 font-light">
-              {data?.createdAt
-                ? new Date(data.createdAt).toLocaleDateString("ko-KR")
-                : "-"}
+              {data?.createdAt ? new Date(data.createdAt).toLocaleDateString("ko-KR") : "-"}
             </span>
           </div>
         </div>

@@ -50,7 +50,7 @@ export function Navbar() {
               pathname === "/settings" ? "text-gold" : "text-white/40 hover:text-gold"
             }`}
           >
-            설정
+            프로필
           </Link>
         </div>
       </nav>
@@ -58,7 +58,7 @@ export function Navbar() {
       {/* Mobile Bottom Nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-charcoal/95 backdrop-blur-md border-t border-gold/10 md:hidden safe-area-bottom">
         <div className="flex items-center justify-around h-14 px-1">
-          {[...navItems, { href: "/settings", label: "설정" }].map((item) => (
+          {[...navItems, { href: "/settings", label: "프로필" }].map((item) => (
             <Link
               key={item.href}
               href={item.href}

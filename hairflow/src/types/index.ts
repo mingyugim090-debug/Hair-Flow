@@ -55,6 +55,13 @@ export interface TimelineResult {
   };
 }
 
+// 포트폴리오 작품
+export interface PortfolioWork {
+  url: string;
+  caption: string;
+  createdAt: string;
+}
+
 // 사용자 프로필
 export interface UserProfile {
   id: string;
@@ -70,6 +77,7 @@ export interface UserProfile {
   plan: 'free' | 'basic' | 'pro';
   dailyUsage: number;
   lastUsageDate: string | null;
+  portfolioWorks: PortfolioWork[];
   createdAt: string;
 }
 
