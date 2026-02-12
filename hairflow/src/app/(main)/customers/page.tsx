@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Customer } from "@/types";
 
@@ -11,6 +12,7 @@ export default function CustomersPage() {
   const [form, setForm] = useState({ name: "", phone: "", memo: "" });
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
   const fetchCustomers = async () => {
     const res = await fetch("/api/customers");
@@ -173,7 +175,8 @@ export default function CustomersPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="border border-gold/10 p-5 hover:bg-gold/5 transition-colors group"
+                onClick={() => router.push(`/customers/${customer.id}`)}
+                className="border border-gold/10 p-5 hover:bg-gold/5 transition-colors group cursor-pointer"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -193,12 +196,17 @@ export default function CustomersPage() {
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleDelete(customer.id)}
-                    className="text-[11px] text-white/20 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 ml-4 shrink-0"
-                  >
-                    삭제
-                  </button>
+                  <div className="flex items-center gap-3 ml-4 shrink-0">
+                    <span className="text-[11px] text-gold/40 group-hover:text-gold transition-colors">
+                      상세 →
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(customer.id); }}
+                      className="text-[11px] text-white/20 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))}

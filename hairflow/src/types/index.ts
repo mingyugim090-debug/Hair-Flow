@@ -77,6 +77,46 @@ export interface Customer {
   createdAt: string;
 }
 
+// 고객 모발 분석 결과
+export interface CustomerAnalysisResult {
+  hairAnalysis: {
+    condition: string;
+    damageLevel: string;
+    scalpCondition: string;
+    hairType: string;
+    thickness: string;
+    porosity: string;
+    summary: string;
+  };
+  recipe: {
+    recommendedTreatment: string;
+    description: string;
+    steps: {
+      order: number;
+      action: string;
+      duration: string;
+      details: string;
+    }[];
+    products: {
+      name: string;
+      purpose: string;
+      usage: string;
+    }[];
+    homecare: string[];
+    cautions: string[];
+    revisitWeeks: number;
+  };
+}
+
+// 고객 분석 히스토리 항목
+export interface CustomerTimeline {
+  id: string;
+  customerId: string;
+  imageUrl: string | null;
+  analysis: CustomerAnalysisResult;
+  createdAt: string;
+}
+
 // 구독 플랜
 export interface PricingPlan {
   id: 'free' | 'basic' | 'pro';

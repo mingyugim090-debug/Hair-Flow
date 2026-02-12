@@ -84,6 +84,55 @@ export function getTimelineAnalysisPrompt(treatmentType: 'color' | 'cut' | 'perm
 }`;
 }
 
+// 고객 모발 상태 분석 프롬프트 - GPT-4o Vision (사진 1장)
+export const CUSTOMER_ANALYSIS_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너이자 모발 과학 전문가입니다.
+고객의 모발 사진 1장을 정밀 분석하여, 모발 상태 진단과 맞춤형 케어 레시피를 제공합니다.
+
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
+
+export const CUSTOMER_ANALYSIS_USER_PROMPT = `이 사진은 고객의 현재 모발 상태입니다.
+모발과 두피 상태를 정밀하게 분석하고, 맞춤형 케어/시술 레시피를 제공해주세요.
+
+아래 JSON 형식으로 응답해주세요:
+
+{
+  "hairAnalysis": {
+    "condition": "전체 상태 (양호/보통/주의/위험 중 택1)",
+    "damageLevel": "손상도 1~5 (1: 건강, 5: 심한 손상)",
+    "scalpCondition": "두피 상태 관찰 소견 (건조/지성/민감/정상 등 + 상세)",
+    "hairType": "모발 유형 (직모/웨이브/곱슬 등)",
+    "thickness": "모발 굵기 (가는 편/보통/굵은 편)",
+    "porosity": "다공성 (낮음/보통/높음)",
+    "summary": "전체적인 모발 상태 종합 평가 (3~5문장, 한국어)"
+  },
+  "recipe": {
+    "recommendedTreatment": "가장 추천하는 시술/케어 이름 (예: 단백질 클리닉, 두피 스케일링 등)",
+    "description": "추천 이유와 기대 효과 (2~3문장)",
+    "steps": [
+      {
+        "order": 1,
+        "action": "단계별 시술/케어 내용",
+        "duration": "소요 시간",
+        "details": "상세 설명과 팁"
+      }
+    ],
+    "products": [
+      {
+        "name": "추천 제품/약제명 (한국 시장 기준)",
+        "purpose": "용도",
+        "usage": "사용 방법"
+      }
+    ],
+    "homecare": [
+      "홈케어 권장 사항 (구체적으로)"
+    ],
+    "cautions": [
+      "시술/케어 시 주의사항"
+    ],
+    "revisitWeeks": 4
+  }
+}`;
+
 // DALL-E 3 이미지 생성 프롬프트 래퍼
 export function getDallePrompt(baseDescription: string, weekLabel: string): string {
   return `A realistic close-up photograph of hair showing natural changes after ${weekLabel}. ${baseDescription}. Professional hair salon photography style, natural lighting, high detail, photorealistic. Do not include any text or watermarks.`;

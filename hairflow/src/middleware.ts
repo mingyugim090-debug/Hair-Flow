@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 로그인 안 된 상태에서 보호 경로 접근 → 로그인 페이지로
-  const protectedPaths = ['/dashboard', '/recipe', '/timeline', '/pricing'];
+  const protectedPaths = ['/dashboard', '/recipe', '/timeline', '/pricing', '/customers'];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -52,5 +52,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/recipe/:path*', '/timeline/:path*', '/pricing/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/recipe/:path*', '/timeline/:path*', '/pricing/:path*', '/customers/:path*', '/login'],
 };
