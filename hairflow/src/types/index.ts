@@ -67,6 +67,16 @@ export interface UserProfile {
   createdAt: string;
 }
 
+// 고객
+export interface Customer {
+  id: string;
+  designerId: string;
+  name: string;
+  phone: string | null;
+  memo: string | null;
+  createdAt: string;
+}
+
 // 구독 플랜
 export interface PricingPlan {
   id: 'free' | 'basic' | 'pro';

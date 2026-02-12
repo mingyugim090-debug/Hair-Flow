@@ -10,6 +10,7 @@ const navItems = [
   { href: "/dashboard", label: "대시보드" },
   { href: "/recipe", label: "AI 레시피" },
   { href: "/timeline", label: "AI 타임라인" },
+  { href: "/customers", label: "고객관리" },
   { href: "/pricing", label: "요금제" },
 ];
 
