@@ -23,6 +23,7 @@ const quickActions = [
 
 interface UserData {
   name: string | null;
+  designerName: string | null;
   plan: string;
   dailyUsage: number;
   lastUsageDate: string | null;
@@ -46,7 +47,7 @@ export default function DashboardPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("name, plan, daily_usage, last_usage_date")
+        .select("name, designer_name, plan, daily_usage, last_usage_date")
         .eq("id", user.id)
         .single();
 
@@ -55,6 +56,7 @@ export default function DashboardPage() {
         const isToday = profile.last_usage_date === today;
         setUserData({
           name: profile.name ?? user.user_metadata?.full_name ?? null,
+          designerName: profile.designer_name ?? null,
           plan: profile.plan ?? "free",
           dailyUsage: isToday ? (profile.daily_usage ?? 0) : 0,
           lastUsageDate: profile.last_usage_date,
@@ -87,8 +89,8 @@ export default function DashboardPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <span className="section-label">Dashboard</span>
         <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-light mt-4 mb-2">
-          {userData?.name ? (
-            <>{userData.name}님, <em className="italic text-gold-light">안녕하세요</em></>
+          {(userData?.designerName || userData?.name) ? (
+            <>{userData.designerName ?? userData.name}님, <em className="italic text-gold-light">안녕하세요</em></>
           ) : (
             <>안녕하세요</>
           )}
