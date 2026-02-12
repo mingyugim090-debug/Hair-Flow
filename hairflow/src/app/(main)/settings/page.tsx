@@ -126,7 +126,8 @@ export default function ProfilePage() {
       .upload(path, file, { upsert: true, contentType: file.type });
 
     if (uploadError) {
-      alert("업로드에 실패했습니다.");
+      console.error("Avatar upload error:", uploadError);
+      alert(`업로드에 실패했습니다: ${uploadError.message}`);
       setAvatarUploading(false);
       return;
     }
@@ -170,7 +171,8 @@ export default function ProfilePage() {
       .upload(path, file, { contentType: file.type });
 
     if (uploadError) {
-      alert("업로드에 실패했습니다.");
+      console.error("Work upload error:", uploadError);
+      alert(`업로드에 실패했습니다: ${uploadError.message}`);
       setWorkUploading(false);
       return;
     }
