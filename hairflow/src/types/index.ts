@@ -63,6 +63,10 @@ export interface UserProfile {
   avatarUrl: string | null;
   shopName: string | null;
   designerName: string | null;
+  instagramId: string | null;
+  specialties: string[];
+  bio: string | null;
+  isOnboarded: boolean;
   plan: 'free' | 'basic' | 'pro';
   dailyUsage: number;
   lastUsageDate: string | null;

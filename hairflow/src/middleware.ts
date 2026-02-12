@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // 로그인 안 된 상태에서 보호 경로 접근 → 로그인 페이지로
-  const protectedPaths = ['/dashboard', '/recipe', '/timeline', '/pricing', '/customers', '/settings'];
+  const protectedPaths = ['/dashboard', '/recipe', '/timeline', '/pricing', '/customers', '/settings', '/onboarding'];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -48,9 +48,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 온보딩 체크: 로그인된 사용자가 보호 경로(온보딩 제외) 접근 시
+  if (user && isProtectedPath && !request.nextUrl.pathname.startsWith('/onboarding')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_onboarded')
+      .eq('id', user.id)
+      .single();
+
+    // is_onboarded가 false이면 온보딩으로 리다이렉트
+    if (profile && profile.is_onboarded === false) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/onboarding';
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/recipe/:path*', '/timeline/:path*', '/pricing/:path*', '/customers/:path*', '/settings/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/recipe/:path*', '/timeline/:path*', '/pricing/:path*', '/customers/:path*', '/settings/:path*', '/onboarding/:path*', '/login'],
 };
