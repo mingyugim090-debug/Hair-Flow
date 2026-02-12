@@ -61,6 +61,8 @@ export interface UserProfile {
   email: string;
   name: string | null;
   avatarUrl: string | null;
+  shopName: string | null;
+  designerName: string | null;
   plan: 'free' | 'basic' | 'pro';
   dailyUsage: number;
   lastUsageDate: string | null;

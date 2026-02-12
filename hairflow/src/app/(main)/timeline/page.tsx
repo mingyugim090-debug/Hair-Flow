@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ImageUploader } from "@/components/ImageUploader";
 import { TimelineView } from "@/components/TimelineView";
+import { UsageLimitModal } from "@/components/UsageLimitModal";
 import type { TimelineResult } from "@/types";
 
 const treatmentTypes = [
@@ -18,6 +19,8 @@ export default function TimelinePage() {
   const [result, setResult] = useState<TimelineResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitMessage, setLimitMessage] = useState("");
 
   const handleGenerate = async () => {
     if (!treatmentImage) {
@@ -35,7 +38,12 @@ export default function TimelinePage() {
       });
       const data = await res.json();
       if (data.error) {
-        setError(data.error.message);
+        if (data.error.code === "USAGE_LIMIT") {
+          setLimitMessage(data.error.message);
+          setShowLimitModal(true);
+        } else {
+          setError(data.error.message);
+        }
       } else {
         setResult(data.data);
       }
@@ -125,6 +133,12 @@ export default function TimelinePage() {
 
       {/* Result */}
       {result && <TimelineView result={result} />}
+
+      <UsageLimitModal
+        open={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        message={limitMessage}
+      />
     </div>
   );
 }

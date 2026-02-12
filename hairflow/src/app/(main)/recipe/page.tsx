@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ImageUploader } from "@/components/ImageUploader";
 import { RecipeCard } from "@/components/RecipeCard";
+import { UsageLimitModal } from "@/components/UsageLimitModal";
 import type { RecipeResult } from "@/types";
 
 export default function RecipePage() {
@@ -12,6 +13,8 @@ export default function RecipePage() {
   const [recipe, setRecipe] = useState<RecipeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitMessage, setLimitMessage] = useState("");
 
   const handleGenerate = async () => {
     if (!currentImage || !referenceImage) {
@@ -29,7 +32,12 @@ export default function RecipePage() {
       });
       const result = await res.json();
       if (result.error) {
-        setError(result.error.message);
+        if (result.error.code === "USAGE_LIMIT") {
+          setLimitMessage(result.error.message);
+          setShowLimitModal(true);
+        } else {
+          setError(result.error.message);
+        }
       } else {
         setRecipe(result.data);
       }
@@ -103,6 +111,12 @@ export default function RecipePage() {
 
       {/* Result */}
       {recipe && <RecipeCard recipe={recipe} />}
+
+      <UsageLimitModal
+        open={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        message={limitMessage}
+      />
     </div>
   );
 }

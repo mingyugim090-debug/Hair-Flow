@@ -60,6 +60,8 @@ function mapProfile(row: Record<string, unknown>): UserProfile {
     email: row.email as string,
     name: (row.name as string) ?? null,
     avatarUrl: (row.avatar_url as string) ?? null,
+    shopName: (row.shop_name as string) ?? null,
+    designerName: (row.designer_name as string) ?? null,
     plan: (row.plan as 'free' | 'basic' | 'pro') ?? 'free',
     dailyUsage: (row.daily_usage as number) ?? 0,
     lastUsageDate: (row.last_usage_date as string) ?? null,

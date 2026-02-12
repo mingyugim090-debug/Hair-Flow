@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { UsageLimitModal } from "@/components/UsageLimitModal";
 import type { Customer, CustomerTimeline, CustomerAnalysisResult } from "@/types";
 
 interface CustomerDetail {
@@ -18,6 +19,8 @@ export default function CustomerDetailPage() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [limitMessage, setLimitMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -48,6 +51,9 @@ export default function CustomerDetailPage() {
           : prev
       );
       setExpandedId(result.data.id);
+    } else if (result.error?.code === "USAGE_LIMIT") {
+      setLimitMessage(result.error.message);
+      setShowLimitModal(true);
     } else {
       alert(result.error?.message ?? "분석에 실패했습니다.");
     }
@@ -283,6 +289,12 @@ export default function CustomerDetailPage() {
           </div>
         )}
       </motion.div>
+
+      <UsageLimitModal
+        open={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        message={limitMessage}
+      />
     </div>
   );
 }

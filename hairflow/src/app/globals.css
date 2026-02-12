@@ -46,49 +46,49 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  /* Luxury color palette */
-  --color-cream: #F5F0EB;
-  --color-charcoal: #1A1A1A;
-  --color-warm-brown: #8B6F5E;
-  --color-gold: #C9A96E;
-  --color-gold-light: #DFC598;
-  --color-soft-beige: #E8DDD3;
+  /* Luxury color palette - warm & refined */
+  --color-cream: #F7F3EF;
+  --color-charcoal: #2C2926;
+  --color-warm-brown: #9A7E6D;
+  --color-gold: #D4B37F;
+  --color-gold-light: #E5CC9E;
+  --color-soft-beige: #EDE4DA;
   --color-deep-brown: #3D2B1F;
 }
 
 :root {
   --radius: 0.625rem;
-  --background: #F5F0EB;
-  --foreground: #1A1A1A;
+  --background: #F7F3EF;
+  --foreground: #2C2926;
   --card: #FFFFFF;
-  --card-foreground: #1A1A1A;
+  --card-foreground: #2C2926;
   --popover: #FFFFFF;
-  --popover-foreground: #1A1A1A;
-  --primary: #1A1A1A;
-  --primary-foreground: #F5F0EB;
-  --secondary: #E8DDD3;
+  --popover-foreground: #2C2926;
+  --primary: #2C2926;
+  --primary-foreground: #F7F3EF;
+  --secondary: #EDE4DA;
   --secondary-foreground: #3D2B1F;
-  --muted: #E8DDD3;
-  --muted-foreground: #8B6F5E;
-  --accent: #E8DDD3;
+  --muted: #EDE4DA;
+  --muted-foreground: #9A7E6D;
+  --accent: #EDE4DA;
   --accent-foreground: #3D2B1F;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: rgba(139, 111, 94, 0.2);
-  --input: rgba(139, 111, 94, 0.2);
-  --ring: #C9A96E;
-  --chart-1: #C9A96E;
-  --chart-2: #8B6F5E;
+  --border: rgba(154, 126, 109, 0.2);
+  --input: rgba(154, 126, 109, 0.2);
+  --ring: #D4B37F;
+  --chart-1: #D4B37F;
+  --chart-2: #9A7E6D;
   --chart-3: #3D2B1F;
-  --chart-4: #DFC598;
-  --chart-5: #E8DDD3;
-  --sidebar: #F5F0EB;
-  --sidebar-foreground: #1A1A1A;
-  --sidebar-primary: #1A1A1A;
-  --sidebar-primary-foreground: #F5F0EB;
-  --sidebar-accent: #E8DDD3;
+  --chart-4: #E5CC9E;
+  --chart-5: #EDE4DA;
+  --sidebar: #F7F3EF;
+  --sidebar-foreground: #2C2926;
+  --sidebar-primary: #2C2926;
+  --sidebar-primary-foreground: #F7F3EF;
+  --sidebar-accent: #EDE4DA;
   --sidebar-accent-foreground: #3D2B1F;
-  --sidebar-border: rgba(139, 111, 94, 0.2);
-  --sidebar-ring: #C9A96E;
+  --sidebar-border: rgba(154, 126, 109, 0.2);
+  --sidebar-ring: #D4B37F;
 }
 
 @layer base {
@@ -111,7 +111,12 @@
   font-size: 11px;
   letter-spacing: 6px;
   text-transform: uppercase;
-  color: #C9A96E;
+  color: #D4B37F;
+}
+
+/* Mobile safe area for bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Scroll animation */
