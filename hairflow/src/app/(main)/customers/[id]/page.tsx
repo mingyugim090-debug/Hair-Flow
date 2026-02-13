@@ -199,17 +199,17 @@ export default function CustomerDetailPage() {
         transition={{ delay: 0.1 }}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-charcoal border border-gold/15 p-1 gap-1">
+          <TabsList className="grid w-full grid-cols-2 bg-charcoal border border-gold/20 p-1 gap-1">
             <TabsTrigger
               value="recipe"
-              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[11px] sm:text-[12px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-2 sm:px-3"
+              className="data-[state=active]:bg-gold/15 data-[state=active]:text-[#E2C799] data-[state=active]:border data-[state=active]:border-gold/50 text-[11px] sm:text-[12px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-2 sm:px-3 font-semibold text-white/70 hover:text-white/90 hover:bg-gold/5 border border-transparent"
             >
               <span className="hidden sm:inline">모발 분석</span>
               <span className="sm:hidden">분석</span>
             </TabsTrigger>
             <TabsTrigger
               value="timeline"
-              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[11px] sm:text-[12px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-2 sm:px-3"
+              className="data-[state=active]:bg-gold/15 data-[state=active]:text-[#E2C799] data-[state=active]:border data-[state=active]:border-gold/50 text-[11px] sm:text-[12px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-2 sm:px-3 font-semibold text-white/70 hover:text-white/90 hover:bg-gold/5 border border-transparent"
             >
               <span className="hidden sm:inline">타임라인 예측</span>
               <span className="sm:hidden">타임라인</span>
@@ -231,7 +231,7 @@ export default function CustomerDetailPage() {
               <button
                 onClick={() => recipeFileInputRef.current?.click()}
                 disabled={analyzingRecipe}
-                className="w-full px-8 py-5 border border-gold text-gold text-[12px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full px-8 py-5 border-2 border-gold text-white font-semibold text-[12px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal hover:border-gold/80 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               >
                 {analyzingRecipe ? "분석 중..." : "모발 사진 촬영/업로드하여 레시피 생성"}
               </button>
@@ -276,7 +276,7 @@ export default function CustomerDetailPage() {
             {/* Analysis History */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[12px] tracking-[4px] uppercase text-gold">
+                <h2 className="text-[12px] tracking-[4px] uppercase text-[#E2C799] font-semibold">
                   분석 히스토리
                 </h2>
                 <span className="text-[12px] text-white/30 font-light">
@@ -368,7 +368,7 @@ export default function CustomerDetailPage() {
           <TabsContent value="timeline" className="mt-6 space-y-6">
             {/* Treatment Type Selection */}
             <div>
-              <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-3">시술 타입 선택</h3>
+              <h3 className="text-[11px] tracking-[3px] text-[#E2C799] uppercase mb-3 font-semibold">시술 타입 선택</h3>
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {[
                   { value: "color", label: "염색" },
@@ -378,10 +378,10 @@ export default function CustomerDetailPage() {
                   <button
                     key={option.value}
                     onClick={() => setTreatmentType(option.value as "color" | "cut" | "perm")}
-                    className={`px-4 py-3 border text-[12px] tracking-[2px] uppercase transition-all duration-500 ${
+                    className={`px-4 py-3 border-2 text-[12px] tracking-[2px] uppercase transition-all duration-500 font-semibold shadow-sm hover:shadow-md ${
                       treatmentType === option.value
-                        ? "border-gold bg-gold/10 text-gold"
-                        : "border-gold/15 text-white/40 hover:border-gold/40"
+                        ? "border-gold bg-gold/15 text-[#E2C799]"
+                        : "border-gold/20 text-white/70 hover:border-gold/50 hover:bg-gold/5"
                     }`}
                   >
                     {option.label}
@@ -403,7 +403,7 @@ export default function CustomerDetailPage() {
               <button
                 onClick={() => timelineFileInputRef.current?.click()}
                 disabled={analyzingTimeline}
-                className="w-full px-8 py-5 border border-gold text-gold text-[12px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full px-8 py-5 border-2 border-gold text-white font-semibold text-[12px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal hover:border-gold/80 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               >
                 {analyzingTimeline ? "AI 예측 중..." : "시술 완료 사진 촬영/업로드하여 미래 예측"}
               </button>
@@ -448,7 +448,7 @@ export default function CustomerDetailPage() {
             {/* Timeline History */}
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[12px] tracking-[4px] uppercase text-gold">
+                <h2 className="text-[12px] tracking-[4px] uppercase text-[#E2C799] font-semibold">
                   예측 히스토리
                 </h2>
                 <span className="text-[12px] text-white/30 font-light">
@@ -556,7 +556,7 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
             </div>
           )}
           <div className="flex-1">
-            <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-3">모발 상태 분석</h3>
+            <h3 className="text-[11px] tracking-[3px] text-[#E2C799] uppercase mb-3 font-semibold">모발 상태 분석</h3>
             <p className="text-[14px] text-white/70 font-light leading-relaxed mb-4">
               {hairAnalysis.summary}
             </p>
@@ -571,7 +571,7 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
 
         {/* Recipe */}
         <div>
-          <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-3">맞춤 케어 레시피</h3>
+          <h3 className="text-[11px] tracking-[3px] text-[#E2C799] uppercase mb-3 font-semibold">맞춤 케어 레시피</h3>
           <div className="border border-gold/10 p-5 mb-4">
             <p className="font-heading text-[20px] font-light mb-2">{recipe.recommendedTreatment}</p>
             <p className="text-[13px] text-white/50 font-light">{recipe.description}</p>
@@ -580,7 +580,7 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
           {/* Steps */}
           {recipe.steps.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-[10px] tracking-[2px] text-white/30 uppercase mb-3">시술 단계</h4>
+              <h4 className="text-[10px] tracking-[2px] text-white/50 uppercase mb-3 font-semibold">시술 단계</h4>
               <div className="space-y-2">
                 {recipe.steps.map((step) => (
                   <div key={step.order} className="border border-gold/5 p-4 flex gap-4">
@@ -598,7 +598,7 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
           {/* Products */}
           {recipe.products.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-[10px] tracking-[2px] text-white/30 uppercase mb-3">추천 제품</h4>
+              <h4 className="text-[10px] tracking-[2px] text-white/50 uppercase mb-3 font-semibold">추천 제품</h4>
               <div className="space-y-2">
                 {recipe.products.map((product, i) => (
                   <div key={i} className="border border-gold/5 p-4">
@@ -613,7 +613,7 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
           {/* Homecare */}
           {recipe.homecare.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-[10px] tracking-[2px] text-white/30 uppercase mb-3">홈케어 가이드</h4>
+              <h4 className="text-[10px] tracking-[2px] text-white/50 uppercase mb-3 font-semibold">홈케어 가이드</h4>
               <ul className="space-y-1">
                 {recipe.homecare.map((item, i) => (
                   <li key={i} className="text-[13px] text-white/50 font-light flex gap-2">
@@ -628,7 +628,7 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
           {/* Cautions */}
           {recipe.cautions.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-[10px] tracking-[2px] text-white/30 uppercase mb-3">주의사항</h4>
+              <h4 className="text-[10px] tracking-[2px] text-white/50 uppercase mb-3 font-semibold">주의사항</h4>
               <ul className="space-y-1">
                 {recipe.cautions.map((item, i) => (
                   <li key={i} className="text-[13px] text-red-400/70 font-light flex gap-2">
@@ -642,8 +642,8 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
 
           {/* Revisit */}
           <div className="border border-gold/15 p-4 text-center">
-            <p className="text-[11px] tracking-[2px] text-white/30 uppercase mb-1">추천 재방문</p>
-            <p className="font-heading text-[24px] text-gold font-light">
+            <p className="text-[11px] tracking-[2px] text-white/50 uppercase mb-1 font-semibold">추천 재방문</p>
+            <p className="font-heading text-[24px] text-[#E2C799] font-light">
               {recipe.revisitWeeks}주 후
             </p>
           </div>
@@ -656,8 +656,8 @@ function AnalysisDetail({ analysis, imageUrl }: { analysis: CustomerAnalysisResu
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] tracking-[1px] text-white/25 uppercase mb-1">{label}</p>
-      <p className="text-[13px] text-white/60 font-light">{value}</p>
+      <p className="text-[10px] tracking-[1px] text-white/40 uppercase mb-1 font-semibold">{label}</p>
+      <p className="text-[13px] text-white/70 font-light">{value}</p>
     </div>
   );
 }
@@ -673,7 +673,7 @@ function TimelinePredictionDetail({ prediction }: { prediction: TimelinePredicti
       <div className="p-6 space-y-8">
         {/* Current Analysis */}
         <div>
-          <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-3">현재 상태 분석</h3>
+          <h3 className="text-[11px] tracking-[3px] text-[#E2C799] uppercase mb-3 font-semibold">현재 상태 분석</h3>
           <p className="text-[14px] text-white/70 font-light leading-relaxed">
             {prediction.currentAnalysis}
           </p>
@@ -681,7 +681,7 @@ function TimelinePredictionDetail({ prediction }: { prediction: TimelinePredicti
 
         {/* Timeline Predictions */}
         <div>
-          <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-4">미래 변화 예측</h3>
+          <h3 className="text-[11px] tracking-[3px] text-[#E2C799] uppercase mb-4 font-semibold">미래 변화 예측</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             {prediction.predictions.map((pred) => (
               <div key={pred.week} className="border border-gold/5 overflow-hidden">
@@ -710,8 +710,8 @@ function TimelinePredictionDetail({ prediction }: { prediction: TimelinePredicti
 
         {/* Revisit Recommendation */}
         <div className="border border-gold/15 p-6 text-center">
-          <p className="text-[11px] tracking-[2px] text-white/30 uppercase mb-2">추천 재방문</p>
-          <p className="font-heading text-[28px] text-gold font-light mb-2">
+          <p className="text-[11px] tracking-[2px] text-white/50 uppercase mb-2 font-semibold">추천 재방문</p>
+          <p className="font-heading text-[28px] text-[#E2C799] font-light mb-2">
             {prediction.revisitRecommendation.week}주 후
           </p>
           <p className="text-[13px] text-white/50 font-light">
