@@ -24,9 +24,20 @@ export async function POST(request: NextRequest) {
     };
 
     if (!paymentKey || !orderId || !amount || !planId) {
+      console.error('Missing payment params:', { paymentKey: !!paymentKey, orderId: !!orderId, amount: !!amount, planId: !!planId });
       return NextResponse.json<ApiResponse<null>>({
         data: null,
         error: { code: 'MISSING_PARAMS', message: '결제 정보가 누락되었습니다.' },
+      }, { status: 400 });
+    }
+
+    // 결제 금액 검증
+    const expectedAmount = planId === 'enterprise' ? 99000 : 19900;
+    if (amount !== expectedAmount) {
+      console.error('Payment amount mismatch:', { userId: user.id, planId, expected: expectedAmount, received: amount });
+      return NextResponse.json<ApiResponse<null>>({
+        data: null,
+        error: { code: 'AMOUNT_MISMATCH', message: `결제 금액이 올바르지 않습니다. (${planId} 플랜: ${expectedAmount}원)` },
       }, { status: 400 });
     }
 
@@ -76,10 +87,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (subscriptionError) {
-      console.error('Subscription creation failed:', subscriptionError);
+      console.error('Subscription creation failed:', {
+        userId: user.id,
+        planId,
+        amount,
+        orderId,
+        error: subscriptionError,
+        errorCode: subscriptionError.code,
+        errorMessage: subscriptionError.message,
+        errorDetails: subscriptionError.details,
+      });
       return NextResponse.json<ApiResponse<null>>({
         data: null,
-        error: { code: 'DB_ERROR', message: '구독 정보 저장에 실패했습니다. 관리자에게 문의하세요.' },
+        error: { code: 'DB_ERROR', message: `구독 정보 저장에 실패했습니다. (에러: ${subscriptionError.message || subscriptionError.code})` },
       }, { status: 500 });
     }
 
@@ -90,16 +110,25 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id);
 
     if (profileError) {
-      console.error('Profile plan update failed:', profileError);
+      console.error('Profile plan update failed:', {
+        userId: user.id,
+        planId,
+        error: profileError,
+        errorCode: profileError.code,
+        errorMessage: profileError.message,
+        errorDetails: profileError.details,
+      });
       return NextResponse.json<ApiResponse<null>>({
         data: null,
-        error: { code: 'PLAN_UPDATE_ERROR', message: '플랜 업데이트에 실패했습니다. 관리자에게 문의하세요.' },
+        error: { code: 'PLAN_UPDATE_ERROR', message: `플랜 업데이트에 실패했습니다. (에러: ${profileError.message || profileError.code})` },
       }, { status: 500 });
     }
 
     // 캐시 무효화 - 대시보드와 프라이싱 페이지 갱신
     revalidatePath('/dashboard');
     revalidatePath('/pricing');
+
+    console.log('Payment successful:', { userId: user.id, planId, amount, orderId });
 
     return NextResponse.json<ApiResponse<{ orderId: string; plan: string }>>({
       data: { orderId, plan: planId },

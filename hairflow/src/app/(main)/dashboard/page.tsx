@@ -251,7 +251,10 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-[13px] text-white/50 font-light">{planLabel} 플랜</span>
-                {userData?.plan !== "free" && (
+                {userData?.plan === "enterprise" && (
+                  <Badge className="bg-gold/30 text-gold border-gold/40 text-[10px] tracking-[1px]">ENTERPRISE</Badge>
+                )}
+                {userData?.plan === "basic" && (
                   <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] tracking-[1px]">PRO</Badge>
                 )}
               </div>

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     email TEXT NOT NULL,
     name TEXT,
     avatar_url TEXT,
-    plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'basic', 'pro')),
+    plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'basic', 'enterprise')),
     daily_usage INT DEFAULT 0,
     last_usage_date DATE,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS timelines (
 CREATE TABLE IF NOT EXISTS subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    plan TEXT NOT NULL CHECK (plan IN ('basic', 'pro')),
+    plan TEXT NOT NULL CHECK (plan IN ('basic', 'enterprise')),
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'expired')),
     toss_order_id TEXT,
     toss_payment_key TEXT,
