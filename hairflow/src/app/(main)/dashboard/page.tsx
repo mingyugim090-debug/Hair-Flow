@@ -120,6 +120,19 @@ export default function DashboardPage() {
   const usage = userData?.dailyUsage ?? 0;
   const progressPercent = dailyLimit ? Math.min(100, (usage / dailyLimit) * 100) : 0;
 
+  // 플랜별 주요 기능 정의
+  const planFeatures = {
+    free: ["하루 3건 AI 분석", "AI 시술 레시피", "AI 미래 타임라인"],
+    basic: ["무제한 AI 분석", "시술 히스토리 무제한", "약제 브랜드 DB 제공"],
+    enterprise: ["Basic 모든 기능", "스태프 10명 연동", "매장 분석 리포트"],
+  };
+
+  const currentPlanFeatures = userData?.plan === "enterprise"
+    ? planFeatures.enterprise
+    : userData?.plan === "basic"
+    ? planFeatures.basic
+    : planFeatures.free;
+
   return (
     <div className="space-y-10">
       {/* Welcome */}
@@ -234,7 +247,7 @@ export default function DashboardPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">오늘의 사용량</h2>
         <div className="border border-gold/15 p-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-[13px] text-white/50 font-light">{planLabel} 플랜</span>
@@ -255,6 +268,17 @@ export default function DashboardPage() {
               </Link>
             )}
           </div>
+
+          {/* 플랜별 기능 표시 */}
+          <div className="space-y-2 pt-6 border-t border-gold/10">
+            {currentPlanFeatures.map((feature, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className="text-gold text-[11px]">&#10003;</span>
+                <span className="text-[13px] text-white/60 font-light">{feature}</span>
+              </div>
+            ))}
+          </div>
+
           {dailyLimit && (
             <div className="mt-6 h-px bg-white/10 relative overflow-hidden">
               <div
