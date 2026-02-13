@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import type { ApiResponse, Customer, CustomerTimeline, CustomerAnalysisResult } from '@/types';
+import type { ApiResponse, Customer, CustomerTimeline, CustomerAnalysisResult, TimelinePredictionResult } from '@/types';
 
 interface CustomerDetail {
   customer: Customer;
@@ -58,13 +58,19 @@ export async function GET(
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    const timelines: CustomerTimeline[] = (timelineRows ?? []).map((row) => ({
-      id: row.id,
-      customerId: row.customer_id,
-      imageUrl: row.treatment_image_url ?? null,
-      analysis: row.result_images as CustomerAnalysisResult,
-      createdAt: row.created_at,
-    }));
+    const timelines: CustomerTimeline[] = (timelineRows ?? []).map((row) => {
+      const type = row.treatment_type === 'timeline' ? 'timeline' : 'analysis';
+      return {
+        id: row.id,
+        customerId: row.customer_id,
+        type,
+        imageUrl: row.treatment_image_url ?? null,
+        ...(type === 'analysis'
+          ? { analysis: row.result_images as CustomerAnalysisResult }
+          : { timelinePrediction: row.result_images as TimelinePredictionResult }),
+        createdAt: row.created_at,
+      };
+    });
 
     return NextResponse.json<ApiResponse<CustomerDetail>>({
       data: { customer, timelines },

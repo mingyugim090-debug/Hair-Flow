@@ -122,12 +122,29 @@ export interface CustomerAnalysisResult {
   };
 }
 
+// 타임라인 예측 결과 (DALL-E 3 기반)
+export interface TimelinePredictionResult {
+  currentAnalysis: string;
+  predictions: {
+    week: number;
+    label: string;
+    imageUrl: string;
+    description: string;
+  }[];
+  revisitRecommendation: {
+    week: number;
+    reason: string;
+  };
+}
+
 // 고객 분석 히스토리 항목
 export interface CustomerTimeline {
   id: string;
   customerId: string;
+  type: 'analysis' | 'timeline';  // 분석 타입 구분
   imageUrl: string | null;
-  analysis: CustomerAnalysisResult;
+  analysis?: CustomerAnalysisResult;  // 모발 분석 결과 (type='analysis')
+  timelinePrediction?: TimelinePredictionResult;  // 타임라인 예측 (type='timeline')
   createdAt: string;
 }
 

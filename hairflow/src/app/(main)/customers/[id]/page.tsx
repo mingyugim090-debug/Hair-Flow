@@ -7,7 +7,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsageLimitModal } from "@/components/UsageLimitModal";
-import type { Customer, CustomerTimeline, CustomerAnalysisResult } from "@/types";
+import type { Customer, CustomerTimeline, CustomerAnalysisResult, TimelinePredictionResult } from "@/types";
 
 interface CustomerDetail {
   customer: Customer;
@@ -24,6 +24,7 @@ export default function CustomerDetailPage() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitMessage, setLimitMessage] = useState("");
   const [activeTab, setActiveTab] = useState<string>("recipe");
+  const [treatmentType, setTreatmentType] = useState<"color" | "cut" | "perm">("color");
   const recipeFileInputRef = useRef<HTMLInputElement>(null);
   const timelineFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,9 +67,38 @@ export default function CustomerDetailPage() {
 
   const handleTimelineAnalyze = async (file: File) => {
     setAnalyzingTimeline(true);
-    alert("타임라인 예측 기능은 곧 출시됩니다!");
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("treatmentType", treatmentType);
+
+    const res = await fetch(`/api/customers/${id}/timeline`, {
+      method: "POST",
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (result.data) {
+      const newTimeline: CustomerTimeline = {
+        id: result.data.id,
+        customerId: id as string,
+        type: "timeline",
+        imageUrl: null,
+        timelinePrediction: result.data.timelinePrediction,
+        createdAt: new Date().toISOString(),
+      };
+      setData((prev) =>
+        prev
+          ? { ...prev, timelines: [newTimeline, ...prev.timelines] }
+          : prev
+      );
+      setExpandedId(newTimeline.id);
+    } else if (result.error?.code === "USAGE_LIMIT") {
+      setLimitMessage(result.error.message);
+      setShowLimitModal(true);
+    } else {
+      alert(result.error?.message ?? "예측에 실패했습니다.");
+    }
     setAnalyzingTimeline(false);
-    // TODO: /api/customers/[id]/timeline API 호출
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "recipe" | "timeline") => {
@@ -124,6 +154,10 @@ export default function CustomerDetailPage() {
 
   const { customer, timelines } = data;
 
+  // 탭별로 필터링
+  const analysisTimelines = timelines.filter((t) => t.type === "analysis");
+  const timelinePredictions = timelines.filter((t) => t.type === "timeline");
+
   return (
     <div className="space-y-10">
       {/* Back + Header */}
@@ -165,18 +199,20 @@ export default function CustomerDetailPage() {
         transition={{ delay: 0.1 }}
       >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-charcoal border border-gold/15 p-1">
+          <TabsList className="grid w-full grid-cols-2 bg-charcoal border border-gold/15 p-1 gap-1">
             <TabsTrigger
               value="recipe"
-              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[12px] tracking-[2px] uppercase transition-all duration-500"
+              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[11px] sm:text-[12px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-2 sm:px-3"
             >
-              모발 분석 & 레시피
+              <span className="hidden sm:inline">모발 분석</span>
+              <span className="sm:hidden">분석</span>
             </TabsTrigger>
             <TabsTrigger
               value="timeline"
-              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[12px] tracking-[2px] uppercase transition-all duration-500"
+              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[11px] sm:text-[12px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-2 sm:px-3"
             >
-              미래 타임라인 예측
+              <span className="hidden sm:inline">타임라인 예측</span>
+              <span className="sm:hidden">타임라인</span>
             </TabsTrigger>
           </TabsList>
 
@@ -244,15 +280,15 @@ export default function CustomerDetailPage() {
                   분석 히스토리
                 </h2>
                 <span className="text-[12px] text-white/30 font-light">
-                  {timelines.length}건
+                  {analysisTimelines.length}건
                 </span>
               </div>
 
-              {timelines.length > 0 ? (
+              {analysisTimelines.length > 0 ? (
                 <div className="space-y-3">
-                  {timelines.map((timeline, i) => {
+                  {analysisTimelines.map((timeline, i) => {
                     const isExpanded = expandedId === timeline.id;
-                    const analysis = timeline.analysis;
+                    const analysis = timeline.analysis!;
                     const damage = getDamageBadge(analysis?.hairAnalysis?.damageLevel ?? "0");
 
                     return (
@@ -330,6 +366,30 @@ export default function CustomerDetailPage() {
 
           {/* Timeline Tab */}
           <TabsContent value="timeline" className="mt-6 space-y-6">
+            {/* Treatment Type Selection */}
+            <div>
+              <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-3">시술 타입 선택</h3>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {[
+                  { value: "color", label: "염색" },
+                  { value: "cut", label: "커트" },
+                  { value: "perm", label: "펌" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setTreatmentType(option.value as "color" | "cut" | "perm")}
+                    className={`px-4 py-3 border text-[12px] tracking-[2px] uppercase transition-all duration-500 ${
+                      treatmentType === option.value
+                        ? "border-gold bg-gold/10 text-gold"
+                        : "border-gold/15 text-white/40 hover:border-gold/40"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Upload Button */}
             <div>
               <input
@@ -345,21 +405,118 @@ export default function CustomerDetailPage() {
                 disabled={analyzingTimeline}
                 className="w-full px-8 py-5 border border-gold text-gold text-[12px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {analyzingTimeline ? "예측 중..." : "시술 완료 사진 촬영/업로드하여 미래 예측"}
+                {analyzingTimeline ? "AI 예측 중..." : "시술 완료 사진 촬영/업로드하여 미래 예측"}
               </button>
               <p className="text-[12px] text-white/30 font-light mt-3 text-center">
-                시술이 완료된 직후의 사진을 촬영하면, AI가 8주간의 변화를 예측하여 이미지로 생성합니다.
+                시술이 완료된 직후의 사진을 촬영하면, AI가 {treatmentType === "color" ? "8주간" : treatmentType === "cut" ? "8주간" : "12주간"}의 변화를 예측하여 이미지로 생성합니다.
               </p>
             </div>
 
-            {/* Coming Soon */}
-            <div className="border border-gold/10 p-16 text-center">
-              <p className="font-heading text-[24px] font-light text-gold mb-2">
-                Coming Soon
-              </p>
-              <p className="text-[13px] text-white/30 font-light">
-                DALL-E 3 기반 미래 타임라인 예측 기능은 곧 출시됩니다!
-              </p>
+            {/* Analyzing Loading */}
+            <AnimatePresence>
+              {analyzingTimeline && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border border-gold/20 p-10"
+                >
+                  <div className="flex flex-col items-center gap-6">
+                    <div className="relative">
+                      <div className="w-16 h-16 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
+                      <div
+                        className="absolute inset-0 w-16 h-16 border-2 border-transparent border-b-gold/40 rounded-full animate-spin"
+                        style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-heading text-[18px] font-light text-gold mb-2">
+                        AI 타임라인 예측 중
+                      </p>
+                      <p className="text-[13px] text-white/40 font-light">
+                        DALL-E 3가 미래 변화 이미지를 생성하고 있습니다...
+                      </p>
+                      <p className="text-[11px] text-white/20 font-light mt-2">
+                        약 30초~1분 정도 소요됩니다
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Timeline History */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-[12px] tracking-[4px] uppercase text-gold">
+                  예측 히스토리
+                </h2>
+                <span className="text-[12px] text-white/30 font-light">
+                  {timelinePredictions.length}건
+                </span>
+              </div>
+
+              {timelinePredictions.length > 0 ? (
+                <div className="space-y-3">
+                  {timelinePredictions.map((timeline, i) => {
+                    const isExpanded = expandedId === timeline.id;
+                    const prediction = timeline.timelinePrediction!;
+
+                    return (
+                      <motion.div
+                        key={timeline.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        {/* Card Header */}
+                        <div
+                          onClick={() => setExpandedId(isExpanded ? null : timeline.id)}
+                          className="border border-gold/10 p-5 hover:bg-gold/5 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[14px] font-light">
+                                  타임라인 예측 · {prediction.predictions.length}주차
+                                </span>
+                              </div>
+                              <p className="text-[12px] text-white/30 font-light">
+                                {new Date(timeline.createdAt).toLocaleDateString("ko-KR", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                            <span className="text-[12px] text-gold/40 shrink-0">
+                              {isExpanded ? "▲" : "▼"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Expanded Detail */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <TimelinePredictionDetail prediction={prediction} />
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="border border-gold/10 p-16 text-center">
+                  <p className="font-heading text-[24px] font-light text-white/40 mb-2">
+                    No Predictions
+                  </p>
+                  <p className="text-[13px] text-white/30 font-light">
+                    아직 예측 기록이 없습니다. 위 버튼으로 첫 예측을 시작해보세요.
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
@@ -502,5 +659,66 @@ function InfoItem({ label, value }: { label: string; value: string }) {
       <p className="text-[10px] tracking-[1px] text-white/25 uppercase mb-1">{label}</p>
       <p className="text-[13px] text-white/60 font-light">{value}</p>
     </div>
+  );
+}
+
+function TimelinePredictionDetail({ prediction }: { prediction: TimelinePredictionResult }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className="border border-gold/10 border-t-0 overflow-hidden"
+    >
+      <div className="p-6 space-y-8">
+        {/* Current Analysis */}
+        <div>
+          <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-3">현재 상태 분석</h3>
+          <p className="text-[14px] text-white/70 font-light leading-relaxed">
+            {prediction.currentAnalysis}
+          </p>
+        </div>
+
+        {/* Timeline Predictions */}
+        <div>
+          <h3 className="text-[11px] tracking-[3px] text-gold uppercase mb-4">미래 변화 예측</h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {prediction.predictions.map((pred) => (
+              <div key={pred.week} className="border border-gold/5 overflow-hidden">
+                {pred.imageUrl && (
+                  <div className="relative aspect-square w-full bg-charcoal/50">
+                    <Image
+                      src={pred.imageUrl}
+                      alt={pred.label}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="p-4">
+                  <h4 className="font-heading text-[16px] font-light mb-2 text-gold">
+                    {pred.label}
+                  </h4>
+                  <p className="text-[13px] text-white/60 font-light leading-relaxed">
+                    {pred.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Revisit Recommendation */}
+        <div className="border border-gold/15 p-6 text-center">
+          <p className="text-[11px] tracking-[2px] text-white/30 uppercase mb-2">추천 재방문</p>
+          <p className="font-heading text-[28px] text-gold font-light mb-2">
+            {prediction.revisitRecommendation.week}주 후
+          </p>
+          <p className="text-[13px] text-white/50 font-light">
+            {prediction.revisitRecommendation.reason}
+          </p>
+        </div>
+      </div>
+    </motion.div>
   );
 }

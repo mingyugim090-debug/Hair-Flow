@@ -178,6 +178,7 @@ export async function POST(
     const timeline: CustomerTimeline = {
       id: timelineRow?.id ?? '',
       customerId,
+      type: 'analysis',
       imageUrl,
       analysis: analysisResult,
       createdAt: timelineRow?.created_at ?? new Date().toISOString(),
