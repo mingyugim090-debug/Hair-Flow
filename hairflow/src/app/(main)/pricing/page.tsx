@@ -16,6 +16,7 @@ const plans = [
     features: ["하루 3건 AI 분석", "AI 시술 레시피", "AI 미래 타임라인", "기본 레시피 카드"],
     limitations: ["분석 히스토리 미제공", "약제 브랜드 DB 미제공"],
     highlight: false,
+    badge: null,
   },
   {
     id: "basic",
@@ -24,20 +25,33 @@ const plans = [
     priceLabel: "19,900원",
     period: "/월",
     description: "개인 디자이너에게 추천",
-    features: ["무제한 AI 분석", "AI 시술 레시피", "AI 미래 타임라인", "분석 히스토리 저장", "우선 처리"],
-    limitations: [],
-    highlight: true,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: 39900,
-    priceLabel: "39,900원",
-    period: "/월",
-    description: "매장 전체가 사용할 때",
-    features: ["매장 직원 전체 사용", "무제한 AI 분석", "매출 분석 리포트", "약제 브랜드별 DB", "전용 고객 지원"],
+    features: [
+      "무제한 AI 시술 레시피 생성",
+      "8주 미래 변화 타임라인 분석",
+      "시술 히스토리 무제한 저장",
+      "표준 약제 브랜드 DB 제공"
+    ],
     limitations: [],
     highlight: false,
+    badge: "추천",
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: 99000,
+    priceLabel: "99,000원",
+    period: "/월",
+    description: "매장/팀 단위 추천",
+    features: [
+      "Basic의 모든 기능 포함",
+      "최대 10명의 스태프 계정 연동",
+      "매장 전체 매출 분석 리포트 대시보드",
+      "매장 전용 맞춤형 약제/브랜드 DB 커스텀",
+      "1:1 전담 고객 지원 및 우선 처리 권한"
+    ],
+    limitations: [],
+    highlight: true,
+    badge: "인기",
   },
 ];
 
@@ -134,8 +148,14 @@ export default function PricingPage() {
           >
             <div className="flex items-center justify-center gap-2 mb-4">
               <h3 className="font-heading text-[24px] font-normal">{plan.name}</h3>
-              {plan.highlight && (
-                <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] tracking-[1px]">추천</Badge>
+              {plan.badge && plan.id !== currentPlan && (
+                <Badge className={`text-[10px] tracking-[1px] ${
+                  plan.highlight
+                    ? "bg-gold/30 text-gold border-gold/40"
+                    : "bg-gold/20 text-gold border-gold/30"
+                }`}>
+                  {plan.badge}
+                </Badge>
               )}
               {plan.id === currentPlan && plan.id !== "free" && (
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px]">사용 중</Badge>
@@ -185,18 +205,6 @@ export default function PricingPage() {
           </motion.div>
         ))}
       </div>
-
-      {/* Enterprise */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-        className="text-center py-8">
-        <div className="border border-gold/10 p-10 max-w-2xl mx-auto">
-          <h3 className="font-heading text-[24px] font-light mb-2">Enterprise</h3>
-          <p className="text-[13px] text-white/40 font-light mb-6">대형 체인 미용실 전용 서비스</p>
-          <button className="px-8 py-3 border border-gold/20 text-gold/60 text-[11px] tracking-[2px] uppercase hover:border-gold hover:text-gold transition-all duration-500">
-            문의하기
-          </button>
-        </div>
-      </motion.div>
     </div>
   );
 }
