@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getAuthUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import type { ApiResponse } from '@/types';
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // 구독 정보 저장
-    await supabase.from('subscriptions').insert({
+    const { error: subscriptionError } = await supabase.from('subscriptions').insert({
       user_id: user.id,
       plan: planId,
       status: 'active',
@@ -74,11 +75,31 @@ export async function POST(request: NextRequest) {
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     });
 
+    if (subscriptionError) {
+      console.error('Subscription creation failed:', subscriptionError);
+      return NextResponse.json<ApiResponse<null>>({
+        data: null,
+        error: { code: 'DB_ERROR', message: '구독 정보 저장에 실패했습니다. 관리자에게 문의하세요.' },
+      }, { status: 500 });
+    }
+
     // 사용자 플랜 업데이트
-    await supabase
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ plan: planId })
       .eq('id', user.id);
+
+    if (profileError) {
+      console.error('Profile plan update failed:', profileError);
+      return NextResponse.json<ApiResponse<null>>({
+        data: null,
+        error: { code: 'PLAN_UPDATE_ERROR', message: '플랜 업데이트에 실패했습니다. 관리자에게 문의하세요.' },
+      }, { status: 500 });
+    }
+
+    // 캐시 무효화 - 대시보드와 프라이싱 페이지 갱신
+    revalidatePath('/dashboard');
+    revalidatePath('/pricing');
 
     return NextResponse.json<ApiResponse<{ orderId: string; plan: string }>>({
       data: { orderId, plan: planId },

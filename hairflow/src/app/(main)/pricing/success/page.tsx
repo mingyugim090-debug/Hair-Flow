@@ -43,6 +43,12 @@ function PaymentSuccessContent() {
           setErrorMessage(result.error.message);
         } else {
           setStatus("success");
+          // 서버 데이터 갱신
+          router.refresh();
+          // 3초 후 자동 리다이렉트
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 3000);
         }
       } catch {
         setStatus("error");
@@ -78,7 +84,10 @@ function PaymentSuccessContent() {
                 지금부터 무제한으로 AI 분석을 이용하세요.
               </p>
               <button
-                onClick={() => router.push("/dashboard")}
+                onClick={() => {
+                  router.refresh();
+                  router.push("/dashboard");
+                }}
                 className="px-10 py-3 border border-gold text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500"
               >
                 대시보드로 이동
