@@ -46,49 +46,59 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 
-  /* Luxury color palette - warm & refined */
-  --color-cream: #F7F3EF;
+  /* ── Warm Neutral Base ── */
+  --color-cream: #FBF8F4;
+  --color-ivory: #F5EFE7;
+  --color-soft-beige: #EDE4DA;
+  --color-clay: #C9B9A8;
+  --color-warm-taupe: #9A8578;
+  --color-warm-brown: #8B7B6B;
+  --color-deep-brown: #3D2B1F;
   --color-charcoal: #2C2926;
-  --color-warm-brown: #9A7E6D;
+
+  /* ── Dusty Rose (Primary Accent) ── */
+  --color-rose: #C4979A;
+  --color-rose-light: #D9B8BB;
+  --color-rose-dark: #A67C7F;
+
+  /* ── Champagne Gold (Secondary Accent) ── */
   --color-gold: #D4B37F;
   --color-gold-light: #E5CC9E;
-  --color-soft-beige: #EDE4DA;
-  --color-deep-brown: #3D2B1F;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: #F7F3EF;
+  --radius: 0.75rem;
+  --background: #FBF8F4;
   --foreground: #2C2926;
   --card: #FFFFFF;
-  --card-foreground: #2C2926;
+  --card-foreground: #3D2B1F;
   --popover: #FFFFFF;
-  --popover-foreground: #2C2926;
-  --primary: #2C2926;
-  --primary-foreground: #F7F3EF;
-  --secondary: #EDE4DA;
+  --popover-foreground: #3D2B1F;
+  --primary: #C4979A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5EFE7;
   --secondary-foreground: #3D2B1F;
   --muted: #EDE4DA;
-  --muted-foreground: #9A7E6D;
-  --accent: #EDE4DA;
+  --muted-foreground: #9A8578;
+  --accent: #F5EFE7;
   --accent-foreground: #3D2B1F;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: rgba(154, 126, 109, 0.2);
-  --input: rgba(154, 126, 109, 0.2);
-  --ring: #D4B37F;
-  --chart-1: #D4B37F;
-  --chart-2: #9A7E6D;
-  --chart-3: #3D2B1F;
-  --chart-4: #E5CC9E;
-  --chart-5: #EDE4DA;
-  --sidebar: #F7F3EF;
+  --border: rgba(201, 185, 168, 0.25);
+  --input: rgba(201, 185, 168, 0.25);
+  --ring: #C4979A;
+  --chart-1: #C4979A;
+  --chart-2: #D4B37F;
+  --chart-3: #9A8578;
+  --chart-4: #D9B8BB;
+  --chart-5: #E5CC9E;
+  --sidebar: #FBF8F4;
   --sidebar-foreground: #2C2926;
-  --sidebar-primary: #2C2926;
-  --sidebar-primary-foreground: #F7F3EF;
-  --sidebar-accent: #EDE4DA;
+  --sidebar-primary: #C4979A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F5EFE7;
   --sidebar-accent-foreground: #3D2B1F;
-  --sidebar-border: rgba(154, 126, 109, 0.2);
-  --sidebar-ring: #D4B37F;
+  --sidebar-border: rgba(201, 185, 168, 0.25);
+  --sidebar-ring: #C4979A;
 }
 
 @layer base {
@@ -101,12 +111,12 @@
   }
 }
 
-/* Serif heading utility */
+/* ── Serif heading ── */
 .font-heading {
   font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
 }
 
-/* Section label style */
+/* ── Section label (champagne gold) ── */
 .section-label {
   font-size: 11px;
   letter-spacing: 6px;
@@ -114,23 +124,68 @@
   color: #D4B37F;
 }
 
-/* Mobile safe area for bottom nav */
+/* ── Glassmorphism ── */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(159, 139, 121, 0.06);
+}
+
+/* ── Soft Elevation ── */
+.soft-shadow {
+  box-shadow: 0 2px 16px rgba(159, 139, 121, 0.07), 0 1px 4px rgba(159, 139, 121, 0.04);
+}
+
+.soft-shadow-lg {
+  box-shadow: 0 8px 32px rgba(159, 139, 121, 0.1), 0 2px 8px rgba(159, 139, 121, 0.05);
+}
+
+/* ── Organic shapes ── */
+.organic-blob {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+.organic-blob-2 {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+}
+
+.organic-blob-3 {
+  border-radius: 50% 50% 30% 70% / 40% 60% 40% 60%;
+}
+
+/* ── Mobile safe area ── */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Scroll animation */
+/* ── Animations ── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes floatSlow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(3deg); }
 }
 
 @keyframes scrollPulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
+}
+
+@keyframes morphBlob {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 50% 60% 30% 60% / 30% 50% 70% 50%; }
+  75% { border-radius: 60% 30% 60% 40% / 60% 40% 30% 70%; }
 }

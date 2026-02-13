@@ -16,34 +16,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-charcoal flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-6 relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(201,169,110,0.08)_0%,transparent_60%)]" />
-      <div className="absolute w-[200px] h-[200px] rounded-full border border-gold/10 top-[15%] right-[10%] animate-[floatSlow_8s_ease-in-out_infinite]" />
-      <div className="absolute w-[150px] h-[150px] rounded-full border border-gold/10 bottom-[20%] left-[5%] animate-[floatSlow_6s_ease-in-out_infinite_reverse]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(196,151,154,0.06)_0%,transparent_60%)]" />
+      <div className="absolute w-[250px] h-[250px] bg-rose/[0.06] organic-blob top-[15%] right-[10%] animate-[morphBlob_20s_ease-in-out_infinite]" />
+      <div className="absolute w-[200px] h-[200px] bg-gold/[0.06] organic-blob-2 bottom-[20%] left-[5%] animate-[morphBlob_15s_ease-in-out_infinite_reverse]" />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="text-center mb-16">
           <Link href="/" className="inline-flex flex-col items-center gap-4">
             <Image src="/logo.png" alt="HairFlow" width={72} height={72} className="object-contain" />
-            <h1 className="font-heading text-[28px] font-light tracking-[8px] text-white">
+            <h1 className="font-heading text-[28px] font-light tracking-[8px] text-charcoal">
               HAIRFLOW
             </h1>
           </Link>
-          <p className="text-[13px] text-white/40 mt-3 tracking-[2px] font-light">AI Hair Design Assistant</p>
+          <p className="text-[13px] text-warm-taupe mt-3 tracking-[2px] font-light">AI Hair Design Assistant</p>
         </div>
 
         {/* Login Card */}
-        <div className="border border-gold/20 p-10">
-          <h2 className="font-heading text-[24px] font-light text-white text-center mb-2">로그인</h2>
-          <p className="text-[13px] text-white/40 text-center mb-10 font-light">
+        <div className="bg-white rounded-2xl soft-shadow-lg border border-clay/10 p-10">
+          <h2 className="font-heading text-[24px] font-light text-charcoal text-center mb-2">로그인</h2>
+          <p className="text-[13px] text-warm-taupe text-center mb-10 font-light">
             Google 계정으로 간편하게 시작하세요
           </p>
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full h-14 bg-white hover:bg-gray-50 text-charcoal font-normal flex items-center justify-center gap-3 transition-colors text-[14px]"
+            className="w-full h-14 bg-charcoal hover:bg-deep-brown text-white font-normal flex items-center justify-center gap-3 transition-colors text-[14px] rounded-xl"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -55,18 +55,18 @@ export default function LoginPage() {
           </button>
 
           <div className="mt-8 text-center">
-            <p className="text-[11px] text-white/30 font-light leading-relaxed">
+            <p className="text-[11px] text-warm-taupe/70 font-light leading-relaxed">
               로그인 시{" "}
-              <span className="text-gold/60 cursor-pointer hover:text-gold transition-colors">이용약관</span>과{" "}
-              <span className="text-gold/60 cursor-pointer hover:text-gold transition-colors">개인정보처리방침</span>에 동의합니다.
+              <span className="text-rose cursor-pointer hover:text-rose-dark transition-colors">이용약관</span>과{" "}
+              <span className="text-rose cursor-pointer hover:text-rose-dark transition-colors">개인정보처리방침</span>에 동의합니다.
             </p>
           </div>
         </div>
 
         {/* Back */}
         <div className="text-center mt-10">
-          <Link href="/" className="text-[12px] tracking-[2px] text-white/40 hover:text-gold transition-colors uppercase font-light">
-            ← 홈으로 돌아가기
+          <Link href="/" className="text-[12px] tracking-[2px] text-warm-taupe hover:text-rose transition-colors uppercase font-light">
+            &#8592; 홈으로 돌아가기
           </Link>
         </div>
       </div>
