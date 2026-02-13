@@ -21,7 +21,7 @@ function PaymentSuccessContent() {
       return;
     }
 
-    const planId = orderId.split("_")[1] as "basic" | "pro";
+    const planId = orderId.split("_")[1] as "basic" | "enterprise";
 
     const confirmPayment = async () => {
       try {

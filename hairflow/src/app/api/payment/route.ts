@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       paymentKey: string;
       orderId: string;
       amount: number;
-      planId: 'basic' | 'pro';
+      planId: 'basic' | 'enterprise';
     };
 
     if (!paymentKey || !orderId || !amount || !planId) {

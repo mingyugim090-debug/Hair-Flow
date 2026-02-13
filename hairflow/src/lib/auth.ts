@@ -66,7 +66,7 @@ function mapProfile(row: Record<string, unknown>): UserProfile {
     specialties: (row.specialties as string[]) ?? [],
     bio: (row.bio as string) ?? null,
     isOnboarded: (row.is_onboarded as boolean) ?? false,
-    plan: (row.plan as 'free' | 'basic' | 'pro') ?? 'free',
+    plan: (row.plan as 'free' | 'basic' | 'enterprise') ?? 'free',
     dailyUsage: (row.daily_usage as number) ?? 0,
     lastUsageDate: (row.last_usage_date as string) ?? null,
     portfolioWorks: (row.portfolio_works as { url: string; caption: string; createdAt: string }[]) ?? [],
@@ -77,7 +77,7 @@ function mapProfile(row: Record<string, unknown>): UserProfile {
 const DAILY_LIMITS: Record<string, number> = {
   free: 3,
   basic: 999999,
-  pro: 999999,
+  enterprise: 999999,
 };
 
 export async function checkUsageLimit(userId: string): Promise<{ allowed: boolean; remaining: number }> {

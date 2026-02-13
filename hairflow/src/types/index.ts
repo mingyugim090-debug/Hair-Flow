@@ -74,7 +74,7 @@ export interface UserProfile {
   specialties: string[];
   bio: string | null;
   isOnboarded: boolean;
-  plan: 'free' | 'basic' | 'pro';
+  plan: 'free' | 'basic' | 'enterprise';
   dailyUsage: number;
   lastUsageDate: string | null;
   portfolioWorks: PortfolioWork[];
@@ -150,7 +150,7 @@ export interface CustomerTimeline {
 
 // 구독 플랜
 export interface PricingPlan {
-  id: 'free' | 'basic' | 'pro';
+  id: 'free' | 'basic' | 'enterprise';
   name: string;
   price: number;
   features: string[];
