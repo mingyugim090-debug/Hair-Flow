@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsageLimitModal } from "@/components/UsageLimitModal";
 import type { Customer, CustomerTimeline, CustomerAnalysisResult } from "@/types";
 
@@ -17,11 +18,14 @@ export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<CustomerDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzingRecipe, setAnalyzingRecipe] = useState(false);
+  const [analyzingTimeline, setAnalyzingTimeline] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [limitMessage, setLimitMessage] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<string>("recipe");
+  const recipeFileInputRef = useRef<HTMLInputElement>(null);
+  const timelineFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,8 +37,8 @@ export default function CustomerDetailPage() {
     fetchData();
   }, [id]);
 
-  const handleAnalyze = async (file: File) => {
-    setAnalyzing(true);
+  const handleRecipeAnalyze = async (file: File) => {
+    setAnalyzingRecipe(true);
     const formData = new FormData();
     formData.append("image", file);
 
@@ -57,10 +61,17 @@ export default function CustomerDetailPage() {
     } else {
       alert(result.error?.message ?? "분석에 실패했습니다.");
     }
-    setAnalyzing(false);
+    setAnalyzingRecipe(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTimelineAnalyze = async (file: File) => {
+    setAnalyzingTimeline(true);
+    alert("타임라인 예측 기능은 곧 출시됩니다!");
+    setAnalyzingTimeline(false);
+    // TODO: /api/customers/[id]/timeline API 호출
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "recipe" | "timeline") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -76,7 +87,11 @@ export default function CustomerDetailPage() {
       return;
     }
 
-    handleAnalyze(file);
+    if (type === "recipe") {
+      handleRecipeAnalyze(file);
+    } else {
+      handleTimelineAnalyze(file);
+    }
     e.target.value = "";
   };
 
@@ -143,151 +158,211 @@ export default function CustomerDetailPage() {
         </div>
       </motion.div>
 
-      {/* New Analysis Button */}
+      {/* Tabs for Recipe & Timeline */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={analyzing}
-          className="w-full px-8 py-5 border border-gold text-gold text-[12px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {analyzing ? "분석 중..." : "새 분석 시작 (사진 촬영/업로드)"}
-        </button>
-      </motion.div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-charcoal border border-gold/15 p-1">
+            <TabsTrigger
+              value="recipe"
+              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[12px] tracking-[2px] uppercase transition-all duration-500"
+            >
+              모발 분석 & 레시피
+            </TabsTrigger>
+            <TabsTrigger
+              value="timeline"
+              className="data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30 text-[12px] tracking-[2px] uppercase transition-all duration-500"
+            >
+              미래 타임라인 예측
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Analyzing Loading */}
-      <AnimatePresence>
-        {analyzing && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border border-gold/20 p-10"
-          >
-            <div className="flex flex-col items-center gap-6">
-              <div className="relative">
-                <div className="w-16 h-16 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
-                <div className="absolute inset-0 w-16 h-16 border-2 border-transparent border-b-gold/40 rounded-full animate-spin" style={{ animationDirection: "reverse", animationDuration: "1.5s" }} />
-              </div>
-              <div className="text-center">
-                <p className="font-heading text-[18px] font-light text-gold mb-2">
-                  AI 모발 분석 중
-                </p>
-                <p className="text-[13px] text-white/40 font-light">
-                  AI가 모발 상태를 정밀 분석하고 맞춤 레시피를 생성 중입니다...
-                </p>
-                <p className="text-[11px] text-white/20 font-light mt-2">
-                  약 10~20초 정도 소요됩니다
-                </p>
-              </div>
+          {/* Recipe Tab */}
+          <TabsContent value="recipe" className="mt-6 space-y-6">
+            {/* Upload Button */}
+            <div>
+              <input
+                ref={recipeFileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => handleFileChange(e, "recipe")}
+                className="hidden"
+              />
+              <button
+                onClick={() => recipeFileInputRef.current?.click()}
+                disabled={analyzingRecipe}
+                className="w-full px-8 py-5 border border-gold text-gold text-[12px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {analyzingRecipe ? "분석 중..." : "모발 사진 촬영/업로드하여 레시피 생성"}
+              </button>
+              <p className="text-[12px] text-white/30 font-light mt-3 text-center">
+                고객의 현재 모발 사진을 촬영하면, AI가 모발 상태를 분석하고 맞춤 케어 레시피를 생성합니다.
+              </p>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Analysis History */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[12px] tracking-[4px] uppercase text-gold">
-            분석 히스토리
-          </h2>
-          <span className="text-[12px] text-white/30 font-light">
-            {timelines.length}건
-          </span>
-        </div>
-
-        {timelines.length > 0 ? (
-          <div className="space-y-3">
-            {timelines.map((timeline, i) => {
-              const isExpanded = expandedId === timeline.id;
-              const analysis = timeline.analysis;
-              const damage = getDamageBadge(analysis?.hairAnalysis?.damageLevel ?? "0");
-
-              return (
+            {/* Analyzing Loading */}
+            <AnimatePresence>
+              {analyzingRecipe && (
                 <motion.div
-                  key={timeline.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border border-gold/20 p-10"
                 >
-                  {/* Card Header */}
-                  <div
-                    onClick={() => setExpandedId(isExpanded ? null : timeline.id)}
-                    className="border border-gold/10 p-5 hover:bg-gold/5 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                      {/* Thumbnail */}
-                      {timeline.imageUrl && (
-                        <div className="w-14 h-14 shrink-0 border border-gold/10 overflow-hidden">
-                          <Image
-                            src={timeline.imageUrl}
-                            alt="분석 사진"
-                            width={56}
-                            height={56}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[14px] font-light">
-                            {analysis?.hairAnalysis?.condition ?? "분석 완료"}
-                          </span>
-                          <span className={`text-[10px] tracking-[1px] px-2 py-0.5 border ${damage.color}`}>
-                            손상도 {analysis?.hairAnalysis?.damageLevel ?? "-"}
-                          </span>
-                        </div>
-                        <p className="text-[12px] text-white/30 font-light">
-                          {new Date(timeline.createdAt).toLocaleDateString("ko-KR", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                      <span className="text-[12px] text-gold/40 shrink-0">
-                        {isExpanded ? "▲" : "▼"}
-                      </span>
+                  <div className="flex flex-col items-center gap-6">
+                    <div className="relative">
+                      <div className="w-16 h-16 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
+                      <div
+                        className="absolute inset-0 w-16 h-16 border-2 border-transparent border-b-gold/40 rounded-full animate-spin"
+                        style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-heading text-[18px] font-light text-gold mb-2">
+                        AI 모발 분석 중
+                      </p>
+                      <p className="text-[13px] text-white/40 font-light">
+                        AI가 모발 상태를 정밀 분석하고 맞춤 레시피를 생성 중입니다...
+                      </p>
+                      <p className="text-[11px] text-white/20 font-light mt-2">
+                        약 10~20초 정도 소요됩니다
+                      </p>
                     </div>
                   </div>
-
-                  {/* Expanded Detail */}
-                  <AnimatePresence>
-                    {isExpanded && analysis && (
-                      <AnalysisDetail analysis={analysis} imageUrl={timeline.imageUrl} />
-                    )}
-                  </AnimatePresence>
                 </motion.div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="border border-gold/10 p-16 text-center">
-            <p className="font-heading text-[24px] font-light text-white/40 mb-2">
-              No Analysis
-            </p>
-            <p className="text-[13px] text-white/30 font-light">
-              아직 분석 기록이 없습니다. 위 버튼으로 첫 분석을 시작해보세요.
-            </p>
-          </div>
-        )}
+              )}
+            </AnimatePresence>
+
+            {/* Analysis History */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-[12px] tracking-[4px] uppercase text-gold">
+                  분석 히스토리
+                </h2>
+                <span className="text-[12px] text-white/30 font-light">
+                  {timelines.length}건
+                </span>
+              </div>
+
+              {timelines.length > 0 ? (
+                <div className="space-y-3">
+                  {timelines.map((timeline, i) => {
+                    const isExpanded = expandedId === timeline.id;
+                    const analysis = timeline.analysis;
+                    const damage = getDamageBadge(analysis?.hairAnalysis?.damageLevel ?? "0");
+
+                    return (
+                      <motion.div
+                        key={timeline.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        {/* Card Header */}
+                        <div
+                          onClick={() => setExpandedId(isExpanded ? null : timeline.id)}
+                          className="border border-gold/10 p-5 hover:bg-gold/5 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            {/* Thumbnail */}
+                            {timeline.imageUrl && (
+                              <div className="w-14 h-14 shrink-0 border border-gold/10 overflow-hidden">
+                                <Image
+                                  src={timeline.imageUrl}
+                                  alt="분석 사진"
+                                  width={56}
+                                  height={56}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[14px] font-light">
+                                  {analysis?.hairAnalysis?.condition ?? "분석 완료"}
+                                </span>
+                                <span className={`text-[10px] tracking-[1px] px-2 py-0.5 border ${damage.color}`}>
+                                  손상도 {analysis?.hairAnalysis?.damageLevel ?? "-"}
+                                </span>
+                              </div>
+                              <p className="text-[12px] text-white/30 font-light">
+                                {new Date(timeline.createdAt).toLocaleDateString("ko-KR", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                            <span className="text-[12px] text-gold/40 shrink-0">
+                              {isExpanded ? "▲" : "▼"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Expanded Detail */}
+                        <AnimatePresence>
+                          {isExpanded && analysis && (
+                            <AnalysisDetail analysis={analysis} imageUrl={timeline.imageUrl} />
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="border border-gold/10 p-16 text-center">
+                  <p className="font-heading text-[24px] font-light text-white/40 mb-2">
+                    No Analysis
+                  </p>
+                  <p className="text-[13px] text-white/30 font-light">
+                    아직 분석 기록이 없습니다. 위 버튼으로 첫 분석을 시작해보세요.
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="mt-6 space-y-6">
+            {/* Upload Button */}
+            <div>
+              <input
+                ref={timelineFileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => handleFileChange(e, "timeline")}
+                className="hidden"
+              />
+              <button
+                onClick={() => timelineFileInputRef.current?.click()}
+                disabled={analyzingTimeline}
+                className="w-full px-8 py-5 border border-gold text-gold text-[12px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {analyzingTimeline ? "예측 중..." : "시술 완료 사진 촬영/업로드하여 미래 예측"}
+              </button>
+              <p className="text-[12px] text-white/30 font-light mt-3 text-center">
+                시술이 완료된 직후의 사진을 촬영하면, AI가 8주간의 변화를 예측하여 이미지로 생성합니다.
+              </p>
+            </div>
+
+            {/* Coming Soon */}
+            <div className="border border-gold/10 p-16 text-center">
+              <p className="font-heading text-[24px] font-light text-gold mb-2">
+                Coming Soon
+              </p>
+              <p className="text-[13px] text-white/30 font-light">
+                DALL-E 3 기반 미래 타임라인 예측 기능은 곧 출시됩니다!
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </motion.div>
 
       <UsageLimitModal

@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Customer } from "@/types";
 
 export default function CustomersPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", memo: "" });
   const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState("");
-  const router = useRouter();
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
 
   const fetchCustomers = async () => {
     const res = await fetch("/api/customers");
