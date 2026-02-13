@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Customer } from "@/types";
 
-export default function CustomersPage() {
+function CustomersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -224,5 +224,17 @@ export default function CustomersPage() {
         )}
       </motion.div>
     </div>
+  );
+}
+
+export default function CustomersPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center py-32">
+        <div className="w-8 h-8 border border-gold/30 border-t-gold rounded-full animate-spin" />
+      </div>
+    }>
+      <CustomersContent />
+    </Suspense>
   );
 }
