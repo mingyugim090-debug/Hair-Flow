@@ -68,12 +68,16 @@ export default function LandingPage() {
       </section>
 
       {/* About */}
-      <section id="about" className="bg-cream text-charcoal">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-[60px] py-20 sm:py-28 md:py-[140px] grid md:grid-cols-2 gap-12 sm:gap-16 md:gap-20 items-center">
+      <section id="about" className="bg-cream text-charcoal relative overflow-hidden">
+        {/* Subtle background pattern for cream section */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_48%,rgba(139,111,94,0.5)_49%,rgba(139,111,94,0.5)_51%,transparent_52%)] bg-[length:40px_40px]" />
+        </div>
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-[60px] py-20 sm:py-28 md:py-[140px] grid md:grid-cols-2 gap-12 sm:gap-16 md:gap-20 items-center relative z-10">
           <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}
-            className="relative aspect-[3/4] overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-soft-beige to-warm-brown flex items-center justify-center">
-              <span className="text-[80px] opacity-30">✂</span>
+            className="relative aspect-[3/4] overflow-hidden shadow-luxury hover-gold-glow group">
+            <div className="w-full h-full bg-gradient-to-br from-soft-beige to-warm-brown flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
+              <span className="text-[80px] opacity-30 transition-transform duration-500 group-hover:rotate-12">✂</span>
             </div>
             <div className="absolute -top-5 -left-5 right-5 bottom-5 border border-gold -z-10" />
           </motion.div>
@@ -149,12 +153,12 @@ export default function LandingPage() {
             },
           ].map((item) => (
             <motion.div key={item.num} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="p-8 sm:p-10 md:p-12 lg:p-14 border border-gold/10 hover:bg-gold/5 hover:border-gold/30 transition-all duration-300">
-              <div className="font-heading text-[13px] text-gold tracking-[2px] mb-6">{item.num}</div>
-              <div className="font-heading text-[clamp(22px,3vw,28px)] font-normal text-white mb-2">{item.name}</div>
-              <div className="text-[13px] text-white/40 font-light mb-6 tracking-[1px]">{item.nameEn}</div>
+              className="p-8 sm:p-10 md:p-12 lg:p-14 glass-luxury border border-gold/10 hover:border-gold/30 transition-all duration-500 hover-gold-glow shadow-luxury-sm group">
+              <div className="font-heading text-[13px] text-gold tracking-[2px] mb-6 transition-all duration-300 group-hover:tracking-[3px]">{item.num}</div>
+              <div className="font-heading text-[clamp(22px,3vw,28px)] font-normal text-white mb-2 italic">{item.name}</div>
+              <div className="text-[13px] text-white/40 font-light mb-6 tracking-[1px] uppercase">{item.nameEn}</div>
               <div className="text-[14px] leading-[1.8] text-white/60 font-light mb-8">{item.desc}</div>
-              <div className="text-[16px] text-gold-light font-light">{item.sub}</div>
+              <div className="text-[16px] text-gold-light font-light group-hover:text-gold transition-colors duration-300">{item.sub}</div>
             </motion.div>
           ))}
         </div>
@@ -176,9 +180,9 @@ export default function LandingPage() {
             { name: "Enterprise", price: "99,000원", period: "/월", desc: "헤어샵/팀 전용", features: ["Basic 모든 기능 포함", "최대 10명 스태프 연동", "매장 매출 분석 대시보드", "맞춤형 약제/브랜드 DB", "1:1 전담 고객 지원"], hl: false, badge: "" },
           ].map((plan, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-              className={`p-8 sm:p-10 md:p-12 border text-center ${plan.hl ? "border-gold bg-charcoal text-white" : "border-warm-brown/20 bg-white"}`}>
-              {plan.badge && <span className="section-label mb-4 inline-block">{plan.badge}</span>}
-              <h3 className="font-heading text-[28px] font-normal mb-2">{plan.name}</h3>
+              className={`p-8 sm:p-10 md:p-12 border text-center shadow-luxury hover-gold-glow transition-all duration-500 group ${plan.hl ? "border-gold bg-charcoal text-white glass-luxury-dark" : "border-warm-brown/20 bg-white hover:shadow-[0_15px_50px_rgba(0,0,0,0.1)]"}`}>
+              {plan.badge && <span className="section-label mb-4 inline-block transition-all duration-300 group-hover:tracking-[5px]">{plan.badge}</span>}
+              <h3 className="font-heading text-[28px] font-normal mb-2 italic">{plan.name}</h3>
               <p className={`text-[13px] font-light mb-6 ${plan.hl ? "text-white/50" : "text-charcoal/50"}`}>{plan.desc}</p>
               <div className="font-heading text-[36px] font-light mb-1">
                 {plan.price}<small className={`text-[14px] ${plan.hl ? "text-white/30" : "text-charcoal/30"} font-sans`}>{plan.period}</small>
@@ -191,10 +195,10 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link href="/login"
-                className={`inline-block w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 ${
+                className={`inline-block w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 shadow-luxury-sm hover:shadow-luxury group/btn ${
                   plan.hl ? "border border-gold text-gold hover:bg-gold hover:text-charcoal" : "border border-deep-brown/30 text-deep-brown hover:bg-deep-brown hover:text-white"
                 }`}>
-                시작하기
+                <span className="inline-block transition-transform duration-300 group-hover/btn:tracking-[4px]">시작하기</span>
               </Link>
             </motion.div>
           ))}

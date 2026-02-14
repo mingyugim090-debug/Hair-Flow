@@ -99,13 +99,16 @@
     @apply bg-background text-foreground;
     font-weight: 300;
     background-image:
-      /* Luxury geometric pattern */
+      /* Radial gradient for depth - center glow */
+      radial-gradient(ellipse 120% 100% at 50% 0%, rgba(212, 179, 127, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(212, 179, 127, 0.04) 0%, transparent 50%),
+      /* Luxury wireframe geometric pattern */
       linear-gradient(135deg, transparent 24%, rgba(212, 179, 127, 0.03) 25%, rgba(212, 179, 127, 0.03) 26%, transparent 27%, transparent 74%, rgba(212, 179, 127, 0.03) 75%, rgba(212, 179, 127, 0.03) 76%, transparent 77%),
       linear-gradient(45deg, transparent 24%, rgba(212, 179, 127, 0.03) 25%, rgba(212, 179, 127, 0.03) 26%, transparent 27%, transparent 74%, rgba(212, 179, 127, 0.03) 75%, rgba(212, 179, 127, 0.03) 76%, transparent 77%),
-      /* Subtle dots */
+      /* Subtle noise texture dots */
       radial-gradient(circle at 50% 50%, rgba(212, 179, 127, 0.04) 1px, transparent 1px);
-    background-size: 80px 80px, 80px 80px, 20px 20px;
-    background-position: 0 0, 40px 40px, 0 0;
+    background-size: 100% 100%, 100% 100%, 80px 80px, 80px 80px, 20px 20px;
+    background-position: 0 0, 0 0, 0 0, 40px 40px, 0 0;
   }
 }
 
@@ -141,4 +144,73 @@
 @keyframes scrollPulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
+}
+
+/* Glassmorphism effect - Luxury transparent layer */
+.glass-luxury {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 179, 127, 0.2);
+}
+
+.glass-luxury-dark {
+  background: rgba(44, 41, 38, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 179, 127, 0.15);
+}
+
+/* Soft luxury shadow - floating effect */
+.shadow-luxury {
+  box-shadow:
+    0 10px 40px -10px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(212, 179, 127, 0.08);
+}
+
+.shadow-luxury-sm {
+  box-shadow:
+    0 5px 20px -5px rgba(0, 0, 0, 0.12),
+    0 0 10px rgba(212, 179, 127, 0.05);
+}
+
+/* Hover gold border glow effect */
+.hover-gold-glow {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-gold-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(212, 179, 127, 0) 0%, rgba(212, 179, 127, 0.4) 50%, rgba(212, 179, 127, 0) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hover-gold-glow:hover::before {
+  opacity: 1;
+}
+
+.hover-gold-glow:hover {
+  box-shadow:
+    0 10px 40px -10px rgba(0, 0, 0, 0.2),
+    0 0 30px rgba(212, 179, 127, 0.15);
+}
+
+/* Subtle gradient background animation */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
 }
