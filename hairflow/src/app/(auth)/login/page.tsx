@@ -6,25 +6,45 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const handleGoogleLogin = async () => {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    });
+    try {
+      const supabase = createClient();
+      console.log('Initiating Google login...');
+      console.log('Redirect URL:', `${window.location.origin}/api/auth/callback`);
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) {
+        console.error('Google login error:', error);
+        alert(`로그인 중 오류가 발생했습니다: ${error.message}`);
+        return;
+      }
+
+      console.log('OAuth initiated successfully:', data);
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('로그인 처리 중 문제가 발생했습니다. 다시 시도해주세요.');
+    }
   };
 
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-6 relative overflow-hidden">
       {/* Background decorations - enhanced luxury */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_80%_at_50%_40%,rgba(212,179,127,0.12)_0%,transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_40%)]" />
-      <div className="absolute w-[280px] h-[280px] rounded-full border border-gold/10 top-[12%] right-[8%] animate-[floatSlow_10s_ease-in-out_infinite] shadow-[0_0_60px_rgba(212,179,127,0.1)]" />
-      <div className="absolute w-[200px] h-[200px] rounded-full border border-gold/10 bottom-[15%] left-[5%] animate-[floatSlow_7s_ease-in-out_infinite_reverse] shadow-[0_0_40px_rgba(212,179,127,0.08)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_80%_at_50%_40%,rgba(212,179,127,0.12)_0%,transparent_60%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_40%)] pointer-events-none" />
+      <div className="absolute w-[280px] h-[280px] rounded-full border border-gold/10 top-[12%] right-[8%] animate-[floatSlow_10s_ease-in-out_infinite] shadow-[0_0_60px_rgba(212,179,127,0.1)] pointer-events-none" />
+      <div className="absolute w-[200px] h-[200px] rounded-full border border-gold/10 bottom-[15%] left-[5%] animate-[floatSlow_7s_ease-in-out_infinite_reverse] shadow-[0_0_40px_rgba(212,179,127,0.08)] pointer-events-none" />
 
       {/* Subtle wireframe lines - abstract geometric */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.02]" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
         <line x1="0" y1="30%" x2="100%" y2="30%" stroke="#D4B37F" strokeWidth="0.5"/>
         <line x1="0" y1="70%" x2="100%" y2="70%" stroke="#D4B37F" strokeWidth="0.5"/>
         <line x1="30%" y1="0" x2="30%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>

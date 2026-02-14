@@ -35,22 +35,36 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center px-4 py-20 sm:py-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_40%,rgba(201,169,110,0.12)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_50%)]" />
+        {/* Background Effects - Enhanced */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_40%,rgba(201,169,110,0.12)_0%,transparent_60%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_50%)] pointer-events-none" />
+
+        {/* Luxury Geometric Shapes */}
+        <div className="absolute top-20 right-[10%] w-64 h-64 border border-gold/10 rotate-45 pointer-events-none" />
+        <div className="absolute bottom-32 left-[8%] w-48 h-48 border border-gold/10 rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 left-[15%] w-32 h-32 border border-gold/10 pointer-events-none" />
+
+        {/* Diagonal Lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="0" x2="100%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
+          <line x1="100%" y1="0" x2="0" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
+          <line x1="30%" y1="0" x2="30%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
+          <line x1="70%" y1="0" x2="70%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
+        </svg>
 
         <div className="text-center relative z-10 px-4 sm:px-6 max-w-[900px] mx-auto w-full">
           <motion.p custom={0} initial="hidden" animate="visible" variants={fadeUp}
             className="text-[10px] sm:text-[12px] tracking-[6px] sm:tracking-[8px] uppercase text-gold mb-6 sm:mb-8">
-            Designer's Smart Assistant
+            AI Hair Design Assistant
           </motion.p>
           <motion.h1 custom={1} initial="hidden" animate="visible" variants={fadeUp}
-            className="font-heading text-[clamp(32px,8vw,68px)] font-light leading-[1.2] sm:leading-[1.25] tracking-tight mb-6 sm:mb-8 px-2">
-            감각을 데이터로 완성하다,<br />디자이너를 위한 <em className="italic text-gold-light">HairFlow</em>
+            className="font-heading text-[clamp(36px,8vw,72px)] font-light leading-[1.2] sm:leading-[1.25] tracking-tight mb-6 sm:mb-8 px-2">
+            디자이너를 위한<br /><em className="italic text-gold-light">HairFlow</em>
           </motion.h1>
           <motion.p custom={2} initial="hidden" animate="visible" variants={fadeUp}
-            className="text-[clamp(14px,3.5vw,17px)] font-light text-white/70 leading-[1.7] sm:leading-[1.8] max-w-[700px] mx-auto px-2">
-            5면 정밀 분석부터 8주 후 스타일 예측까지,<br className="hidden sm:block" />
-            고객에게 확신을 주는 스마트한 상담 경험을 시작하세요.
+            className="text-[clamp(15px,3.5vw,18px)] font-light text-white/70 leading-[1.7] sm:leading-[1.8] max-w-[600px] mx-auto px-2">
+            AI 시술 레시피부터 미래 예측까지,<br className="hidden sm:block" />
+            확신 있는 상담을 시작하세요.
           </motion.p>
           <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="mt-10 sm:mt-12">
             <Link href="/login"

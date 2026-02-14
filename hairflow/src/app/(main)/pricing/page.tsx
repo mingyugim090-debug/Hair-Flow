@@ -123,7 +123,7 @@ export default function PricingPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <span className="section-label">Pricing</span>
           <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-light mt-4 mb-2">
-            심플한 <em className="italic text-gold-light">요금제</em>
+            <em className="italic text-gold-light">요금제</em>
           </h1>
         </motion.div>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -142,12 +142,12 @@ export default function PricingPage() {
             transition={{ delay: i * 0.1 }}
             className={`p-8 border text-center ${
               plan.highlight
-                ? "border-gold bg-gold/5"
-                : "border-gold/10"
+                ? "border-gold bg-charcoal/80 backdrop-blur-sm"
+                : "border-gold/15 bg-charcoal/60 backdrop-blur-sm"
             }`}
           >
             <div className="flex items-center justify-center gap-2 mb-4">
-              <h3 className="font-heading text-[24px] font-normal">{plan.name}</h3>
+              <h3 className="font-heading text-[24px] font-normal text-white">{plan.name}</h3>
               {plan.badge && plan.id !== currentPlan && (
                 <Badge className={`text-[10px] tracking-[1px] ${
                   plan.highlight
@@ -161,44 +161,23 @@ export default function PricingPage() {
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px]">사용 중</Badge>
               )}
             </div>
-            <p className="text-[13px] text-white/40 font-light mb-4">{plan.description}</p>
-            <div className="mb-6">
-              <span className="font-heading text-[32px] font-light">{plan.priceLabel}</span>
-              <span className="text-[13px] text-white/30 font-light">{plan.period}</span>
+            <p className="text-[13px] text-white/50 font-light mb-6">{plan.description}</p>
+            <div className="mb-8 pb-8 border-b border-gold/10">
+              <span className="font-heading text-[36px] font-light text-white">{plan.priceLabel}</span>
+              <span className="text-[14px] text-white/40 font-light">{plan.period}</span>
             </div>
-
-            <button
-              onClick={() => handleSubscribe(plan.id)}
-              disabled={isButtonDisabled(plan.id)}
-              className={`w-full py-3 text-[11px] tracking-[2px] uppercase transition-all duration-500 mb-6 ${
-                plan.highlight && plan.id !== currentPlan
-                  ? "border border-gold text-gold hover:bg-gold hover:text-charcoal"
-                  : isButtonDisabled(plan.id)
-                  ? "border border-white/10 text-white/20 cursor-not-allowed"
-                  : "border border-gold/30 text-gold/60 hover:bg-gold hover:text-charcoal"
-              }`}
-            >
-              {loading === plan.id ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-3 h-3 border border-gold/30 border-t-gold rounded-full animate-spin" />
-                  결제 진행 중...
-                </span>
-              ) : (
-                getButtonText(plan.id)
-              )}
-            </button>
 
             <div className="space-y-3 text-left">
               {plan.features.map((feature, j) => (
                 <div key={j} className="flex items-center gap-3 text-[13px] font-light">
                   <span className="text-gold text-[11px]">&#10003;</span>
-                  <span className="text-white/60">{feature}</span>
+                  <span className="text-white/70">{feature}</span>
                 </div>
               ))}
               {plan.limitations.map((limitation, j) => (
                 <div key={j} className="flex items-center gap-3 text-[13px] font-light">
-                  <span className="text-white/15 text-[11px]">&#10005;</span>
-                  <span className="text-white/25">{limitation}</span>
+                  <span className="text-white/20 text-[11px]">&#10005;</span>
+                  <span className="text-white/30">{limitation}</span>
                 </div>
               ))}
             </div>
