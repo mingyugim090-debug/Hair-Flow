@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import type { ApiResponse, Customer, Consultation, ChemicalRecord, ThreeViewAnalysisResult, CustomerAnalysisResult, TimelinePredictionResult } from '@/types';
+import type { ApiResponse, Customer, Consultation, ChemicalRecord, ThreeViewAnalysisResult, CustomerAnalysisResult, TimelinePredictionResult, FiveViewAnalysisResult, StyleRecommendationResult, StyleBasedRecipeResult, PostTreatmentTimeline } from '@/types';
 
 interface CustomerDetailResponse {
   customer: Customer;
@@ -87,8 +87,19 @@ export async function GET(
           photos: {
             front: row.photo_front ?? undefined,
             back: row.photo_back ?? undefined,
-            side: row.photo_side ?? undefined,
+            left: row.photo_left ?? undefined,
+            right: row.photo_right ?? undefined,
+            top: row.photo_top ?? undefined,
           },
+          // 5면 사진 분석 결과
+          fiveViewAnalysis: row.five_view_analysis as FiveViewAnalysisResult | undefined,
+          // AI 스타일 추천 결과
+          styleRecommendations: row.style_recommendations as StyleRecommendationResult | undefined,
+          // 선택한 스타일 기반 레시피
+          styleBasedRecipe: row.style_based_recipe as StyleBasedRecipeResult | undefined,
+          // 시술 후 타임라인
+          postTreatmentTimeline: row.post_treatment_timeline as PostTreatmentTimeline | undefined,
+          // 기존 호환성 유지
           analysisResult: row.analysis_result as ThreeViewAnalysisResult | undefined,
           recipeResult: row.recipe_result as CustomerAnalysisResult | undefined,
           timelinePrediction: row.timeline_prediction as TimelinePredictionResult | undefined,
