@@ -35,37 +35,35 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative h-screen flex items-center justify-center">
-        <div className="absolute w-[300px] h-[300px] rounded-full border border-gold/15 top-[10%] right-[-50px] animate-[floatSlow_8s_ease-in-out_infinite]" />
-        <div className="absolute w-[200px] h-[200px] rounded-full border border-gold/15 bottom-[20%] left-[-30px] animate-[floatSlow_6s_ease-in-out_infinite_reverse]" />
-        <div className="absolute w-[150px] h-[150px] rounded-full border border-gold/15 top-[30%] left-[15%] animate-[floatSlow_10s_ease-in-out_infinite]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_40%,rgba(201,169,110,0.12)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_50%)]" />
 
-        <div className="text-center relative z-10 px-6">
+        <div className="text-center relative z-10 px-6 max-w-[900px] mx-auto">
           <motion.p custom={0} initial="hidden" animate="visible" variants={fadeUp}
             className="text-[12px] tracking-[8px] uppercase text-gold mb-8">
-            AI Hair Design Assistant
+            Designer's Smart Assistant
           </motion.p>
           <motion.h1 custom={1} initial="hidden" animate="visible" variants={fadeUp}
-            className="font-heading text-[clamp(48px,9vw,110px)] font-light leading-[1.05] tracking-tight">
-            Your Hair,<br />Your <em className="italic text-gold-light">Recipe</em>
+            className="font-heading text-[clamp(36px,7vw,68px)] font-light leading-[1.25] tracking-tight mb-8">
+            감각을 데이터로 완성하다,<br />디자이너를 위한 <em className="italic text-gold-light">HairFlow</em>
           </motion.h1>
           <motion.p custom={2} initial="hidden" animate="visible" variants={fadeUp}
-            className="font-heading text-[clamp(16px,2vw,22px)] font-light text-white/60 mt-7 tracking-[3px]">
-            AI가 만드는 완벽한 시술 레시피
+            className="text-[clamp(14px,1.8vw,17px)] font-light text-white/70 leading-[1.8] max-w-[700px] mx-auto">
+            5면 정밀 분석부터 8주 후 스타일 예측까지,<br className="hidden sm:block" />
+            고객에게 확신을 주는 스마트한 상담 경험을 시작하세요.
           </motion.p>
-          <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="mt-14">
+          <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="mt-12">
             <Link href="/login"
-              className="inline-block px-[52px] py-[18px] border border-gold text-gold text-[12px] tracking-[4px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500">
-              시작하기
+              className="inline-block px-[52px] py-[18px] border border-gold text-gold text-[12px] tracking-[4px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-300">
+              지금 시작하기
             </Link>
           </motion.div>
         </div>
 
-        <motion.div custom={5} initial="hidden" animate="visible" variants={fadeUp}
+        <motion.div custom={4} initial="hidden" animate="visible" variants={fadeUp}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
           <span className="text-[10px] tracking-[3px] text-white/40 uppercase">Scroll</span>
-          <div className="w-px h-10 bg-gradient-to-b from-gold to-transparent animate-[scrollPulse_2s_ease_infinite]" />
+          <div className="w-px h-10 bg-gradient-to-b from-gold to-transparent" />
         </motion.div>
       </section>
 
@@ -90,18 +88,18 @@ export default function LandingPage() {
               모호한 소통으로 인한 재시술의 공포.
             </p>
             <p className="text-[15px] leading-[2] text-charcoal/70 font-light">
-              HairFlow는 GPT-4o Vision으로 두 사진을 정밀 비교 분석하여,
+              HairFlow는 첨단 시각 분석 기술로 모발 상태를 정밀 진단하고,
               경력 20년차 수준의 시술 레시피를 자동 생성합니다.
             </p>
-            <div className="flex gap-12 mt-12 pt-12 border-t border-warm-brown/20">
+            <div className="flex gap-8 sm:gap-12 mt-12 pt-12 border-t border-warm-brown/20">
               {[
-                { num: "23%", label: "재시술율" },
-                { num: "40%", label: "재방문율" },
-                { num: "35%", label: "불만족율" },
+                { num: "5면", label: "정밀 분석" },
+                { num: "8주", label: "미래 예측" },
+                { num: "24/7", label: "시술 지원" },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <div className="font-heading text-[48px] font-light text-gold leading-none">{stat.num}</div>
-                  <div className="text-[12px] tracking-[2px] text-charcoal/50 mt-2 uppercase">{stat.label}</div>
+                  <div className="font-heading text-[clamp(36px,5vw,48px)] font-light text-gold leading-none">{stat.num}</div>
+                  <div className="text-[11px] sm:text-[12px] tracking-[2px] text-charcoal/50 mt-2 uppercase">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -115,24 +113,48 @@ export default function LandingPage() {
         <div className="text-center mb-20 relative z-10">
           <span className="section-label">Features</span>
           <h2 className="font-heading text-[clamp(32px,4vw,52px)] font-light text-white mt-6">
-            AI <em className="italic text-gold-light">시술 솔루션</em>
+            <em className="italic text-gold-light">4대 핵심</em> 기능
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-px max-w-[1200px] mx-auto relative z-10">
+        <div className="grid sm:grid-cols-2 gap-px max-w-[1200px] mx-auto relative z-10">
           {[
-            { num: "01", name: "AI Recipe", nameKr: "AI 시술 레시피", desc: "레퍼런스 + 현재 모발 사진 2장을 업로드하면, 약제 배합·시술 순서·주의사항까지 포함된 맞춤 레시피를 자동 생성합니다.", sub: "GPT-4o Vision" },
-            { num: "02", name: "Future Timeline", nameKr: "AI 미래 타임라인", desc: "시술 완료 사진으로 2주/4주/8주 후 변화를 예측합니다. DALL-E 3가 생성한 이미지로 재방문 시점을 시각적으로 안내합니다.", sub: "DALL-E 3" },
-            { num: "03", name: "Hair Analysis", nameKr: "모발 상태 진단", desc: "베이스 레벨, 손상도, 모질, 모량을 AI가 정밀 분석합니다. 현재 상태와 목표 스타일의 차이를 수치화합니다.", sub: "Deep Analysis" },
-            { num: "04", name: "Smart Revisit", nameKr: "재방문 추천", desc: "시술 후 시간 경과에 따른 변화를 예측하여 최적의 재방문 시점을 자동으로 추천합니다.", sub: "Auto Scheduling" },
+            {
+              num: "01",
+              name: "정밀 진단",
+              nameEn: "Precision Analysis",
+              desc: "5개 각도(전/후/좌/우/상) 사진을 통해 두상 형태, 모발 밀도 분포, 손상도를 체계적으로 분석합니다.",
+              sub: "디지털 모발 진단"
+            },
+            {
+              num: "02",
+              name: "스타일 시뮬레이션",
+              nameEn: "Style Simulation",
+              desc: "고객의 얼굴형과 분위기에 최적화된 헤어 스타일을 제안하고, 맞춤형 시술 레시피(커트/펌 가이드)를 생성합니다.",
+              sub: "맞춤 레시피 생성"
+            },
+            {
+              num: "03",
+              name: "미래 타임라인",
+              nameEn: "Future Timeline",
+              desc: "시술 직후 사진을 바탕으로 1주부터 8주까지의 스타일 변화를 시각적으로 예측하여 재방문 시점을 제안합니다.",
+              sub: "성장 데이터 분석"
+            },
+            {
+              num: "04",
+              name: "히스토리 관리",
+              nameEn: "History Management",
+              desc: "회차별 사진 데이터와 시술 기록을 한눈에 관리하여 지속 가능한 고객 케어를 실현합니다.",
+              sub: "체계적 데이터 관리"
+            },
           ].map((item) => (
             <motion.div key={item.num} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="p-14 border border-gold/10 hover:bg-gold/5 hover:border-gold/30 transition-all duration-500 cursor-pointer">
-              <div className="font-heading text-[14px] text-gold tracking-[2px] mb-7">{item.num}</div>
-              <div className="font-heading text-[28px] font-normal text-white mb-2">{item.name}</div>
-              <div className="text-[14px] text-white/40 font-light mb-6">{item.nameKr}</div>
-              <div className="text-[14px] leading-[1.8] text-white/50 font-light mb-8">{item.desc}</div>
-              <div className="font-heading text-[20px] text-gold-light">{item.sub}</div>
+              className="p-10 sm:p-12 md:p-14 border border-gold/10 hover:bg-gold/5 hover:border-gold/30 transition-all duration-300">
+              <div className="font-heading text-[13px] text-gold tracking-[2px] mb-6">{item.num}</div>
+              <div className="font-heading text-[clamp(22px,3vw,28px)] font-normal text-white mb-2">{item.name}</div>
+              <div className="text-[13px] text-white/40 font-light mb-6 tracking-[1px]">{item.nameEn}</div>
+              <div className="text-[14px] leading-[1.8] text-white/60 font-light mb-8">{item.desc}</div>
+              <div className="text-[16px] text-gold-light font-light">{item.sub}</div>
             </motion.div>
           ))}
         </div>
@@ -183,14 +205,15 @@ export default function LandingPage() {
       <section className="bg-soft-beige py-[140px] px-6 text-center">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-[600px] mx-auto">
           <span className="section-label">Get Started</span>
-          <h2 className="font-heading text-[clamp(36px,5vw,64px)] font-light text-deep-brown leading-[1.2] mt-6 mb-6">
-            지금 바로<br /><em className="italic text-warm-brown">시작하세요</em>
+          <h2 className="font-heading text-[clamp(36px,5vw,56px)] font-light text-deep-brown leading-[1.3] mt-6 mb-6">
+            고객과의 상담,<br /><em className="italic text-warm-brown">HairFlow</em>와 함께
           </h2>
-          <p className="text-[15px] leading-[2] text-charcoal/60 font-light max-w-[500px] mx-auto mb-14">
-            3년차도 10년차 수준의 시술이 가능합니다.
+          <p className="text-[15px] leading-[1.9] text-charcoal/60 font-light max-w-[480px] mx-auto mb-12">
+            5면 정밀 분석부터 미래 예측까지,<br />
+            데이터 기반의 확신 있는 시술을 지금 경험하세요.
           </p>
           <Link href="/login"
-            className="inline-block px-[52px] py-[18px] border border-deep-brown text-deep-brown text-[12px] tracking-[4px] uppercase hover:bg-deep-brown hover:text-white transition-all duration-500">
+            className="inline-block px-[52px] py-[18px] border border-deep-brown text-deep-brown text-[12px] tracking-[4px] uppercase hover:bg-deep-brown hover:text-white transition-all duration-300">
             무료로 시작하기
           </Link>
         </motion.div>
