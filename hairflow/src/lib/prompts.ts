@@ -137,3 +137,45 @@ export const CUSTOMER_ANALYSIS_USER_PROMPT = `이 사진은 고객의 현재 모
 export function getDallePrompt(baseDescription: string, weekLabel: string): string {
   return `A realistic close-up photograph of hair showing natural changes after ${weekLabel}. ${baseDescription}. Professional hair salon photography style, natural lighting, high detail, photorealistic. Do not include any text or watermarks.`;
 }
+
+// 3면 사진 종합 분석 프롬프트 (앞/뒤/옆)
+export const THREE_VIEW_ANALYSIS_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너이자 모발 과학 전문가입니다.
+고객의 앞면, 뒷면, 옆면 사진 3장을 종합 분석하여, 얼굴형에 맞는 스타일 추천과 모발 상태 진단을 제공합니다.
+
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
+
+export const THREE_VIEW_ANALYSIS_USER_PROMPT = `3장의 사진(앞면, 뒷면, 옆면)을 통해 고객의 얼굴형, 현재 스타일, 모발 상태를 종합 분석하고,
+고객에게 가장 잘 어울리는 헤어 스타일을 추천해주세요.
+
+반드시 아래 JSON 형식으로만 응답하세요:
+
+{
+  "faceShape": {
+    "type": "얼굴형 타입 (둥근형/긴형/각진형/하트형/계란형 중 택1)",
+    "description": "얼굴형 특징 상세 설명 (2-3문장)",
+    "confidence": 85
+  },
+  "styleAnalysis": {
+    "currentStyle": "현재 헤어 스타일 설명 (길이, 레이어, 볼륨 등)",
+    "vibe": ["캐주얼", "세련된"],
+    "recommendedStyles": [
+      {
+        "name": "추천 스타일 이름 (예: 레이어드 롱 웨이브)",
+        "reason": "이 스타일을 추천하는 이유 (얼굴형과의 조화, 효과 등)",
+        "suitability": 95,
+        "imageDescription": "스타일 시각적 설명 (영어, DALL-E에 활용 가능)"
+      }
+    ]
+  },
+  "hairAnalysis": {
+    "condition": "양호/보통/주의/위험 중 택1",
+    "damageLevel": "1~5 단계 (숫자만)",
+    "scalpCondition": "두피 상태 (건조/지성/민감/정상 등)",
+    "hairType": "직모/웨이브/곱슬 등",
+    "thickness": "가는 편/보통/굵은 편",
+    "porosity": "낮음/보통/높음",
+    "density": "모발 밀도 (낮음/보통/높음)",
+    "summary": "모발 상태 종합 평가 (3-5문장)"
+  },
+  "comprehensiveAdvice": "종합 조언: 얼굴형과 모발 상태를 고려한 전체적인 스타일링 방향 제시 (3-5문장)"
+}`;

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import type { ApiResponse, Customer, CustomerTimeline, CustomerAnalysisResult, TimelinePredictionResult } from '@/types';
+import type { ApiResponse, Customer, Consultation, ChemicalRecord, ThreeViewAnalysisResult, CustomerAnalysisResult, TimelinePredictionResult } from '@/types';
 
-interface CustomerDetail {
+interface CustomerDetailResponse {
   customer: Customer;
-  timelines: CustomerTimeline[];
+  consultations: Consultation[];
 }
 
-// 고객 상세 + 분석 히스토리 조회
+// 고객 상세 + 시술 히스토리 조회
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -23,10 +23,9 @@ export async function GET(
     }
 
     const { id: customerId } = await params;
-
     const supabase = await createClient();
 
-    // 고객 정보 조회 (본인의 고객만)
+    // 고객 정보 조회
     const { data: customerRow, error: customerError } = await supabase
       .from('customers')
       .select('*')
@@ -50,30 +49,58 @@ export async function GET(
       createdAt: customerRow.created_at,
     };
 
-    // 해당 고객의 분석 히스토리 (timelines)
-    const { data: timelineRows } = await supabase
-      .from('timelines')
+    // 시술 회차 조회 (consultations)
+    const { data: consultationRows } = await supabase
+      .from('consultations')
       .select('*')
       .eq('customer_id', customerId)
-      .eq('user_id', user.id)
+      .eq('designer_id', user.id)
       .order('created_at', { ascending: false });
 
-    const timelines: CustomerTimeline[] = (timelineRows ?? []).map((row) => {
-      const type = row.treatment_type === 'timeline' ? 'timeline' : 'analysis';
-      return {
-        id: row.id,
-        customerId: row.customer_id,
-        type,
-        imageUrl: row.treatment_image_url ?? null,
-        ...(type === 'analysis'
-          ? { analysis: row.result_images as CustomerAnalysisResult }
-          : { timelinePrediction: row.result_images as TimelinePredictionResult }),
-        createdAt: row.created_at,
-      };
-    });
+    const consultations: Consultation[] = await Promise.all(
+      (consultationRows ?? []).map(async (row) => {
+        // 약제 기록 조회
+        const { data: chemicalRows } = await supabase
+          .from('chemical_records')
+          .select('*')
+          .eq('consultation_id', row.id)
+          .order('created_at', { ascending: false });
 
-    return NextResponse.json<ApiResponse<CustomerDetail>>({
-      data: { customer, timelines },
+        const chemicalRecords: ChemicalRecord[] = (chemicalRows ?? []).map((chem) => ({
+          id: chem.id,
+          consultationId: chem.consultation_id,
+          brand: chem.brand,
+          productName: chem.product_name,
+          ratio: chem.ratio,
+          mixingNotes: chem.mixing_notes ?? '',
+          applicationMethod: chem.application_method ?? '',
+          processingTime: chem.processing_time ?? '',
+          createdAt: chem.created_at,
+        }));
+
+        return {
+          id: row.id,
+          customerId: row.customer_id,
+          designerId: row.designer_id,
+          sessionNumber: row.session_number,
+          treatmentType: row.treatment_type,
+          photos: {
+            front: row.photo_front ?? undefined,
+            back: row.photo_back ?? undefined,
+            side: row.photo_side ?? undefined,
+          },
+          analysisResult: row.analysis_result as ThreeViewAnalysisResult | undefined,
+          recipeResult: row.recipe_result as CustomerAnalysisResult | undefined,
+          timelinePrediction: row.timeline_prediction as TimelinePredictionResult | undefined,
+          chemicalRecords,
+          notes: row.notes ?? '',
+          createdAt: row.created_at,
+        };
+      })
+    );
+
+    return NextResponse.json<ApiResponse<CustomerDetailResponse>>({
+      data: { customer, consultations },
       error: null,
     });
   } catch {
