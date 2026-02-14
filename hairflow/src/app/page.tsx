@@ -178,47 +178,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="bg-cream text-charcoal py-20 sm:py-28 md:py-[140px] px-4 sm:px-6 md:px-[60px]">
-        <div className="text-center mb-12 sm:mb-16 md:mb-20">
-          <span className="section-label">Pricing</span>
-          <h2 className="font-heading text-[clamp(32px,4vw,52px)] font-light text-deep-brown mt-6">
-            심플한 <em className="italic text-warm-brown">요금제</em>
-          </h2>
-        </div>
-
-        <div className="grid sm:grid-cols-3 gap-px max-w-[1000px] mx-auto">
-          {[
-            { name: "Free", price: "0원", period: "", desc: "HairFlow를 체험해보세요", features: ["하루 3건 분석", "AI 시술 레시피", "AI 미래 타임라인"], hl: false, badge: "" },
-            { name: "Basic", price: "19,900원", period: "/월", desc: "개인 디자이너에게 추천", features: ["무제한 AI 분석", "AI 시술 레시피", "AI 미래 타임라인", "분석 히스토리 저장"], hl: true, badge: "추천" },
-            { name: "Enterprise", price: "99,000원", period: "/월", desc: "헤어샵/팀 전용", features: ["Basic 모든 기능 포함", "최대 10명 스태프 연동", "매장 매출 분석 대시보드", "맞춤형 약제/브랜드 DB", "1:1 전담 고객 지원"], hl: false, badge: "" },
-          ].map((plan, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-              className={`p-8 sm:p-10 md:p-12 border text-center shadow-luxury hover-gold-glow transition-all duration-500 group ${plan.hl ? "border-gold bg-charcoal text-white glass-luxury-dark" : "border-warm-brown/20 bg-white hover:shadow-[0_15px_50px_rgba(0,0,0,0.1)]"}`}>
-              {plan.badge && <span className="section-label mb-4 inline-block transition-all duration-300 group-hover:tracking-[5px]">{plan.badge}</span>}
-              <h3 className="font-heading text-[28px] font-normal mb-2 italic">{plan.name}</h3>
-              <p className={`text-[13px] font-light mb-6 ${plan.hl ? "text-white/50" : "text-charcoal/50"}`}>{plan.desc}</p>
-              <div className="font-heading text-[36px] font-light mb-1">
-                {plan.price}<small className={`text-[14px] ${plan.hl ? "text-white/30" : "text-charcoal/30"} font-sans`}>{plan.period}</small>
-              </div>
-              <div className={`space-y-3 mt-8 mb-8 text-left ${plan.hl ? "text-white/60" : "text-charcoal/60"}`}>
-                {plan.features.map((f, j) => (
-                  <div key={j} className="flex items-center gap-3 text-[14px] font-light">
-                    <span className="text-gold">&#10003;</span>{f}
-                  </div>
-                ))}
-              </div>
-              <Link href="/login"
-                className={`inline-block w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 shadow-luxury-sm hover:shadow-luxury group/btn ${
-                  plan.hl ? "border border-gold text-gold hover:bg-gold hover:text-charcoal" : "border border-deep-brown/30 text-deep-brown hover:bg-deep-brown hover:text-white"
-                }`}>
-                <span className="inline-block transition-transform duration-300 group-hover/btn:tracking-[4px]">시작하기</span>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="bg-soft-beige py-20 sm:py-28 md:py-[140px] px-4 sm:px-6 text-center">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-[600px] mx-auto px-4">

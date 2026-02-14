@@ -167,7 +167,7 @@ export default function PricingPage() {
               <span className="text-[14px] text-white/40 font-light">{plan.period}</span>
             </div>
 
-            <div className="space-y-3 text-left">
+            <div className="space-y-3 text-left mb-8">
               {plan.features.map((feature, j) => (
                 <div key={j} className="flex items-center gap-3 text-[13px] font-light">
                   <span className="text-gold text-[11px]">&#10003;</span>
@@ -181,6 +181,18 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
+
+            <button
+              onClick={() => handleSubscribe(plan.id)}
+              disabled={isButtonDisabled(plan.id)}
+              className={`w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 shadow-luxury-sm hover:shadow-luxury ${
+                plan.highlight
+                  ? "border border-gold text-gold hover:bg-gold hover:text-charcoal disabled:opacity-40 disabled:cursor-not-allowed"
+                  : "border border-gold/30 text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed"
+              }`}
+            >
+              {loading === plan.id ? "처리 중..." : getButtonText(plan.id)}
+            </button>
           </motion.div>
         ))}
       </div>
