@@ -25,7 +25,6 @@ export default function LandingPage() {
         <div className="hidden md:flex items-center gap-10">
           <a href="#about" className="text-[13px] font-light tracking-[2px] uppercase text-white/80 hover:text-gold transition-colors">소개</a>
           <a href="#features" className="text-[13px] font-light tracking-[2px] uppercase text-white/80 hover:text-gold transition-colors">기능</a>
-          <a href="#pricing" className="text-[13px] font-light tracking-[2px] uppercase text-white/80 hover:text-gold transition-colors">요금제</a>
           <Link href="/login" className="text-[13px] font-light tracking-[2px] uppercase text-white/80 hover:text-gold transition-colors">로그인</Link>
         </div>
         <Link href="/login" className="md:hidden text-[13px] font-light tracking-[2px] uppercase text-gold">

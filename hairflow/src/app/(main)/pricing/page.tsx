@@ -108,11 +108,17 @@ export default function PricingPage() {
 
   const getButtonText = (planId: string) => {
     if (planId === currentPlan) return "현재 플랜";
-    if (planId === "free") return "현재 플랜";
+    if (planId === "free") return "Free 플랜";
+    // Enterprise 사용자가 다른 플랜을 볼 때
+    if (currentPlan === "enterprise" && planId !== "enterprise") {
+      return `${plans.find((p) => p.id === planId)?.name} 플랜`;
+    }
     return `${plans.find((p) => p.id === planId)?.name} 시작하기`;
   };
 
   const isButtonDisabled = (planId: string) => {
+    // Enterprise 사용자는 다른 플랜 클릭 불가
+    if (currentPlan === "enterprise" && planId !== "enterprise") return true;
     return planId === "free" || planId === currentPlan || loading !== null;
   };
 
@@ -140,7 +146,7 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className={`p-8 border text-center ${
+            className={`p-8 border text-center flex flex-col ${
               plan.highlight
                 ? "border-gold bg-charcoal/80 backdrop-blur-sm"
                 : "border-gold/15 bg-charcoal/60 backdrop-blur-sm"
@@ -167,7 +173,7 @@ export default function PricingPage() {
               <span className="text-[14px] text-white/40 font-light">{plan.period}</span>
             </div>
 
-            <div className="space-y-3 text-left mb-8">
+            <div className="flex-1 space-y-3 text-left mb-8">
               {plan.features.map((feature, j) => (
                 <div key={j} className="flex items-center gap-3 text-[13px] font-light">
                   <span className="text-gold text-[11px]">&#10003;</span>
