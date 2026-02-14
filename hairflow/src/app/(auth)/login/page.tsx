@@ -37,21 +37,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-charcoal flex items-center justify-center px-6 relative overflow-hidden">
-      {/* Background decorations - enhanced luxury */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_80%_at_50%_40%,rgba(212,179,127,0.12)_0%,transparent_60%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_40%)] pointer-events-none" />
-      <div className="absolute w-[280px] h-[280px] rounded-full border border-gold/10 top-[12%] right-[8%] animate-[floatSlow_10s_ease-in-out_infinite] shadow-[0_0_60px_rgba(212,179,127,0.1)] pointer-events-none" />
-      <div className="absolute w-[200px] h-[200px] rounded-full border border-gold/10 bottom-[15%] left-[5%] animate-[floatSlow_7s_ease-in-out_infinite_reverse] shadow-[0_0_40px_rgba(212,179,127,0.08)] pointer-events-none" />
+      {/* Background decorations - enhanced luxury - All non-interactive */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_80%_at_50%_40%,rgba(212,179,127,0.12)_0%,transparent_60%)] pointer-events-none -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_40%)] pointer-events-none -z-10" />
+      <div className="absolute w-[280px] h-[280px] rounded-full border border-gold/10 top-[12%] right-[8%] animate-[floatSlow_10s_ease-in-out_infinite] shadow-[0_0_60px_rgba(212,179,127,0.1)] pointer-events-none -z-10" />
+      <div className="absolute w-[200px] h-[200px] rounded-full border border-gold/10 bottom-[15%] left-[5%] animate-[floatSlow_7s_ease-in-out_infinite_reverse] shadow-[0_0_40px_rgba(212,179,127,0.08)] pointer-events-none -z-10" />
 
       {/* Subtle wireframe lines - abstract geometric */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none -z-10" xmlns="http://www.w3.org/2000/svg">
         <line x1="0" y1="30%" x2="100%" y2="30%" stroke="#D4B37F" strokeWidth="0.5"/>
         <line x1="0" y1="70%" x2="100%" y2="70%" stroke="#D4B37F" strokeWidth="0.5"/>
         <line x1="30%" y1="0" x2="30%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
         <line x1="70%" y1="0" x2="70%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
       </svg>
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-md relative z-20">
         {/* Logo - enhanced with serif */}
         <div className="text-center mb-16">
           <Link href="/" className="inline-flex flex-col items-center gap-4 group">
@@ -67,7 +67,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card - Glassmorphism */}
-        <div className="glass-luxury-dark p-12 shadow-luxury hover-gold-glow">
+        <div className="relative z-10 glass-luxury-dark p-12 shadow-luxury">
           <h2 className="font-heading text-[28px] font-normal text-white text-center mb-2 italic">로그인</h2>
           <p className="text-[13px] text-white/50 text-center mb-10 font-light tracking-wider">
             Google 계정으로 간편하게 시작하세요
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full h-14 bg-white hover:bg-gold/10 hover:text-white text-charcoal font-normal flex items-center justify-center gap-3 transition-all duration-300 text-[14px] shadow-luxury-sm hover:shadow-luxury hover:border hover:border-gold/40 group"
+            className="relative z-30 w-full h-14 bg-white hover:bg-gold/10 hover:text-white text-charcoal font-normal flex items-center justify-center gap-3 transition-all duration-300 text-[14px] shadow-luxury-sm hover:shadow-luxury hover:border hover:border-gold/40 group cursor-pointer"
           >
             <svg className="w-5 h-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
