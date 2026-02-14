@@ -98,6 +98,14 @@
   body {
     @apply bg-background text-foreground;
     font-weight: 300;
+    background-image:
+      /* Luxury geometric pattern */
+      linear-gradient(135deg, transparent 24%, rgba(212, 179, 127, 0.03) 25%, rgba(212, 179, 127, 0.03) 26%, transparent 27%, transparent 74%, rgba(212, 179, 127, 0.03) 75%, rgba(212, 179, 127, 0.03) 76%, transparent 77%),
+      linear-gradient(45deg, transparent 24%, rgba(212, 179, 127, 0.03) 25%, rgba(212, 179, 127, 0.03) 26%, transparent 27%, transparent 74%, rgba(212, 179, 127, 0.03) 75%, rgba(212, 179, 127, 0.03) 76%, transparent 77%),
+      /* Subtle dots */
+      radial-gradient(circle at 50% 50%, rgba(212, 179, 127, 0.04) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px, 20px 20px;
+    background-position: 0 0, 40px 40px, 0 0;
   }
 }
 

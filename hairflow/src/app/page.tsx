@@ -34,27 +34,27 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative h-screen flex items-center justify-center">
+      <section className="relative min-h-screen flex items-center justify-center px-4 py-20 sm:py-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_70%_40%,rgba(201,169,110,0.12)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_20%_80%,rgba(139,111,94,0.08)_0%,transparent_50%)]" />
 
-        <div className="text-center relative z-10 px-6 max-w-[900px] mx-auto">
+        <div className="text-center relative z-10 px-4 sm:px-6 max-w-[900px] mx-auto w-full">
           <motion.p custom={0} initial="hidden" animate="visible" variants={fadeUp}
-            className="text-[12px] tracking-[8px] uppercase text-gold mb-8">
+            className="text-[10px] sm:text-[12px] tracking-[6px] sm:tracking-[8px] uppercase text-gold mb-6 sm:mb-8">
             Designer's Smart Assistant
           </motion.p>
           <motion.h1 custom={1} initial="hidden" animate="visible" variants={fadeUp}
-            className="font-heading text-[clamp(36px,7vw,68px)] font-light leading-[1.25] tracking-tight mb-8">
+            className="font-heading text-[clamp(32px,8vw,68px)] font-light leading-[1.2] sm:leading-[1.25] tracking-tight mb-6 sm:mb-8 px-2">
             감각을 데이터로 완성하다,<br />디자이너를 위한 <em className="italic text-gold-light">HairFlow</em>
           </motion.h1>
           <motion.p custom={2} initial="hidden" animate="visible" variants={fadeUp}
-            className="text-[clamp(14px,1.8vw,17px)] font-light text-white/70 leading-[1.8] max-w-[700px] mx-auto">
+            className="text-[clamp(14px,3.5vw,17px)] font-light text-white/70 leading-[1.7] sm:leading-[1.8] max-w-[700px] mx-auto px-2">
             5면 정밀 분석부터 8주 후 스타일 예측까지,<br className="hidden sm:block" />
             고객에게 확신을 주는 스마트한 상담 경험을 시작하세요.
           </motion.p>
-          <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="mt-12">
+          <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="mt-10 sm:mt-12">
             <Link href="/login"
-              className="inline-block px-[52px] py-[18px] border border-gold text-gold text-[12px] tracking-[4px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-300">
+              className="inline-block px-[40px] sm:px-[52px] py-[16px] sm:py-[18px] border border-gold text-gold text-[11px] sm:text-[12px] tracking-[3px] sm:tracking-[4px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-300">
               지금 시작하기
             </Link>
           </motion.div>
@@ -69,7 +69,7 @@ export default function LandingPage() {
 
       {/* About */}
       <section id="about" className="bg-cream text-charcoal">
-        <div className="max-w-[1300px] mx-auto px-6 md:px-[60px] py-[140px] grid md:grid-cols-2 gap-20 items-center">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-[60px] py-20 sm:py-28 md:py-[140px] grid md:grid-cols-2 gap-12 sm:gap-16 md:gap-20 items-center">
           <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}
             className="relative aspect-[3/4] overflow-hidden">
             <div className="w-full h-full bg-gradient-to-br from-soft-beige to-warm-brown flex items-center justify-center">
@@ -91,15 +91,15 @@ export default function LandingPage() {
               HairFlow는 첨단 시각 분석 기술로 모발 상태를 정밀 진단하고,
               경력 20년차 수준의 시술 레시피를 자동 생성합니다.
             </p>
-            <div className="flex gap-8 sm:gap-12 mt-12 pt-12 border-t border-warm-brown/20">
+            <div className="flex flex-wrap justify-center md:justify-start gap-6 sm:gap-8 md:gap-12 mt-8 sm:mt-12 pt-8 sm:pt-12 border-t border-warm-brown/20">
               {[
                 { num: "5면", label: "정밀 분석" },
                 { num: "8주", label: "미래 예측" },
                 { num: "24/7", label: "시술 지원" },
               ].map((stat) => (
-                <div key={stat.label}>
-                  <div className="font-heading text-[clamp(36px,5vw,48px)] font-light text-gold leading-none">{stat.num}</div>
-                  <div className="text-[11px] sm:text-[12px] tracking-[2px] text-charcoal/50 mt-2 uppercase">{stat.label}</div>
+                <div key={stat.label} className="text-center md:text-left min-w-[80px]">
+                  <div className="font-heading text-[clamp(32px,6vw,48px)] font-light text-gold leading-none">{stat.num}</div>
+                  <div className="text-[10px] sm:text-[11px] md:text-[12px] tracking-[2px] text-charcoal/50 mt-2 uppercase">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -108,9 +108,9 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="bg-charcoal relative py-[140px] px-6 md:px-[60px]">
+      <section id="features" className="bg-charcoal relative py-20 sm:py-28 md:py-[140px] px-4 sm:px-6 md:px-[60px]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,169,110,0.05)_0%,transparent_60%)]" />
-        <div className="text-center mb-20 relative z-10">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20 relative z-10">
           <span className="section-label">Features</span>
           <h2 className="font-heading text-[clamp(32px,4vw,52px)] font-light text-white mt-6">
             <em className="italic text-gold-light">4대 핵심</em> 기능
@@ -149,7 +149,7 @@ export default function LandingPage() {
             },
           ].map((item) => (
             <motion.div key={item.num} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="p-10 sm:p-12 md:p-14 border border-gold/10 hover:bg-gold/5 hover:border-gold/30 transition-all duration-300">
+              className="p-8 sm:p-10 md:p-12 lg:p-14 border border-gold/10 hover:bg-gold/5 hover:border-gold/30 transition-all duration-300">
               <div className="font-heading text-[13px] text-gold tracking-[2px] mb-6">{item.num}</div>
               <div className="font-heading text-[clamp(22px,3vw,28px)] font-normal text-white mb-2">{item.name}</div>
               <div className="text-[13px] text-white/40 font-light mb-6 tracking-[1px]">{item.nameEn}</div>
@@ -161,8 +161,8 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="bg-cream text-charcoal py-[140px] px-6 md:px-[60px]">
-        <div className="text-center mb-20">
+      <section id="pricing" className="bg-cream text-charcoal py-20 sm:py-28 md:py-[140px] px-4 sm:px-6 md:px-[60px]">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <span className="section-label">Pricing</span>
           <h2 className="font-heading text-[clamp(32px,4vw,52px)] font-light text-deep-brown mt-6">
             심플한 <em className="italic text-warm-brown">요금제</em>
@@ -171,13 +171,13 @@ export default function LandingPage() {
 
         <div className="grid sm:grid-cols-3 gap-px max-w-[1000px] mx-auto">
           {[
-            { name: "Free", price: "0원", period: "", desc: "HairFlow를 체험해보세요", features: ["하루 3건 분석", "AI 시술 레시피", "AI 미래 타임라인"], hl: false },
-            { name: "Basic", price: "19,900원", period: "/월", desc: "개인 디자이너에게 추천", features: ["무제한 분석", "분석 히스토리 저장", "우선 처리"], hl: true },
-            { name: "Pro", price: "39,900원", period: "/월", desc: "매장 전체가 사용할 때", features: ["매장 전체 사용", "매출 분석 리포트", "약제 브랜드 DB"], hl: false },
+            { name: "Free", price: "0원", period: "", desc: "HairFlow를 체험해보세요", features: ["하루 3건 분석", "AI 시술 레시피", "AI 미래 타임라인"], hl: false, badge: "" },
+            { name: "Basic", price: "19,900원", period: "/월", desc: "개인 디자이너에게 추천", features: ["무제한 AI 분석", "AI 시술 레시피", "AI 미래 타임라인", "분석 히스토리 저장"], hl: true, badge: "추천" },
+            { name: "Enterprise", price: "99,000원", period: "/월", desc: "헤어샵/팀 전용", features: ["Basic 모든 기능 포함", "최대 10명 스태프 연동", "매장 매출 분석 대시보드", "맞춤형 약제/브랜드 DB", "1:1 전담 고객 지원"], hl: false, badge: "" },
           ].map((plan, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-              className={`p-12 border text-center ${plan.hl ? "border-gold bg-charcoal text-white" : "border-warm-brown/20 bg-white"}`}>
-              {plan.hl && <span className="section-label mb-4 inline-block">추천</span>}
+              className={`p-8 sm:p-10 md:p-12 border text-center ${plan.hl ? "border-gold bg-charcoal text-white" : "border-warm-brown/20 bg-white"}`}>
+              {plan.badge && <span className="section-label mb-4 inline-block">{plan.badge}</span>}
               <h3 className="font-heading text-[28px] font-normal mb-2">{plan.name}</h3>
               <p className={`text-[13px] font-light mb-6 ${plan.hl ? "text-white/50" : "text-charcoal/50"}`}>{plan.desc}</p>
               <div className="font-heading text-[36px] font-light mb-1">
@@ -202,8 +202,8 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-soft-beige py-[140px] px-6 text-center">
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-[600px] mx-auto">
+      <section className="bg-soft-beige py-20 sm:py-28 md:py-[140px] px-4 sm:px-6 text-center">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-[600px] mx-auto px-4">
           <span className="section-label">Get Started</span>
           <h2 className="font-heading text-[clamp(36px,5vw,56px)] font-light text-deep-brown leading-[1.3] mt-6 mb-6">
             고객과의 상담,<br /><em className="italic text-warm-brown">HairFlow</em>와 함께
@@ -213,24 +213,19 @@ export default function LandingPage() {
             데이터 기반의 확신 있는 시술을 지금 경험하세요.
           </p>
           <Link href="/login"
-            className="inline-block px-[52px] py-[18px] border border-deep-brown text-deep-brown text-[12px] tracking-[4px] uppercase hover:bg-deep-brown hover:text-white transition-all duration-300">
+            className="inline-block px-[40px] sm:px-[52px] py-[16px] sm:py-[18px] border border-deep-brown text-deep-brown text-[11px] sm:text-[12px] tracking-[3px] sm:tracking-[4px] uppercase hover:bg-deep-brown hover:text-white transition-all duration-300">
             무료로 시작하기
           </Link>
         </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-charcoal py-20 px-6 text-center">
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <Image src="/logo.png" alt="HairFlow" width={48} height={48} className="object-contain" />
-          <span className="font-heading text-[32px] font-light tracking-[8px] text-white">HAIRFLOW</span>
+      <footer className="bg-charcoal py-16 sm:py-20 px-4 sm:px-6 text-center">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <Image src="/logo.png" alt="HairFlow" width={40} height={40} className="sm:w-12 sm:h-12 object-contain" />
+          <span className="font-heading text-[24px] sm:text-[32px] font-light tracking-[6px] sm:tracking-[8px] text-white">HAIRFLOW</span>
         </div>
-        <div className="flex justify-center gap-8 mb-12">
-          <Link href="/pricing" className="text-[12px] tracking-[3px] text-white/50 uppercase hover:text-gold transition-colors">Pricing</Link>
-          <span className="text-[12px] tracking-[3px] text-white/50 uppercase hover:text-gold transition-colors cursor-pointer">Terms</span>
-          <span className="text-[12px] tracking-[3px] text-white/50 uppercase hover:text-gold transition-colors cursor-pointer">Privacy</span>
-        </div>
-        <p className="text-[11px] text-white/25 tracking-[2px]">&copy; 2026 HairFlow. All rights reserved.</p>
+        <p className="text-[10px] sm:text-[11px] text-white/25 tracking-[2px]">&copy; 2026 HairFlow. All rights reserved.</p>
       </footer>
     </div>
   );
