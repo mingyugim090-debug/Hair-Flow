@@ -21,7 +21,10 @@ export async function POST(req: Request) {
         .rpc('get_org_by_invite_code', { code: inviteCode })
         .single();
 
-    if (orgError || !org) {
+    // Type assertion for the RPC result
+    const organization = org as { id: string; name: string } | null;
+
+    if (orgError || !organization) {
         console.error("Invite code check failed:", orgError);
         return NextResponse.json({ error: "유효하지 않은 초대 코드입니다." }, { status: 404 });
     }
