@@ -47,8 +47,9 @@ export async function POST(req: Request) {
 
     if (createError || !org) {
         console.error("Org create error:", createError);
+        const errorMessage = createError?.message || createError?.code || "Unknown error";
         return NextResponse.json({
-            error: `매장 생성 실패: ${createError.message || createError.code}`,
+            error: `매장 생성 실패: ${errorMessage}`,
             details: createError
         }, { status: 500 });
     }
