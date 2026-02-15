@@ -23,6 +23,7 @@ export async function POST(req: Request) {
 
     // Type assertion for the RPC result
     const organization = org as { id: string; name: string } | null;
+    console.log("Found organization:", organization);
 
     if (orgError || !organization) {
         console.error("Invite code check failed:", orgError);
