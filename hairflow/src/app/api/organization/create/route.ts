@@ -47,7 +47,10 @@ export async function POST(req: Request) {
 
     if (createError || !org) {
         console.error("Org create error:", createError);
-        return NextResponse.json({ error: "매장 생성 실패" }, { status: 500 });
+        return NextResponse.json({
+            error: `매장 생성 실패: ${createError.message || createError.code}`,
+            details: createError
+        }, { status: 500 });
     }
 
     // Auto-join as owner (memberships)
