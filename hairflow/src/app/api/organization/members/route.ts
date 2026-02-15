@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 // GET: Fetch organization members and invite code (Owner only)
 export async function GET() {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -48,9 +48,13 @@ export async function GET() {
                 userId: m.user_id,
                 role: m.role,
                 joinedAt: m.joined_at,
+                // @ts-ignore
                 name: m.profiles?.name,
+                // @ts-ignore
                 email: m.profiles?.email,
+                // @ts-ignore
                 avatarUrl: m.profiles?.avatar_url,
+                // @ts-ignore
                 designerName: m.profiles?.designer_name
             }))
         }
@@ -59,7 +63,7 @@ export async function GET() {
 
 // POST: Regenerate invite code (Owner only)
 export async function POST() {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -99,7 +103,7 @@ export async function POST() {
 
 // DELETE: Remove a member (Owner only)
 export async function DELETE(req: Request) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     const { searchParams } = new URL(req.url);
     const targetUserId = searchParams.get('userId');
