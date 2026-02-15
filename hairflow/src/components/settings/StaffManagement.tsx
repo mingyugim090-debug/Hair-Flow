@@ -18,7 +18,11 @@ interface OrganizationData {
     invite_code?: string;
 }
 
-export function StaffManagement() {
+interface Props {
+    defaultShopName?: string;
+}
+
+export function StaffManagement({ defaultShopName }: Props) {
     const [loading, setLoading] = useState(true);
     const [organization, setOrganization] = useState<OrganizationData | null>(null);
     const [members, setMembers] = useState<Member[]>([]);
@@ -77,8 +81,69 @@ export function StaffManagement() {
         }
     };
 
+    const [creating, setCreating] = useState(false);
+    const [newShopName, setNewShopName] = useState(defaultShopName || "");
+
+    useEffect(() => {
+        if (defaultShopName) setNewShopName(defaultShopName);
+    }, [defaultShopName]);
+
+    const handleCreateShop = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newShopName.trim()) return;
+
+        setCreating(true);
+        try {
+            const res = await fetch("/api/organization/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: newShopName.trim() })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                // Refresh members/org data
+                await fetchMembers();
+            } else {
+                alert(result.error || "매장 생성 실패");
+            }
+        } catch (error) {
+            alert("오류가 발생했습니다.");
+        }
+        setCreating(false);
+    };
+
     if (loading) return <div className="text-white/40 text-sm py-8 text-center">로딩 중...</div>;
-    if (!organization) return <div className="text-white/40 text-sm py-8 text-center">생성된 매장이 없습니다.</div>;
+
+    // If no organization, show creation form
+    if (!organization) {
+        return (
+            <div className="bg-white/5 border border-white/10 p-8 rounded-lg text-center">
+                <h3 className="text-white text-lg font-light mb-2">매장 관리 시작하기</h3>
+                <p className="text-white/40 text-xs mb-8">
+                    스태프를 관리하고 포트폴리오를 공유하려면<br />먼저 매장을 생성해야 합니다.
+                </p>
+
+                <form onSubmit={handleCreateShop} className="max-w-xs mx-auto space-y-4">
+                    <input
+                        type="text"
+                        value={newShopName}
+                        onChange={(e) => setNewShopName(e.target.value)}
+                        placeholder="매장명 입력 (예: 헤어플로우 강남점)"
+                        className="w-full bg-black/40 border border-gold/20 px-4 py-3 text-center text-white placeholder:text-white/20 focus:border-gold/50 focus:outline-none"
+                        disabled={creating}
+                    />
+                    <button
+                        type="submit"
+                        disabled={creating || !newShopName.trim()}
+                        className="w-full py-3 bg-gold text-charcoal font-medium text-sm tracking-widest hover:bg-gold-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {creating ? "생성 중..." : "매장 생성하기"}
+                    </button>
+                </form>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">

@@ -694,7 +694,7 @@ export default function ProfilePage() {
           className="pt-10 border-t border-gold/10"
         >
           <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">스태프 관리</h2>
-          <StaffManagement />
+          <StaffManagement defaultShopName={data?.shopName} />
         </motion.div>
       )}
 
