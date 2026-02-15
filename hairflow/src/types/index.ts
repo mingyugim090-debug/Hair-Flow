@@ -344,3 +344,27 @@ export interface Consultation {
   notes: string; // 시술 노트
   createdAt: string;
 }
+
+// 매장 (Organization)
+export interface Organization {
+  id: string;
+  name: string;
+  ownerId: string;
+  createdAt: string;
+}
+
+// 매장 멤버십
+export interface Membership {
+  id: string;
+  organizationId: string;
+  userId: string;
+  role: 'owner' | 'staff';
+  joinedAt: string;
+  profile?: UserProfile; // Join된 프로필 정보
+}
+
+// 확장된 Consultation 타입 (공유 여부 포함)
+export interface ExtendedConsultation extends Consultation {
+  isSharedWithShop: boolean;
+  designer?: UserProfile; // 디자이너 정보 포함
+}

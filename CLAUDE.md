@@ -542,15 +542,24 @@ CREATE INDEX idx_chemical_records_consultation ON chemical_records(consultation_
 - 대시보드 빈 상태 메시지 개선
 - 반응형 UI 개선
 
+- 반응형 UI 개선
+
 ### 2026-02-15
-**커밋**: `pending` - 랜딩페이지 About 섹션 디자인 수정
+**커밋**: `pending` - Enterprise Salon Portfolio 기능 구현
 
 **변경사항**:
-- About 섹션의 가위 이미지 제거
-- 텍스트 레이아웃 중앙 정렬로 변경
+- 매장 통합 포트폴리오 UI (`/salon/portfolio`)
+- 관리자 대시보드 위젯 구현
+- 작품 공유/관리 기능 추가
+- DB: `organizations`, `memberships` 테이블 추가
 
 **수정 파일**:
-- `src/app/page.tsx`
+- `src/app/api/organization/*`
+- `src/app/(main)/salon/portfolio/page.tsx`
+- `src/components/salon/*`
+- `src/types/index.ts`
+
+### 2026-02-15
 
 **수정 파일**:
 - `src/app/(main)/dashboard/page.tsx`
