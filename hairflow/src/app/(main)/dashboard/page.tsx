@@ -139,17 +139,17 @@ export default function DashboardPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <span className="section-label">Dashboard</span>
         <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-light mt-4 mb-2">
-          어떤 고객을 <em className="italic text-gold-light">도와드릴까요?</em>
+          디자이너 <em className="italic text-gold-light">{userData?.designerName ?? userData?.name ?? "님"}</em>의 스마트 어시스턴트
         </h1>
         <p className="text-[15px] text-white/50 font-light">
-          {userData?.designerName ?? userData?.name ?? "디자이너"}님, AI 헤어 어시스턴트로 완벽한 상담을 시작하세요.
+          정밀 모발 분석으로 고객 신뢰를 높이고, 재방문율을 향상시키는 AI 시술 파트너
         </p>
       </motion.div>
 
       {/* Quick Actions: Search & Add */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="glass-luxury border border-gold/15 p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
+          <div className="glass-luxury border border-white/10 p-6 sm:p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
             <div className="font-heading text-[14px] text-gold tracking-[2px] mb-4 transition-all duration-300 group-hover:tracking-[3px]">01</div>
             <h3 className="font-heading text-[24px] font-normal mb-4 italic">고객 검색</h3>
             <div className="flex gap-2">
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="glass-luxury border border-gold/15 p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
+          <div className="glass-luxury border border-white/10 p-6 sm:p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
             <div className="font-heading text-[14px] text-gold tracking-[2px] mb-4 transition-all duration-300 group-hover:tracking-[3px]">02</div>
             <h3 className="font-heading text-[24px] font-normal mb-4 italic">신규 고객 등록</h3>
             <button
@@ -192,7 +192,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
           onSubmit={handleNewCustomerSubmit}
-          className="border border-gold/15 p-8 space-y-4"
+          className="glass-luxury border border-white/10 p-6 sm:p-8 space-y-4 shadow-luxury-sm"
         >
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
@@ -243,19 +243,23 @@ export default function DashboardPage() {
         </motion.form>
       )}
 
-      {/* Usage Stats */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">오늘의 사용량</h2>
-        <div className="glass-luxury border border-gold/15 p-8 shadow-luxury hover-gold-glow">
+      {/* Usage Stats & Enterprise Dashboard */}
+      <div className={userData?.plan === "enterprise" ? "grid lg:grid-cols-2 gap-6" : ""}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">오늘의 사용량</h2>
+        <div className="glass-luxury border border-white/10 p-6 sm:p-8 shadow-luxury hover-gold-glow">
           <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-[13px] text-white/50 font-light">{planLabel} 플랜</span>
+                <span className="text-[13px] text-white/50 font-light">현재 플랜</span>
                 {userData?.plan === "enterprise" && (
                   <Badge className="bg-gold/30 text-gold border-gold/40 text-[10px] tracking-[1px]">ENTERPRISE</Badge>
                 )}
                 {userData?.plan === "basic" && (
-                  <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] tracking-[1px]">PRO</Badge>
+                  <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] tracking-[1px]">BASIC</Badge>
+                )}
+                {userData?.plan === "free" && (
+                  <Badge className="bg-white/10 text-white/50 border-white/20 text-[10px] tracking-[1px]">FREE</Badge>
                 )}
               </div>
               {dailyLimit ? (
@@ -291,7 +295,62 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      </motion.div>
+        </motion.div>
+
+        {/* Enterprise: Staff Activity */}
+        {userData?.plan === "enterprise" && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">매장 현황</h2>
+            <div className="glass-luxury border border-white/10 p-6 sm:p-8 shadow-luxury hover-gold-glow">
+              <div className="mb-6">
+                <h3 className="font-heading text-[20px] font-normal text-white mb-2 italic">스태프 활동</h3>
+                <p className="text-[12px] text-white/40 font-light">오늘 총 활동 요약</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Mock staff data - 추후 실제 데이터로 교체 */}
+                {[
+                  { name: "김지원 실장", analyses: 8, color: "#F56565" },
+                  { name: "박서영 디자이너", analyses: 5, color: "#4299E1" },
+                  { name: "이민준 디자이너", analyses: 3, color: "#48BB78" },
+                ].map((staff, i) => (
+                  <div key={i} className="flex items-center justify-between pb-3 border-b border-gold/5 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: staff.color }}
+                      />
+                      <span className="text-[13px] text-white/70 font-light">{staff.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading text-[20px] font-light text-gold">{staff.analyses}</span>
+                      <span className="text-[11px] text-white/30">건</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-gold/10 grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="font-heading text-[28px] font-light text-gold-light">16</div>
+                  <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">총 분석</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-heading text-[28px] font-light text-gold-light">3</div>
+                  <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">활성 스태프</div>
+                </div>
+              </div>
+
+              <Link
+                href="/settings"
+                className="mt-6 block w-full text-center px-6 py-3 border border-gold/30 text-gold text-[10px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500"
+              >
+                스태프 관리
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </div>
 
       {/* Recent Customers */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -306,7 +365,7 @@ export default function DashboardPage() {
         </div>
 
         {recentCustomers.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {recentCustomers.map((customer, i) => (
               <motion.div
                 key={customer.id}
@@ -314,7 +373,7 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.05 }}
                 onClick={() => router.push(`/customers/${customer.id}`)}
-                className="glass-luxury border border-gold/10 p-6 hover:border-gold/40 transition-all duration-500 cursor-pointer group shadow-luxury-sm hover-gold-glow"
+                className="glass-luxury border border-white/10 p-5 sm:p-6 hover:border-gold/40 transition-all duration-500 cursor-pointer group shadow-luxury-sm hover-gold-glow"
               >
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-heading text-[20px] font-normal group-hover:text-gold transition-colors">
@@ -355,15 +414,25 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="border border-gold/10 p-16 text-center">
-            <p className="font-heading text-[24px] font-light text-white/40 mb-2">No Customers</p>
-            <p className="text-[13px] text-white/30 font-light mb-8">아직 등록된 고객이 없습니다</p>
-            <button
-              onClick={() => setShowNewCustomerForm(true)}
-              className="inline-block px-8 py-3 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500"
-            >
-              첫 고객 등록하기
-            </button>
+          <div className="glass-luxury border border-gold/10 p-16 text-center shadow-luxury-sm">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-gold/20 flex items-center justify-center">
+                <span className="text-[28px] text-gold/40">✂</span>
+              </div>
+              <p className="font-heading text-[24px] font-light text-white mb-3">
+                첫 번째 AI 정밀 분석을 <em className="italic text-gold-light">시작해보세요</em>
+              </p>
+              <p className="text-[13px] text-white/40 font-light mb-10 leading-relaxed">
+                5면 모발 분석부터 맞춤 시술 레시피까지,<br className="hidden sm:block" />
+                고객 만족도를 높이는 첫 걸음을 함께하세요
+              </p>
+              <button
+                onClick={() => setShowNewCustomerForm(true)}
+                className="inline-block px-10 py-4 border border-gold text-gold text-[11px] tracking-[3px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-luxury-sm hover:shadow-luxury"
+              >
+                신규 고객 등록하기
+              </button>
+            </div>
           </div>
         )}
       </motion.div>
