@@ -69,6 +69,7 @@ export interface UserProfile {
   name: string | null;
   avatarUrl: string | null;
   shopName: string | null;
+  organizationName?: string | null; // 소속된 매장 이름 (가입한 경우)
   designerName: string | null;
   instagramId: string | null;
   specialties: string[];
