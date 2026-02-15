@@ -47,27 +47,11 @@ export async function getAuthUser(): Promise<AuthResult> {
     };
   }
 
-  // Check for enterprise membership to upgrade plan in UI
-  const { data: membership } = await supabase
-    .from('memberships')
-    .select(`
-        organization:organizations (
-            owner:profiles (
-                plan
-            )
-        )
-    `)
-    .eq('user_id', user.id)
-    .single();
-
-  let userProfile = profile;
-
-  // @ts-ignore
-  if (membership?.organization?.owner?.plan === 'enterprise' && profile.plan === 'free') {
-    userProfile = { ...profile, plan: 'basic' };
+  if (profileError) {
+    return { user: null, error: '프로필 조회에 실패했습니다.' };
   }
 
-  return { user: mapProfile(userProfile), error: null };
+  return { user: mapProfile(profile), error: null };
 }
 
 function mapProfile(row: Record<string, unknown>): UserProfile {
@@ -77,6 +61,7 @@ function mapProfile(row: Record<string, unknown>): UserProfile {
     name: (row.name as string) ?? null,
     avatarUrl: (row.avatar_url as string) ?? null,
     shopName: (row.shop_name as string) ?? null,
+    organizationName: (row.organization_name as string) ?? null,
     designerName: (row.designer_name as string) ?? null,
     instagramId: (row.instagram_id as string) ?? null,
     specialties: (row.specialties as string[]) ?? [],

@@ -18,6 +18,7 @@ interface PortfolioWork {
 interface ProfileData {
   id: string;
   shopName: string;
+  organizationName?: string; // 소속 매장 이름
   designerName: string;
   instagramId: string;
   specialties: string[];
@@ -56,6 +57,7 @@ export default function ProfilePage() {
         setData({
           id: result.data.id,
           shopName: result.data.shopName ?? "",
+          organizationName: result.data.organizationName,
           designerName: result.data.designerName ?? "",
           instagramId: result.data.instagramId ?? "",
           specialties: result.data.specialties ?? [],
@@ -706,7 +708,19 @@ export default function ProfilePage() {
           transition={{ delay: 0.4 }}
           className="pt-10 border-t border-gold/10"
         >
-          <JoinOrganization />
+          <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">스태프 관리</h2>
+          {data?.organizationName ? (
+            <div className="bg-white/5 border border-white/10 p-8 rounded-lg text-center">
+              <h3 className="text-xl text-gold font-light mb-2">{data.organizationName}</h3>
+              <p className="text-white/60 text-sm mb-4">{data.designerName || "디자이너"}님</p>
+              <div className="inline-block px-4 py-1 border border-gold/30 rounded-full">
+                <span className="text-[11px] text-gold tracking-widest">MEMBER</span>
+              </div>
+              <p className="text-white/30 text-xs mt-4">매장에 정상적으로 합류되었습니다.</p>
+            </div>
+          ) : (
+            <JoinOrganization />
+          )}
         </motion.div>
       )}
     </div>
