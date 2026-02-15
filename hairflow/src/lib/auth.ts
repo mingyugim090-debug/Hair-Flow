@@ -51,7 +51,40 @@ export async function getAuthUser(): Promise<AuthResult> {
     return { user: null, error: '프로필 조회에 실패했습니다.' };
   }
 
-  return { user: mapProfile(profile), error: null };
+  // Check for enterprise membership to upgrade plan in UI
+  const { data: membership } = await supabase
+    .from('memberships')
+    .select(`
+        organization:organizations (
+            name,
+            owner:profiles (
+                plan
+            )
+        )
+    `)
+    .eq('user_id', user.id)
+    .single();
+
+  if (membership) {
+    console.log("Membership found for user:", user.id, membership);
+  }
+
+  let userProfile = profile;
+
+  // @ts-ignore
+  if (membership?.organization?.owner?.plan === 'enterprise' && profile.plan === 'free') {
+    userProfile = { ...profile, plan: 'basic' };
+  }
+
+  // @ts-ignore
+  const orgName = membership?.organization?.name;
+  if (orgName) {
+    console.log("Mapping org name to profile:", orgName);
+    // @ts-ignore
+    userProfile = { ...userProfile, organization_name: orgName };
+  }
+
+  return { user: mapProfile(userProfile), error: null };
 }
 
 function mapProfile(row: Record<string, unknown>): UserProfile {
