@@ -26,12 +26,21 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "이미 생성된 매장이 있습니다." }, { status: 400 });
     }
 
+    // Generate invite code
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const inviteCode = `HF-${result}`;
+
     // Create Organization
     const { data: org, error: createError } = await supabase
         .from("organizations")
         .insert({
             name,
-            owner_id: user.id
+            owner_id: user.id,
+            invite_code: inviteCode
         })
         .select()
         .single();
