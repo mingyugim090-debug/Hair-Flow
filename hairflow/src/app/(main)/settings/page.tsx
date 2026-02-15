@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { StaffManagement } from "@/components/settings/StaffManagement";
+import { JoinOrganization } from "@/components/settings/JoinOrganization";
 
 interface PortfolioWork {
   url: string;
@@ -558,8 +560,8 @@ export default function ProfilePage() {
                     key={s}
                     onClick={() => toggleSpecialty(s)}
                     className={`py-2.5 px-2 border text-[12px] tracking-[0.5px] font-light transition-all duration-300 ${data?.specialties.includes(s)
-                        ? "border-gold bg-gold/10 text-gold"
-                        : "border-white/10 text-white/40 hover:border-gold/30"
+                      ? "border-gold bg-gold/10 text-gold"
+                      : "border-white/10 text-white/40 hover:border-gold/30"
                       }`}
                   >
                     {s}
@@ -682,6 +684,31 @@ export default function ProfilePage() {
           로그아웃
         </button>
       </motion.div>
+
+      {/* ── Enterprise Staff Management ── */}
+      {data?.plan === "enterprise" && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="pt-10 border-t border-gold/10"
+        >
+          <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">스태프 관리</h2>
+          <StaffManagement />
+        </motion.div>
+      )}
+
+      {/* ── Join Organization (For Staff) ── */}
+      {data?.plan !== "enterprise" && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="pt-10 border-t border-gold/10"
+        >
+          <JoinOrganization />
+        </motion.div>
+      )}
     </div>
   );
 }

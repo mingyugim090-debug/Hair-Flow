@@ -350,6 +350,7 @@ export interface Organization {
   id: string;
   name: string;
   ownerId: string;
+  invite_code?: string;
   createdAt: string;
 }
 
