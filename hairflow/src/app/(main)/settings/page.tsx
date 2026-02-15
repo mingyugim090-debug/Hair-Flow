@@ -228,7 +228,7 @@ export default function ProfilePage() {
   };
 
   const planLabel =
-    data?.plan === "pro" ? "Pro" : data?.plan === "basic" ? "Basic" : "Free";
+    data?.plan === "enterprise" ? "Enterprise" : data?.plan === "basic" ? "Basic" : "Free";
 
   if (loading) {
     return (
@@ -557,11 +557,10 @@ export default function ProfilePage() {
                   <button
                     key={s}
                     onClick={() => toggleSpecialty(s)}
-                    className={`py-2.5 px-2 border text-[12px] tracking-[0.5px] font-light transition-all duration-300 ${
-                      data?.specialties.includes(s)
+                    className={`py-2.5 px-2 border text-[12px] tracking-[0.5px] font-light transition-all duration-300 ${data?.specialties.includes(s)
                         ? "border-gold bg-gold/10 text-gold"
                         : "border-white/10 text-white/40 hover:border-gold/30"
-                    }`}
+                      }`}
                   >
                     {s}
                   </button>
