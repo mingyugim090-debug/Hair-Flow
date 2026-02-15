@@ -50,6 +50,45 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
+    // Enterprise Plan: Auto-create Organization
+    if (user.plan === 'enterprise') {
+      try {
+        // Check if exists
+        const { data: existingOrg } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('owner_id', user.id)
+          .single();
+
+        if (!existingOrg) {
+          // Create Organization
+          const { data: org, error: orgError } = await supabase
+            .from('organizations')
+            .insert({
+              name: shopName.trim(),
+              owner_id: user.id
+            })
+            .select()
+            .single();
+
+          if (!orgError && org) {
+            // Join as Owner
+            await supabase
+              .from('memberships')
+              .insert({
+                organization_id: org.id,
+                user_id: user.id,
+                role: 'owner'
+              });
+          }
+        }
+      } catch (e) {
+        console.error("Auto-create org failed", e);
+        // Do not fail the request, just log it. 
+        // User can create manually in settings later.
+      }
+    }
+
     return NextResponse.json<ApiResponse<{ success: boolean }>>({
       data: { success: true },
       error: null,
