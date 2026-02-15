@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Organization } from "@/types";
+
 
 interface Member {
     userId: string;
@@ -13,9 +13,14 @@ interface Member {
     joinedAt: string;
 }
 
+interface OrganizationData {
+    name: string;
+    invite_code?: string;
+}
+
 export function StaffManagement() {
     const [loading, setLoading] = useState(true);
-    const [organization, setOrganization] = useState<Organization | null>(null);
+    const [organization, setOrganization] = useState<OrganizationData | null>(null);
     const [members, setMembers] = useState<Member[]>([]);
     const [inviteCode, setInviteCode] = useState<string | null>(null);
     const [regenerating, setRegenerating] = useState(false);
