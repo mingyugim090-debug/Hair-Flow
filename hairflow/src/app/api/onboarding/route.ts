@@ -61,12 +61,21 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (!existingOrg) {
+          // Generate invite code
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          let result = '';
+          for (let i = 0; i < 6; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          const inviteCode = `HF-${result}`;
+
           // Create Organization
           const { data: org, error: orgError } = await supabase
             .from('organizations')
             .insert({
               name: shopName.trim(),
-              owner_id: user.id
+              owner_id: user.id,
+              invite_code: inviteCode
             })
             .select()
             .single();
