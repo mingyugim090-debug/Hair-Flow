@@ -47,11 +47,27 @@ export async function getAuthUser(): Promise<AuthResult> {
     };
   }
 
-  if (profileError) {
-    return { user: null, error: '프로필 조회에 실패했습니다.' };
+  // Check for enterprise membership to upgrade plan in UI
+  const { data: membership } = await supabase
+    .from('memberships')
+    .select(`
+        organization:organizations (
+            owner:profiles (
+                plan
+            )
+        )
+    `)
+    .eq('user_id', user.id)
+    .single();
+
+  let userProfile = profile;
+
+  // @ts-ignore
+  if (membership?.organization?.owner?.plan === 'enterprise' && profile.plan === 'free') {
+    userProfile = { ...profile, plan: 'basic' };
   }
 
-  return { user: mapProfile(profile), error: null };
+  return { user: mapProfile(userProfile), error: null };
 }
 
 function mapProfile(row: Record<string, unknown>): UserProfile {
@@ -94,7 +110,31 @@ export async function checkUsageLimit(userId: string): Promise<{ allowed: boolea
     return { allowed: false, remaining: 0 };
   }
 
-  const limit = DAILY_LIMITS[profile.plan] ?? 3;
+  // Check if user is a member of an enterprise organization
+  const { data: membership } = await supabase
+    .from('memberships')
+    .select(`
+        organization:organizations (
+            owner:profiles (
+                plan
+            )
+        )
+    `)
+    .eq('user_id', userId)
+    .single();
+
+  let userPlan = profile.plan;
+
+  // @ts-ignore - Supabase type inference might be tricky here
+  const orgPlan = membership?.organization?.owner?.plan;
+
+  // If user belongs to an Enterprise organization, upgrade their effective plan to 'basic' (unlimited)
+  // unless they are already enterprise
+  if (orgPlan === 'enterprise' && userPlan === 'free') {
+    userPlan = 'basic';
+  }
+
+  const limit = DAILY_LIMITS[userPlan] ?? 3;
 
   // 날짜가 바뀌면 사용량 리셋
   if (profile.last_usage_date !== today) {
