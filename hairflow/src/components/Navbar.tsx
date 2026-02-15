@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { href: "/dashboard", label: "대시보드" },
   { href: "/customers", label: "고객관리" },
+  { href: "/salon/portfolio", label: "매장관리" },
   { href: "/pricing", label: "요금제" },
 ];
 
@@ -31,28 +32,25 @@ export function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-[12px] tracking-[2px] uppercase transition-all duration-300 relative pb-1 group ${
-                    pathname === item.href || pathname?.startsWith(item.href + "/")
+                  className={`text-[12px] tracking-[2px] uppercase transition-all duration-300 relative pb-1 group ${pathname === item.href || pathname?.startsWith(item.href + "/")
                       ? "text-gold"
                       : "text-white/60 hover:text-gold"
-                  }`}
+                    }`}
                 >
                   {item.label}
                   {(pathname === item.href || pathname?.startsWith(item.href + "/")) && (
                     <span className="absolute bottom-0 left-0 w-full h-px bg-gold shadow-[0_0_8px_rgba(212,179,127,0.6)]" />
                   )}
-                  <span className={`absolute bottom-0 left-0 w-0 h-px bg-gold/50 transition-all duration-300 group-hover:w-full ${
-                    (pathname === item.href || pathname?.startsWith(item.href + "/")) && "opacity-0"
-                  }`} />
+                  <span className={`absolute bottom-0 left-0 w-0 h-px bg-gold/50 transition-all duration-300 group-hover:w-full ${(pathname === item.href || pathname?.startsWith(item.href + "/")) && "opacity-0"
+                    }`} />
                 </Link>
               ))}
             </div>
           </div>
           <Link
             href="/settings"
-            className={`text-[12px] tracking-[2px] uppercase transition-all duration-300 hover:text-gold ${
-              pathname === "/settings" ? "text-gold" : "text-white/40"
-            }`}
+            className={`text-[12px] tracking-[2px] uppercase transition-all duration-300 hover:text-gold ${pathname === "/settings" ? "text-gold" : "text-white/40"
+              }`}
           >
             프로필
           </Link>
@@ -66,11 +64,10 @@ export function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-2 min-w-0 flex-1 transition-all duration-300 relative ${
-                pathname === item.href || pathname?.startsWith(item.href + "/")
+              className={`flex flex-col items-center justify-center py-2 min-w-0 flex-1 transition-all duration-300 relative ${pathname === item.href || pathname?.startsWith(item.href + "/")
                   ? "text-gold"
                   : "text-white/40 active:text-gold/80"
-              }`}
+                }`}
             >
               <span className="text-[11px] tracking-[1px] font-light truncate">{item.label}</span>
               {(pathname === item.href || pathname?.startsWith(item.href + "/")) && (

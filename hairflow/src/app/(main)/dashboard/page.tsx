@@ -20,10 +20,24 @@ interface RecentCustomer extends Customer {
   lastAnalysis: string | null;
 }
 
+interface DashboardStats {
+  totalAnalysisCount: number;
+  activeStaffCount: number;
+  todayAnalysisCount: number;
+  contributionStats: {
+    designerId: string;
+    name: string;
+    avatarUrl: string | null;
+    count: number;
+    percentage: number;
+  }[];
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [recentCustomers, setRecentCustomers] = useState<RecentCustomer[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewCustomerForm, setShowNewCustomerForm] = useState(false);
   const [newCustomerForm, setNewCustomerForm] = useState({ name: "", phone: "", memo: "" });
@@ -35,6 +49,7 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // 1. 프로필 정보
       const { data: profile } = await supabase
         .from("profiles")
         .select("name, designer_name, plan, daily_usage, last_usage_date")
@@ -51,9 +66,22 @@ export default function DashboardPage() {
           dailyUsage: isToday ? (profile.daily_usage ?? 0) : 0,
           lastUsageDate: profile.last_usage_date,
         });
+
+        // Enterprise 플랜인 경우, 대시보드 통계 가져오기
+        if (profile.plan === 'enterprise') {
+          try {
+            const statsRes = await fetch('/api/organization/dashboard');
+            if (statsRes.ok) {
+              const { data } = await statsRes.json();
+              setDashboardStats(data);
+            }
+          } catch (e) {
+            console.error("Failed to load dashboard stats", e);
+          }
+        }
       }
 
-      // 최근 분석한 고객 목록 가져오기
+      // 2. 최근 분석한 고객 목록 가져오기
       const { data: customers } = await supabase
         .from("customers")
         .select("*")
@@ -115,7 +143,6 @@ export default function DashboardPage() {
     setSubmitting(false);
   };
 
-  const planLabel = userData?.plan === "enterprise" ? "Enterprise" : userData?.plan === "basic" ? "Basic" : "Free";
   const dailyLimit = userData?.plan === "free" ? 3 : null;
   const usage = userData?.dailyUsage ?? 0;
   const progressPercent = dailyLimit ? Math.min(100, (usage / dailyLimit) * 100) : 0;
@@ -130,8 +157,8 @@ export default function DashboardPage() {
   const currentPlanFeatures = userData?.plan === "enterprise"
     ? planFeatures.enterprise
     : userData?.plan === "basic"
-    ? planFeatures.basic
-    : planFeatures.free;
+      ? planFeatures.basic
+      : planFeatures.free;
 
   return (
     <div className="space-y-10">
@@ -247,54 +274,54 @@ export default function DashboardPage() {
       <div className={userData?.plan === "enterprise" ? "grid lg:grid-cols-2 gap-6" : ""}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">오늘의 사용량</h2>
-        <div className="glass-luxury border border-white/10 p-6 sm:p-8 shadow-luxury hover-gold-glow">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-[13px] text-white/50 font-light">현재 플랜</span>
-                {userData?.plan === "enterprise" && (
-                  <Badge className="bg-gold/30 text-gold border-gold/40 text-[10px] tracking-[1px]">ENTERPRISE</Badge>
-                )}
-                {userData?.plan === "basic" && (
-                  <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] tracking-[1px]">BASIC</Badge>
-                )}
-                {userData?.plan === "free" && (
-                  <Badge className="bg-white/10 text-white/50 border-white/20 text-[10px] tracking-[1px]">FREE</Badge>
+          <div className="glass-luxury border border-white/10 p-6 sm:p-8 shadow-luxury hover-gold-glow">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-[13px] text-white/50 font-light">현재 플랜</span>
+                  {userData?.plan === "enterprise" && (
+                    <Badge className="bg-gold/30 text-gold border-gold/40 text-[10px] tracking-[1px]">ENTERPRISE</Badge>
+                  )}
+                  {userData?.plan === "basic" && (
+                    <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] tracking-[1px]">BASIC</Badge>
+                  )}
+                  {userData?.plan === "free" && (
+                    <Badge className="bg-white/10 text-white/50 border-white/20 text-[10px] tracking-[1px]">FREE</Badge>
+                  )}
+                </div>
+                {dailyLimit ? (
+                  <span className="font-heading text-[36px] font-light text-white">{usage} / {dailyLimit}<span className="text-[16px] text-white/40 ml-1">건</span></span>
+                ) : (
+                  <span className="font-heading text-[36px] font-light text-gold-light">Unlimited</span>
                 )}
               </div>
-              {dailyLimit ? (
-                <span className="font-heading text-[36px] font-light text-white">{usage} / {dailyLimit}<span className="text-[16px] text-white/40 ml-1">건</span></span>
-              ) : (
-                <span className="font-heading text-[36px] font-light text-gold-light">Unlimited</span>
+              {userData?.plan === "free" && (
+                <Link href="/pricing"
+                  className="px-6 py-3 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500">
+                  업그레이드
+                </Link>
               )}
             </div>
-            {userData?.plan === "free" && (
-              <Link href="/pricing"
-                className="px-6 py-3 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500">
-                업그레이드
-              </Link>
+
+            {/* 플랜별 기능 표시 */}
+            <div className="space-y-2 pt-6 border-t border-gold/10">
+              {currentPlanFeatures.map((feature, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-gold text-[11px]">&#10003;</span>
+                  <span className="text-[13px] text-white/60 font-light">{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            {dailyLimit && (
+              <div className="mt-6 h-px bg-white/10 relative overflow-hidden">
+                <div
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-gold to-gold-light transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             )}
           </div>
-
-          {/* 플랜별 기능 표시 */}
-          <div className="space-y-2 pt-6 border-t border-gold/10">
-            {currentPlanFeatures.map((feature, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="text-gold text-[11px]">&#10003;</span>
-                <span className="text-[13px] text-white/60 font-light">{feature}</span>
-              </div>
-            ))}
-          </div>
-
-          {dailyLimit && (
-            <div className="mt-6 h-px bg-white/10 relative overflow-hidden">
-              <div
-                className="absolute top-0 left-0 h-full bg-gradient-to-r from-gold to-gold-light transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          )}
-        </div>
         </motion.div>
 
         {/* Enterprise: Staff Activity */}
@@ -307,45 +334,54 @@ export default function DashboardPage() {
                 <p className="text-[12px] text-white/40 font-light">오늘 총 활동 요약</p>
               </div>
 
-              <div className="space-y-4">
-                {/* Mock staff data - 추후 실제 데이터로 교체 */}
-                {[
-                  { name: "김지원 실장", analyses: 8, color: "#F56565" },
-                  { name: "박서영 디자이너", analyses: 5, color: "#4299E1" },
-                  { name: "이민준 디자이너", analyses: 3, color: "#48BB78" },
-                ].map((staff, i) => (
-                  <div key={i} className="flex items-center justify-between pb-3 border-b border-gold/5 last:border-0">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: staff.color }}
-                      />
-                      <span className="text-[13px] text-white/70 font-light">{staff.name}</span>
+              {dashboardStats ? (
+                <div className="space-y-4">
+                  {dashboardStats.contributionStats.slice(0, 3).map((staff, i) => (
+                    <div key={staff.designerId} className="flex items-center justify-between pb-3 border-b border-gold/5 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gold border border-gold/20">
+                          {staff.name[0]}
+                        </div>
+                        <span className="text-[13px] text-white/70 font-light">{staff.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-heading text-[20px] font-light text-gold">{staff.count}</span>
+                        <span className="text-[11px] text-white/30">건</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-heading text-[20px] font-light text-gold">{staff.analyses}</span>
-                      <span className="text-[11px] text-white/30">건</span>
+                  ))}
+                  {dashboardStats.contributionStats.length === 0 && (
+                    <div className="text-center py-4 text-white/30 text-xs font-light">
+                      아직 활동 내역이 없습니다.
                     </div>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4 animate-pulse">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-10 bg-white/5 rounded"></div>
+                  ))}
+                </div>
+              )}
 
-              <div className="mt-6 pt-6 border-t border-gold/10 grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="font-heading text-[28px] font-light text-gold-light">16</div>
-                  <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">총 분석</div>
+              {dashboardStats && (
+                <div className="mt-6 pt-6 border-t border-gold/10 grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="font-heading text-[28px] font-light text-gold-light">{dashboardStats.totalAnalysisCount}</div>
+                    <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">총 분석</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-heading text-[28px] font-light text-gold-light">{dashboardStats.activeStaffCount}</div>
+                    <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">활성 스태프</div>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="font-heading text-[28px] font-light text-gold-light">3</div>
-                  <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">활성 스태프</div>
-                </div>
-              </div>
+              )}
 
               <Link
-                href="/settings"
+                href="/salon/portfolio"
                 className="mt-6 block w-full text-center px-6 py-3 border border-gold/30 text-gold text-[10px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500"
               >
-                스태프 관리
+                매장 포트폴리오 관리
               </Link>
             </div>
           </motion.div>
