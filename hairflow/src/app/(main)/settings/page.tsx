@@ -695,7 +695,7 @@ export default function ProfilePage() {
           transition={{ delay: 0.4 }}
           className="pt-10 border-t border-gold/10"
         >
-          <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">스태프 관리</h2>
+          <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">디자이너 관리</h2>
           <StaffManagement defaultShopName={data?.shopName} />
         </motion.div>
       )}
@@ -708,7 +708,7 @@ export default function ProfilePage() {
           transition={{ delay: 0.4 }}
           className="pt-10 border-t border-gold/10"
         >
-          <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">스태프 관리</h2>
+          <h2 className="text-[11px] tracking-[3px] text-gold uppercase mb-6">디자이너 관리</h2>
           {data?.organizationName ? (
             <div className="bg-white/5 border border-white/10 p-8 rounded-lg text-center">
               <h3 className="text-xl text-gold font-light mb-2">{data.organizationName}</h3>

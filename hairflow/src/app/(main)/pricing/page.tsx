@@ -44,7 +44,7 @@ const plans = [
     description: "매장/팀 단위 추천",
     features: [
       "Basic의 모든 기능 포함",
-      "최대 10명의 스태프 계정 연동",
+      "최대 10명의 디자이너 계정 연동",
       "매장 전체 매출 분석 리포트 대시보드",
       "매장 전용 맞춤형 약제/브랜드 DB 커스텀",
       "1:1 전담 고객 지원 및 우선 처리 권한"
@@ -146,20 +146,18 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className={`p-8 border text-center flex flex-col ${
-              plan.highlight
+            className={`p-8 border text-center flex flex-col ${plan.highlight
                 ? "border-gold bg-charcoal/80 backdrop-blur-sm"
                 : "border-gold/15 bg-charcoal/60 backdrop-blur-sm"
-            }`}
+              }`}
           >
             <div className="flex items-center justify-center gap-2 mb-4">
               <h3 className="font-heading text-[24px] font-normal text-white">{plan.name}</h3>
               {plan.badge && plan.id !== currentPlan && (
-                <Badge className={`text-[10px] tracking-[1px] ${
-                  plan.highlight
+                <Badge className={`text-[10px] tracking-[1px] ${plan.highlight
                     ? "bg-gold/30 text-gold border-gold/40"
                     : "bg-gold/20 text-gold border-gold/30"
-                }`}>
+                  }`}>
                   {plan.badge}
                 </Badge>
               )}
@@ -191,11 +189,10 @@ export default function PricingPage() {
             <button
               onClick={() => handleSubscribe(plan.id)}
               disabled={isButtonDisabled(plan.id)}
-              className={`w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 shadow-luxury-sm hover:shadow-luxury ${
-                plan.highlight
+              className={`w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 shadow-luxury-sm hover:shadow-luxury ${plan.highlight
                   ? "border border-gold text-gold hover:bg-gold hover:text-charcoal disabled:opacity-40 disabled:cursor-not-allowed"
                   : "border border-gold/30 text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed"
-              }`}
+                }`}
             >
               {loading === plan.id ? "처리 중..." : getButtonText(plan.id)}
             </button>

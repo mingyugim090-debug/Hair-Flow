@@ -38,7 +38,7 @@ export function JoinOrganization() {
             <div className="bg-white/5 border border-white/10 p-8 rounded-lg text-center">
                 <h3 className="text-white text-lg font-light mb-2">매장 합류하기</h3>
                 <p className="text-white/40 text-xs mb-8">
-                    원장님께 전달받은 초대 코드를 입력하여<br />매장 스태프로 등록하세요.
+                    원장님께 전달받은 초대 코드를 입력하여<br />매장 디자이너로 등록하세요.
                 </p>
 
                 <form onSubmit={handleJoin} className="max-w-xs mx-auto space-y-4">

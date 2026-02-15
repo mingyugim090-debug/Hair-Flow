@@ -151,7 +151,7 @@ export default function DashboardPage() {
   const planFeatures = {
     free: ["하루 3건 AI 분석", "AI 시술 레시피", "AI 미래 타임라인"],
     basic: ["무제한 AI 분석", "시술 히스토리 무제한", "약제 브랜드 DB 제공"],
-    enterprise: ["Basic 모든 기능", "스태프 10명 연동", "매장 분석 리포트"],
+    enterprise: ["Basic 모든 기능", "디자이너 10명 연동", "매장 분석 리포트"],
   };
 
   const currentPlanFeatures = userData?.plan === "enterprise"
@@ -330,7 +330,7 @@ export default function DashboardPage() {
             <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">매장 현황</h2>
             <div className="glass-luxury border border-white/10 p-6 sm:p-8 shadow-luxury hover-gold-glow">
               <div className="mb-6">
-                <h3 className="font-heading text-[20px] font-normal text-white mb-2 italic">스태프 활동</h3>
+                <h3 className="font-heading text-[20px] font-normal text-white mb-2 italic">디자이너 활동</h3>
                 <p className="text-[12px] text-white/40 font-light">오늘 총 활동 요약</p>
               </div>
 
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-center">
                     <div className="font-heading text-[28px] font-light text-gold-light">{dashboardStats.activeStaffCount}</div>
-                    <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">활성 스태프</div>
+                    <div className="text-[10px] text-white/30 tracking-[2px] uppercase mt-1">활성 디자이너</div>
                   </div>
                 </div>
               )}

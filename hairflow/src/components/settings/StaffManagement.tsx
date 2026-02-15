@@ -62,7 +62,7 @@ export function StaffManagement({ defaultShopName }: Props) {
     };
 
     const removeMember = async (userId: string) => {
-        if (!confirm("정말 이 스태프를 내보내시겠습니까?")) return;
+        if (!confirm("정말 이 디자이너를 내보내시겠습니까?")) return;
 
         const res = await fetch(`/api/organization/members?userId=${userId}`, { method: "DELETE" });
         const result = await res.json();
@@ -121,7 +121,7 @@ export function StaffManagement({ defaultShopName }: Props) {
             <div className="bg-white/5 border border-white/10 p-8 rounded-lg text-center">
                 <h3 className="text-white text-lg font-light mb-2">매장 관리 시작하기</h3>
                 <p className="text-white/40 text-xs mb-8">
-                    스태프를 관리하고 포트폴리오를 공유하려면<br />먼저 매장을 생성해야 합니다.
+                    디자이너를 관리하고 포트폴리오를 공유하려면<br />먼저 매장을 생성해야 합니다.
                 </p>
 
                 <form onSubmit={handleCreateShop} className="max-w-xs mx-auto space-y-4">
@@ -149,9 +149,9 @@ export function StaffManagement({ defaultShopName }: Props) {
         <div className="space-y-8">
             {/* Invite Code Section */}
             <div className="bg-gold/5 border border-gold/10 p-6 rounded-lg">
-                <h3 className="text-gold text-sm tracking-widest uppercase mb-2">스태프 초대 코드</h3>
+                <h3 className="text-gold text-sm tracking-widest uppercase mb-2">디자이너 초대 코드</h3>
                 <p className="text-white/40 text-xs mb-4">
-                    이 코드를 스태프에게 전달하세요. 스태프가 설정 페이지에서 코드를 입력하면 매장에 합류할 수 있습니다.
+                    이 코드를 디자이너에게 전달하세요. 디자이너가 설정 페이지에서 코드를 입력하면 매장에 합류할 수 있습니다.
                 </p>
                 <div className="flex items-center gap-3">
                     <div className="bg-black/40 border border-gold/20 px-6 py-3 text-xl tracking-[4px] text-white font-mono rounded">
@@ -175,7 +175,7 @@ export function StaffManagement({ defaultShopName }: Props) {
 
             {/* Members List */}
             <div>
-                <h3 className="text-white text-sm tracking-widest uppercase mb-4">소속 스태프 ({members.length})</h3>
+                <h3 className="text-white text-sm tracking-widest uppercase mb-4">소속 디자이너 ({members.length})</h3>
                 <div className="grid gap-3">
                     {members.map((member) => (
                         <div key={member.userId} className="flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded hover:border-gold/20 transition-colors group">
