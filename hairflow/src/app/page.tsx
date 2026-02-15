@@ -45,10 +45,10 @@ export default function LandingPage() {
 
         {/* Diagonal Lines */}
         <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="0" x2="100%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
-          <line x1="100%" y1="0" x2="0" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
-          <line x1="30%" y1="0" x2="30%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
-          <line x1="70%" y1="0" x2="70%" y2="100%" stroke="#D4B37F" strokeWidth="0.5"/>
+          <line x1="0" y1="0" x2="100%" y2="100%" stroke="#D4B37F" strokeWidth="0.5" />
+          <line x1="100%" y1="0" x2="0" y2="100%" stroke="#D4B37F" strokeWidth="0.5" />
+          <line x1="30%" y1="0" x2="30%" y2="100%" stroke="#D4B37F" strokeWidth="0.5" />
+          <line x1="70%" y1="0" x2="70%" y2="100%" stroke="#D4B37F" strokeWidth="0.5" />
         </svg>
 
         <div className="text-center relative z-10 px-4 sm:px-6 max-w-[900px] mx-auto w-full">
@@ -86,16 +86,8 @@ export default function LandingPage() {
         <div className="absolute inset-0 opacity-[0.03]">
           <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_48%,rgba(139,111,94,0.5)_49%,rgba(139,111,94,0.5)_51%,transparent_52%)] bg-[length:40px_40px]" />
         </div>
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-[60px] py-20 sm:py-28 md:py-[140px] grid md:grid-cols-2 gap-12 sm:gap-16 md:gap-20 items-center relative z-10">
-          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8 }}
-            className="relative aspect-[3/4] overflow-hidden shadow-luxury hover-gold-glow group">
-            <div className="w-full h-full bg-gradient-to-br from-soft-beige to-warm-brown flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
-              <span className="text-[80px] opacity-30 transition-transform duration-500 group-hover:rotate-12">✂</span>
-            </div>
-            <div className="absolute -top-5 -left-5 right-5 bottom-5 border border-gold -z-10" />
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }}>
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 md:px-[60px] py-20 sm:py-28 md:py-[140px] relative z-10">
+          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="max-w-[800px] mx-auto text-center">
             <span className="section-label">About</span>
             <h2 className="font-heading text-[clamp(32px,4vw,52px)] font-light leading-[1.2] mt-6 mb-8 text-deep-brown">
               헤어 디자이너의<br /><em className="italic text-warm-brown">고민</em>을 해결합니다
@@ -108,13 +100,13 @@ export default function LandingPage() {
               HairFlow는 첨단 시각 분석 기술로 모발 상태를 정밀 진단하고,
               경력 20년차 수준의 시술 레시피를 자동 생성합니다.
             </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-6 sm:gap-8 md:gap-12 mt-8 sm:mt-12 pt-8 sm:pt-12 border-t border-warm-brown/20">
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-12 mt-8 sm:mt-12 pt-8 sm:pt-12 border-t border-warm-brown/20">
               {[
                 { num: "5면", label: "정밀 분석" },
                 { num: "8주", label: "미래 예측" },
                 { num: "24/7", label: "시술 지원" },
               ].map((stat) => (
-                <div key={stat.label} className="text-center md:text-left min-w-[80px]">
+                <div key={stat.label} className="text-center min-w-[80px]">
                   <div className="font-heading text-[clamp(32px,6vw,48px)] font-light text-gold leading-none">{stat.num}</div>
                   <div className="text-[10px] sm:text-[11px] md:text-[12px] tracking-[2px] text-charcoal/50 mt-2 uppercase">{stat.label}</div>
                 </div>
