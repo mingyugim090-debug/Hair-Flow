@@ -16,15 +16,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invite code is required" }, { status: 400 });
     }
 
-    // Find organization by code
+    // Find organization by code using RPC (to bypass RLS)
     const { data: org, error: orgError } = await supabase
-        .from("organizations")
-        .select("id, name")
-        .eq("invite_code", inviteCode)
+        .rpc('get_org_by_invite_code', { code: inviteCode })
         .single();
 
     if (orgError || !org) {
-        return NextResponse.json({ error: "Invalid invite code" }, { status: 404 });
+        console.error("Invite code check failed:", orgError);
+        return NextResponse.json({ error: "유효하지 않은 초대 코드입니다." }, { status: 404 });
     }
 
     // Check if already a member
@@ -32,7 +31,7 @@ export async function POST(req: Request) {
         .from("memberships")
         .select("id")
         .eq("user_id", user.id)
-        .eq("organization_id", org.id)
+        .eq("organization_id", organization.id)
         .single();
 
     if (existing) {
@@ -43,7 +42,7 @@ export async function POST(req: Request) {
     const { error: joinError } = await supabase
         .from("memberships")
         .insert({
-            organization_id: org.id,
+            organization_id: organization.id,
             user_id: user.id,
             role: "staff"
         });
@@ -54,6 +53,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
         success: true,
-        data: { organizationName: org.name }
+        data: { organizationName: organization.name }
     });
 }
