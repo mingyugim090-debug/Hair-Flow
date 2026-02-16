@@ -22,7 +22,7 @@ const plans = [
     limitations: ["시술 히스토리 미제공"],
     highlight: false,
     badge: null,
-    recommendation: null,
+    recommendation: "체험판",
   },
   {
     id: "basic",
