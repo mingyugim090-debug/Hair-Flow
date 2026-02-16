@@ -187,7 +187,7 @@ export function StaffManagement({ defaultShopName }: Props) {
                                     <div className="flex items-center gap-2">
                                         <span className="text-white text-sm font-medium">{member.designerName || member.name}</span>
                                         <span className={`text-[10px] px-2 py-0.5 rounded-full border ${member.role === 'owner' ? 'border-gold text-gold bg-gold/10' : 'border-white/20 text-white/40'}`}>
-                                            {member.role === 'owner' ? 'OWNER' : 'STAFF'}
+                                            {member.role === 'owner' ? 'OWNER' : 'DESIGNER'}
                                         </span>
                                     </div>
                                     <span className="text-white/30 text-xs">{member.email}</span>

@@ -54,7 +54,7 @@ export default function DashboardWidget() {
                     <div className="font-heading text-4xl text-gold">{stats.totalAnalysisCount}</div>
                 </div>
                 <div className="bg-white/5 p-4 rounded-lg text-center border border-white/5">
-                    <div className="text-white/40 text-xs uppercase tracking-widest mb-2">Active Staff</div>
+                    <div className="text-white/40 text-xs uppercase tracking-widest mb-2">Active Designer</div>
                     <div className="font-heading text-4xl text-white">{stats.activeStaffCount}</div>
                 </div>
                 <div className="bg-white/5 p-4 rounded-lg text-center border border-white/5">
