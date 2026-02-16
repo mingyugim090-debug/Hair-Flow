@@ -14,14 +14,15 @@ const plans = [
     period: "",
     description: "HairFlow의 핵심 기능을 가볍게 체험해보세요.",
     features: [
-      "하루 3회 이용 가능 (AI 분석 및 레시피 생성 포함)",
-      "기본 AI 시술 레시피 제공",
-      "AI 모발 미래 타임라인 확인",
-      "기본 레시피 카드 저장 기능",
+      "하루 3회 이용 가능",
+      "AI 종합분석",
+      "AI 스타일 추천",
+      "타임라인 예측",
     ],
-    limitations: [],
+    limitations: ["시술 히스토리 미제공"],
     highlight: false,
     badge: null,
+    recommendation: null,
   },
   {
     id: "basic",
@@ -31,13 +32,14 @@ const plans = [
     period: "/월",
     description: "제한 없는 기능 활용으로 시술의 완성도를 높이세요.",
     features: [
-      "모든 기능 무제한 이용 가능",
-      "시술 히스토리 무제한 저장 및 관리",
-      "8주 미래 변화 타임라인 정밀 분석",
+      "모든 기능 무제한",
+      "고객 관리 무제한",
+      "시술 히스토리 관리",
     ],
     limitations: [],
     highlight: false,
     badge: "추천",
+    recommendation: "개인 디자이너 추천",
   },
   {
     id: "enterprise",
@@ -47,14 +49,14 @@ const plans = [
     period: "/월",
     description: "매장 관리의 효율성을 극대화하고 팀 전체의 성장을 지원합니다.",
     features: [
-      "디자이너 계정 무제한 연동 가능",
+      "매장 디자이너 무제한 연동 가능",
       "초대된 모든 디자이너에게 Basic 플랜 기능 제공",
-      "매장 전체 데이터 분석 리포트 및 통합 대시보드",
-      "매장 데이터 통합 관리 시스템",
+      "매장 전체 디자이너별 고객 데이터 통합 관리 및 분석 시스템",
     ],
     limitations: [],
     highlight: true,
     badge: "인기",
+    recommendation: "매장 단위 추천",
   },
 ];
 
@@ -137,7 +139,7 @@ export default function PricingPage() {
         </motion.div>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="text-[15px] text-white/50 font-light">
-          무료로 시작하고, 비즈니스가 성장하면 업그레이드하세요
+          성공하는 디자이너의 비밀, 당신의 비즈니스 규모에 맞는 플랜을 선택하세요
         </motion.p>
       </div>
 
@@ -182,11 +184,18 @@ export default function PricingPage() {
                 </div>
               ))}
               {plan.limitations.map((limitation, j) => (
-                <div key={j} className="flex items-center gap-3 text-[13px] font-light">
+                <div key={`lim-${j}`} className="flex items-center gap-3 text-[13px] font-light">
                   <span className="text-white/20 text-[11px]">&#10005;</span>
-                  <span className="text-white/30">{limitation}</span>
+                  <span className="text-white/30 line-through">{limitation}</span>
                 </div>
               ))}
+              {plan.recommendation && (
+                <div className="mt-4 pt-4 border-t border-gold/10">
+                  <span className="inline-block px-3 py-1.5 bg-gold/10 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase">
+                    {plan.recommendation}
+                  </span>
+                </div>
+              )}
             </div>
 
             <button
