@@ -58,12 +58,13 @@ export default function LandingPage() {
           </motion.p>
           <motion.h1 custom={1} initial="hidden" animate="visible" variants={fadeUp}
             className="font-heading text-[clamp(36px,8vw,72px)] font-light leading-[1.2] sm:leading-[1.25] tracking-tight mb-6 sm:mb-8 px-2">
-            디자이너를 위한<br /><em className="italic text-gold-light">HairFlow</em>
+            AI를 통해 헤어디자이너의<br />고민을 해결합니다.,<br /><em className="italic text-gold-light">HairFlow</em>
           </motion.h1>
           <motion.p custom={2} initial="hidden" animate="visible" variants={fadeUp}
             className="text-[clamp(15px,3.5vw,18px)] font-light text-white/70 leading-[1.7] sm:leading-[1.8] max-w-[600px] mx-auto px-2">
-            AI 시술 레시피부터 미래 예측까지,<br className="hidden sm:block" />
-            확신 있는 상담을 시작하세요.
+            감에 의존하던 시대는 끝났습니다.<br className="hidden sm:block" />
+            정밀 시각 분석으로 고객의 모발을 읽고,<br className="hidden sm:block" />
+            오차 없는 최적의 시술 레시피를 제안합니다.
           </motion.p>
           <motion.div custom={3} initial="hidden" animate="visible" variants={fadeUp} className="mt-10 sm:mt-12">
             <Link href="/login"
