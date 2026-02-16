@@ -170,7 +170,14 @@ export default function PricingPage() {
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px]">사용 중</Badge>
               )}
             </div>
-            <p className="text-[13px] text-white/50 font-light mb-6">{plan.description}</p>
+            <p className="text-[13px] text-white/50 font-light mb-4">{plan.description}</p>
+            {plan.recommendation && (
+              <div className="mb-6">
+                <span className="inline-block px-3 py-1.5 bg-gold/10 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase">
+                  {plan.recommendation}
+                </span>
+              </div>
+            )}
             <div className="mb-8 pb-8 border-b border-gold/10">
               <span className="font-heading text-[36px] font-light text-white">{plan.priceLabel}</span>
               <span className="text-[14px] text-white/40 font-light">{plan.period}</span>
@@ -189,13 +196,6 @@ export default function PricingPage() {
                   <span className="text-white/30 line-through">{limitation}</span>
                 </div>
               ))}
-              {plan.recommendation && (
-                <div className="mt-4 pt-4 border-t border-gold/10">
-                  <span className="inline-block px-3 py-1.5 bg-gold/10 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase">
-                    {plan.recommendation}
-                  </span>
-                </div>
-              )}
             </div>
 
             <button
