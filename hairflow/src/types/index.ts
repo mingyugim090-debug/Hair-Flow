@@ -80,6 +80,10 @@ export interface UserProfile {
   lastUsageDate: string | null;
   portfolioWorks: PortfolioWork[];
   createdAt: string;
+  // Subscription fields
+  subscriptionEnd: string | null;
+  isCanceled: boolean;
+  remainingUsage: number;
 }
 
 // 고객

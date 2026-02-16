@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 결제 금액 검증
-    const expectedAmount = planId === 'enterprise' ? 99000 : 19900;
+    const expectedAmount = planId === 'enterprise' ? 199000 : 19900;
     if (amount !== expectedAmount) {
       console.error('Payment amount mismatch:', { userId: user.id, planId, expected: expectedAmount, received: amount });
       return NextResponse.json<ApiResponse<null>>({
@@ -73,6 +73,8 @@ export async function POST(request: NextRequest) {
 
     // 결제 성공 → DB 업데이트
     const supabase = await createClient();
+    const now = new Date();
+    const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     // 구독 정보 저장
     const { error: subscriptionError } = await supabase.from('subscriptions').insert({
@@ -82,8 +84,13 @@ export async function POST(request: NextRequest) {
       toss_order_id: orderId,
       toss_payment_key: paymentKey,
       amount,
-      started_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      started_at: now.toISOString(),
+      expires_at: periodEnd.toISOString(),
+      current_period_end: periodEnd.toISOString(),
+      next_billing_date: periodEnd.toISOString(),
+      customer_key: body.customerKey || `customer_${user.id}`,
+      is_canceled: false,
+      retry_count: 0,
     });
 
     if (subscriptionError) {

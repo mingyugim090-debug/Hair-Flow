@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-scroll-area": "^1.0.5",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "@tosspayments/tosspayments-sdk": "^2.5.0",
@@ -21,9 +22,8 @@
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0",
-    "sonner": "^1.4.0",
-    "@radix-ui/react-scroll-area": "^1.0.5"
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

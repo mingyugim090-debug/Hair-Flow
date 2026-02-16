@@ -107,7 +107,8 @@ export async function GET(request: NextRequest) {
                 specialties: item.designer.specialties,
                 // 기타 필수 필드 더미 처리
                 shopName: null, instagramId: null, bio: null, isOnboarded: true,
-                plan: 'basic', dailyUsage: 0, lastUsageDate: null, portfolioWorks: [], createdAt: ''
+                plan: 'basic', dailyUsage: 0, lastUsageDate: null, portfolioWorks: [], createdAt: '',
+                subscriptionEnd: null, isCanceled: false, remainingUsage: 0
             }
         }));
 

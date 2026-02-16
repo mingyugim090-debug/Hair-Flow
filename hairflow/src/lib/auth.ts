@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getRemainingUsage } from '@/lib/subscription';
 import type { UserProfile } from '@/types';
 
 interface AuthResult {
@@ -42,7 +43,7 @@ export async function getAuthUser(): Promise<AuthResult> {
     }
 
     return {
-      user: mapProfile(newProfile),
+      user: mapProfile(newProfile, null),
       error: null,
     };
   }
@@ -84,10 +85,24 @@ export async function getAuthUser(): Promise<AuthResult> {
     userProfile = { ...userProfile, organization_name: orgName };
   }
 
-  return { user: mapProfile(userProfile), error: null };
+  // Fetch active subscription
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('current_period_end, is_canceled, status')
+    .eq('user_id', user.id)
+    .in('status', ['active', 'canceled'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  return { user: mapProfile(userProfile, subscription), error: null };
 }
 
-function mapProfile(row: Record<string, unknown>): UserProfile {
+function mapProfile(row: Record<string, unknown>, subscription: Record<string, unknown> | null): UserProfile {
+  const plan = (row.plan as 'free' | 'basic' | 'enterprise') ?? 'free';
+  const dailyUsage = (row.daily_usage as number) ?? 0;
+  const lastUsageDate = (row.last_usage_date as string) ?? null;
+
   return {
     id: row.id as string,
     email: row.email as string,
@@ -100,11 +115,15 @@ function mapProfile(row: Record<string, unknown>): UserProfile {
     specialties: (row.specialties as string[]) ?? [],
     bio: (row.bio as string) ?? null,
     isOnboarded: (row.is_onboarded as boolean) ?? false,
-    plan: (row.plan as 'free' | 'basic' | 'enterprise') ?? 'free',
-    dailyUsage: (row.daily_usage as number) ?? 0,
-    lastUsageDate: (row.last_usage_date as string) ?? null,
+    plan,
+    dailyUsage,
+    lastUsageDate,
     portfolioWorks: (row.portfolio_works as { url: string; caption: string; createdAt: string }[]) ?? [],
     createdAt: row.created_at as string,
+    // Subscription fields
+    subscriptionEnd: (subscription?.current_period_end as string) ?? null,
+    isCanceled: (subscription?.is_canceled as boolean) ?? false,
+    remainingUsage: getRemainingUsage(dailyUsage, lastUsageDate, plan),
   };
 }
 

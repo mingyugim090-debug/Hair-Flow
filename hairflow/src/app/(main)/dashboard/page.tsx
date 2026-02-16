@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
+import { getDDayText, getRemainingUsage } from "@/lib/subscription";
 import type { Customer } from "@/types";
 
 interface UserData {
@@ -14,6 +15,9 @@ interface UserData {
   plan: string;
   dailyUsage: number;
   lastUsageDate: string | null;
+  subscriptionEnd: string | null;
+  isCanceled: boolean;
+  remainingUsage: number;
 }
 
 interface RecentCustomer extends Customer {
@@ -56,15 +60,29 @@ export default function DashboardPage() {
         .eq("id", user.id)
         .single();
 
+      // 구독 정보 조회
+      const { data: subscription } = await supabase
+        .from("subscriptions")
+        .select("current_period_end, is_canceled, status")
+        .eq("user_id", user.id)
+        .in("status", ["active", "canceled"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
       if (profile) {
         const today = new Date().toISOString().split("T")[0];
         const isToday = profile.last_usage_date === today;
+        const currentUsage = isToday ? (profile.daily_usage ?? 0) : 0;
         setUserData({
           name: profile.name ?? user.user_metadata?.full_name ?? null,
           designerName: profile.designer_name ?? null,
           plan: profile.plan ?? "free",
-          dailyUsage: isToday ? (profile.daily_usage ?? 0) : 0,
+          dailyUsage: currentUsage,
           lastUsageDate: profile.last_usage_date,
+          subscriptionEnd: subscription?.current_period_end ?? null,
+          isCanceled: subscription?.is_canceled ?? false,
+          remainingUsage: getRemainingUsage(currentUsage, profile.last_usage_date, profile.plan ?? "free"),
         });
 
         // Enterprise 플랜인 경우, 대시보드 통계 가져오기
@@ -273,7 +291,7 @@ export default function DashboardPage() {
       {/* Usage Stats & Enterprise Dashboard */}
       <div className={userData?.plan === "enterprise" ? "grid lg:grid-cols-2 gap-6" : ""}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">오늘의 사용량</h2>
+          <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-6">이용 현황</h2>
           <div className="glass-luxury border border-white/10 p-6 sm:p-8 shadow-luxury hover-gold-glow">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -288,19 +306,37 @@ export default function DashboardPage() {
                   {userData?.plan === "free" && (
                     <Badge className="bg-white/10 text-white/50 border-white/20 text-[10px] tracking-[1px]">FREE</Badge>
                   )}
+                  {userData?.isCanceled && (
+                    <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px] tracking-[1px]">해지 예정</Badge>
+                  )}
                 </div>
-                {dailyLimit ? (
-                  <span className="font-heading text-[36px] font-light text-white">{usage} / {dailyLimit}<span className="text-[16px] text-white/40 ml-1">건</span></span>
+                {userData?.plan === "free" ? (
+                  <div>
+                    <span className="font-heading text-[36px] font-light text-white">
+                      {userData.remainingUsage}<span className="text-[16px] text-white/40 ml-1">/ 3회 남음</span>
+                    </span>
+                    {userData.remainingUsage === 0 && (
+                      <p className="text-red-400 text-[12px] mt-1">오늘 이용 가능 횟수를 모두 사용했습니다</p>
+                    )}
+                  </div>
                 ) : (
                   <span className="font-heading text-[36px] font-light text-gold-light">Unlimited</span>
                 )}
               </div>
-              {userData?.plan === "free" && (
-                <Link href="/pricing"
-                  className="px-6 py-3 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500">
-                  업그레이드
-                </Link>
-              )}
+              <div className="text-right">
+                {userData?.plan !== "free" && userData?.subscriptionEnd && (
+                  <div className="mb-2">
+                    <span className="font-heading text-[28px] font-light text-gold">{getDDayText(userData.subscriptionEnd)}</span>
+                    <p className="text-[11px] text-white/30 mt-1">다음 결제일</p>
+                  </div>
+                )}
+                {userData?.plan === "free" && (
+                  <Link href="/pricing"
+                    className="px-6 py-3 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500">
+                    업그레이드
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* 플랜별 기능 표시 */}
@@ -313,7 +349,7 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            {dailyLimit && (
+            {userData?.plan === "free" && (
               <div className="mt-6 h-px bg-white/10 relative overflow-hidden">
                 <div
                   className="absolute top-0 left-0 h-full bg-gradient-to-r from-gold to-gold-light transition-all duration-500"

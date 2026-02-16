@@ -63,6 +63,10 @@ const plans = [
 export default function PricingPage() {
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const [loading, setLoading] = useState<string | null>(null);
+  const [isCanceled, setIsCanceled] = useState(false);
+  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
+  const [cancelMessage, setCancelMessage] = useState<string | null>(null);
+  const [canceling, setCanceling] = useState(false);
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -71,6 +75,21 @@ export default function PricingPage() {
       if (user) {
         const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
         if (profile?.plan) setCurrentPlan(profile.plan);
+
+        // 구독 상태 조회
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("current_period_end, is_canceled, status")
+          .eq("user_id", user.id)
+          .in("status", ["active", "canceled"])
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (subscription) {
+          setIsCanceled(subscription.is_canceled ?? false);
+          setSubscriptionEnd(subscription.current_period_end ?? null);
+        }
       }
     };
     fetchPlan();
@@ -111,6 +130,27 @@ export default function PricingPage() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!confirm("정말 구독을 해지하시겠습니까?\n해지 후에도 현재 이용 기간이 끝날 때까지 기능을 사용하실 수 있습니다.")) return;
+
+    setCanceling(true);
+    try {
+      const res = await fetch("/api/payment/cancel", { method: "POST" });
+      const result = await res.json();
+
+      if (result.data) {
+        setIsCanceled(true);
+        setCancelMessage(result.data.message);
+      } else {
+        alert(result.error?.message || "구독 해지에 실패했습니다.");
+      }
+    } catch {
+      alert("구독 해지 중 오류가 발생했습니다.");
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const getButtonText = (planId: string) => {
     if (planId === currentPlan) return "현재 플랜";
     if (planId === "free") return "Free 플랜";
@@ -143,6 +183,22 @@ export default function PricingPage() {
         </motion.p>
       </div>
 
+      {/* Cancel Message */}
+      {isCanceled && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto bg-red-500/10 border border-red-500/20 p-4 text-center"
+        >
+          <p className="text-red-400 text-[13px]">
+            구독 해지가 예정되어 있습니다. {cancelMessage || (subscriptionEnd && (() => {
+              const end = new Date(subscriptionEnd);
+              return `${end.getMonth() + 1}월 ${end.getDate()}일까지 이용 가능합니다`;
+            })())}
+          </p>
+        </motion.div>
+      )}
+
       {/* Plans */}
       <div className="grid sm:grid-cols-3 gap-px max-w-4xl mx-auto">
         {plans.map((plan, i) => (
@@ -168,6 +224,9 @@ export default function PricingPage() {
               )}
               {plan.id === currentPlan && plan.id !== "free" && (
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px]">사용 중</Badge>
+              )}
+              {plan.id === currentPlan && isCanceled && (
+                <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px]">해지 예정</Badge>
               )}
             </div>
             <p className="text-[13px] text-white/50 font-light mb-4">{plan.description}</p>
@@ -211,6 +270,24 @@ export default function PricingPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* 구독 해지 */}
+      {currentPlan !== "free" && !isCanceled && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center pt-4"
+        >
+          <button
+            onClick={handleCancelSubscription}
+            disabled={canceling}
+            className="text-white/30 text-[12px] tracking-[1px] hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            {canceling ? "처리 중..." : "구독 해지"}
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }
