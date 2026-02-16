@@ -149,9 +149,9 @@ export default function DashboardPage() {
 
   // 플랜별 주요 기능 정의
   const planFeatures = {
-    free: ["하루 3건 AI 분석", "AI 시술 레시피", "AI 미래 타임라인"],
-    basic: ["무제한 AI 분석", "시술 히스토리 무제한", "약제 브랜드 DB 제공"],
-    enterprise: ["Basic 모든 기능", "디자이너 10명 연동", "매장 분석 리포트"],
+    free: ["하루 3회 이용 가능", "기본 AI 시술 레시피", "AI 모발 미래 타임라인"],
+    basic: ["모든 기능 무제한 이용", "시술 히스토리 무제한 저장", "8주 미래 변화 정밀 분석"],
+    enterprise: ["Basic 모든 기능", "디자이너 무제한 연동", "매장 분석 리포트"],
   };
 
   const currentPlanFeatures = userData?.plan === "enterprise"

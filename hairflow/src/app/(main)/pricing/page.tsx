@@ -12,9 +12,14 @@ const plans = [
     price: 0,
     priceLabel: "0원",
     period: "",
-    description: "HairFlow를 체험해보세요",
-    features: ["하루 3건 AI 분석", "AI 시술 레시피", "AI 미래 타임라인", "기본 레시피 카드"],
-    limitations: ["분석 히스토리 미제공", "약제 브랜드 DB 미제공"],
+    description: "HairFlow의 핵심 기능을 가볍게 체험해보세요.",
+    features: [
+      "하루 3회 이용 가능 (AI 분석 및 레시피 생성 포함)",
+      "기본 AI 시술 레시피 제공",
+      "AI 모발 미래 타임라인 확인",
+      "기본 레시피 카드 저장 기능",
+    ],
+    limitations: [],
     highlight: false,
     badge: null,
   },
@@ -24,12 +29,11 @@ const plans = [
     price: 19900,
     priceLabel: "19,900원",
     period: "/월",
-    description: "개인 디자이너에게 추천",
+    description: "제한 없는 기능 활용으로 시술의 완성도를 높이세요.",
     features: [
-      "무제한 AI 시술 레시피 생성",
-      "8주 미래 변화 타임라인 분석",
-      "시술 히스토리 무제한 저장",
-      "표준 약제 브랜드 DB 제공"
+      "모든 기능 무제한 이용 가능",
+      "시술 히스토리 무제한 저장 및 관리",
+      "8주 미래 변화 타임라인 정밀 분석",
     ],
     limitations: [],
     highlight: false,
@@ -38,16 +42,15 @@ const plans = [
   {
     id: "enterprise",
     name: "Enterprise",
-    price: 99000,
-    priceLabel: "99,000원",
+    price: 199000,
+    priceLabel: "199,000원",
     period: "/월",
-    description: "매장/팀 단위 추천",
+    description: "매장 관리의 효율성을 극대화하고 팀 전체의 성장을 지원합니다.",
     features: [
-      "Basic의 모든 기능 포함",
-      "최대 10명의 디자이너 계정 연동",
-      "매장 전체 매출 분석 리포트 대시보드",
-      "매장 전용 맞춤형 약제/브랜드 DB 커스텀",
-      "1:1 전담 고객 지원 및 우선 처리 권한"
+      "디자이너 계정 무제한 연동 가능",
+      "초대된 모든 디자이너에게 Basic 플랜 기능 제공",
+      "매장 전체 데이터 분석 리포트 및 통합 대시보드",
+      "매장 데이터 통합 관리 시스템",
     ],
     limitations: [],
     highlight: true,
@@ -147,16 +150,16 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             className={`p-8 border text-center flex flex-col ${plan.highlight
-                ? "border-gold bg-charcoal/80 backdrop-blur-sm"
-                : "border-gold/15 bg-charcoal/60 backdrop-blur-sm"
+              ? "border-gold bg-charcoal/80 backdrop-blur-sm"
+              : "border-gold/15 bg-charcoal/60 backdrop-blur-sm"
               }`}
           >
             <div className="flex items-center justify-center gap-2 mb-4">
               <h3 className="font-heading text-[24px] font-normal text-white">{plan.name}</h3>
               {plan.badge && plan.id !== currentPlan && (
                 <Badge className={`text-[10px] tracking-[1px] ${plan.highlight
-                    ? "bg-gold/30 text-gold border-gold/40"
-                    : "bg-gold/20 text-gold border-gold/30"
+                  ? "bg-gold/30 text-gold border-gold/40"
+                  : "bg-gold/20 text-gold border-gold/30"
                   }`}>
                   {plan.badge}
                 </Badge>
@@ -190,8 +193,8 @@ export default function PricingPage() {
               onClick={() => handleSubscribe(plan.id)}
               disabled={isButtonDisabled(plan.id)}
               className={`w-full py-4 text-[12px] tracking-[3px] uppercase transition-all duration-500 shadow-luxury-sm hover:shadow-luxury ${plan.highlight
-                  ? "border border-gold text-gold hover:bg-gold hover:text-charcoal disabled:opacity-40 disabled:cursor-not-allowed"
-                  : "border border-gold/30 text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                ? "border border-gold text-gold hover:bg-gold hover:text-charcoal disabled:opacity-40 disabled:cursor-not-allowed"
+                : "border border-gold/30 text-gold hover:bg-gold/10 disabled:opacity-40 disabled:cursor-not-allowed"
                 }`}
             >
               {loading === plan.id ? "처리 중..." : getButtonText(plan.id)}
