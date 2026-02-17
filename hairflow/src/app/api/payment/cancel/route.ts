@@ -74,7 +74,7 @@ export async function POST() {
                 data: null,
                 error: {
                     code: 'UPDATE_FAILED',
-                    message: `해지 처리 실패: ${updateError.message || updateError.code || '알 수 없는 오류'}`
+                    message: '구독 해지 처리에 실패했습니다. 잠시 후 다시 시도해주세요.'
                 },
             }, { status: 500 });
         }
@@ -91,10 +91,9 @@ export async function POST() {
         });
     } catch (error) {
         console.error('Cancel subscription error:', error);
-        const errMsg = error instanceof Error ? error.message : '알 수 없는 오류';
         return NextResponse.json<ApiResponse<null>>({
             data: null,
-            error: { code: 'CANCEL_ERROR', message: `구독 해지 처리 중 오류: ${errMsg}` },
+            error: { code: 'CANCEL_ERROR', message: '구독 해지 처리 중 오류가 발생했습니다.' },
         }, { status: 500 });
     }
 }
