@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 
@@ -67,6 +67,7 @@ export default function PricingPage() {
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
   const [canceling, setCanceling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -131,9 +132,8 @@ export default function PricingPage() {
   };
 
   const handleCancelSubscription = async () => {
-    if (!confirm("정말 구독을 해지하시겠습니까?\n해지 후에도 현재 이용 기간이 끝날 때까지 기능을 사용하실 수 있습니다.")) return;
-
     setCanceling(true);
+    setShowCancelConfirm(false);
     try {
       const res = await fetch("/api/payment/cancel", { method: "POST" });
       const result = await res.json();
@@ -280,7 +280,7 @@ export default function PricingPage() {
           className="text-center pt-4"
         >
           <button
-            onClick={handleCancelSubscription}
+            onClick={() => setShowCancelConfirm(true)}
             disabled={canceling}
             className="text-white/30 text-[12px] tracking-[1px] hover:text-red-400 transition-colors disabled:opacity-50"
           >
@@ -288,6 +288,48 @@ export default function PricingPage() {
           </button>
         </motion.div>
       )}
+      {/* 구독 해지 확인 모달 */}
+      <AnimatePresence>
+        {showCancelConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowCancelConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-charcoal border border-gold/20 p-8 max-w-sm w-full mx-4 shadow-luxury"
+            >
+              <h3 className="font-heading text-[20px] font-light text-white mb-3">
+                구독을 해지하시겠습니까?
+              </h3>
+              <p className="text-[13px] text-white/50 font-light leading-relaxed mb-8">
+                해지 후에도 현재 이용 기간이 끝날 때까지 모든 기능을 사용하실 수 있습니다.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="flex-1 py-3 border border-white/10 text-white/40 text-[12px] tracking-[2px] uppercase hover:border-white/20 transition-all"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleCancelSubscription}
+                  disabled={canceling}
+                  className="flex-1 py-3 border border-red-400/30 text-red-400 text-[12px] tracking-[2px] uppercase hover:bg-red-400/10 transition-all disabled:opacity-50"
+                >
+                  {canceling ? "처리 중..." : "해지하기"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
