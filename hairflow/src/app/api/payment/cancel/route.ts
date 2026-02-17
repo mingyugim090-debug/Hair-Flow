@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getExpiryDateText } from '@/lib/subscription';
 import type { ApiResponse } from '@/types';
 
@@ -22,7 +22,7 @@ export async function POST() {
             }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         // 가장 최근 구독 조회 (status 컬럼 유무에 관계없이 조회)
         const { data: subscription, error: subError } = await supabase
