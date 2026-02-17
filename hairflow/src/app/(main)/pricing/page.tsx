@@ -68,6 +68,7 @@ export default function PricingPage() {
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
   const [canceling, setCanceling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelResult, setCancelResult] = useState<{ type: 'success' | 'error'; message: string; expiryDate?: string } | null>(null);
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -140,12 +141,25 @@ export default function PricingPage() {
 
       if (result.data) {
         setIsCanceled(true);
+        const expiryDate = result.data.expiryDate;
+        setSubscriptionEnd(expiryDate);
         setCancelMessage(result.data.message);
+        setCancelResult({
+          type: 'success',
+          message: result.data.message,
+          expiryDate,
+        });
       } else {
-        alert(result.error?.message || "구독 해지에 실패했습니다.");
+        setCancelResult({
+          type: 'error',
+          message: result.error?.message || "구독 해지에 실패했습니다.",
+        });
       }
     } catch {
-      alert("구독 해지 중 오류가 발생했습니다.");
+      setCancelResult({
+        type: 'error',
+        message: "구독 해지 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      });
     } finally {
       setCanceling(false);
     }
@@ -292,6 +306,7 @@ export default function PricingPage() {
       <AnimatePresence>
         {showCancelConfirm && (
           <motion.div
+            key="cancel-confirm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -308,8 +323,11 @@ export default function PricingPage() {
               <h3 className="font-heading text-[20px] font-light text-white mb-3">
                 구독을 해지하시겠습니까?
               </h3>
-              <p className="text-[13px] text-white/50 font-light leading-relaxed mb-8">
+              <p className="text-[13px] text-white/50 font-light leading-relaxed mb-3">
                 해지 후에도 현재 이용 기간이 끝날 때까지 모든 기능을 사용하실 수 있습니다.
+              </p>
+              <p className="text-[13px] text-white/40 font-light leading-relaxed mb-8">
+                이용 기간 종료 후에는 Free 플랜으로 자동 전환되며, 유료 기능이 제한됩니다.
               </p>
               <div className="flex gap-3">
                 <button
@@ -326,6 +344,86 @@ export default function PricingPage() {
                   {canceling ? "처리 중..." : "해지하기"}
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 구독 해지 결과 모달 */}
+      <AnimatePresence>
+        {cancelResult && (
+          <motion.div
+            key="cancel-result"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setCancelResult(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-charcoal border border-gold/20 p-8 max-w-sm w-full mx-4 shadow-luxury"
+            >
+              {cancelResult.type === 'success' ? (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h3 className="font-heading text-[20px] font-light text-white">
+                      해지 완료
+                    </h3>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-5 mb-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] text-white/40 font-light">현재 플랜</span>
+                      <span className="text-[13px] text-gold font-light">{currentPlan === 'enterprise' ? 'Enterprise' : 'Basic'}</span>
+                    </div>
+                    {cancelResult.expiryDate && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] text-white/40 font-light">이용 가능일</span>
+                        <span className="text-[13px] text-white/70 font-light">
+                          {new Date(cancelResult.expiryDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}까지
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] text-white/40 font-light">이후 플랜</span>
+                      <span className="text-[13px] text-white/50 font-light">Free (무료)</span>
+                    </div>
+                  </div>
+                  <p className="text-[12px] text-white/40 font-light leading-relaxed mb-6">
+                    이용 기간 종료 후 자동으로 Free 플랜으로 전환됩니다. 유료 기능(무제한 이용, 시술 히스토리 등)은 이용 기간 종료 후 사용할 수 없습니다.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                    <h3 className="font-heading text-[20px] font-light text-white">
+                      해지 실패
+                    </h3>
+                  </div>
+                  <p className="text-[13px] text-white/50 font-light leading-relaxed mb-6">
+                    {cancelResult.message}
+                  </p>
+                </>
+              )}
+              <button
+                onClick={() => setCancelResult(null)}
+                className="w-full py-3 border border-gold/30 text-gold text-[12px] tracking-[2px] uppercase hover:bg-gold/10 transition-all"
+              >
+                확인
+              </button>
             </motion.div>
           </motion.div>
         )}
