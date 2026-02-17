@@ -165,11 +165,11 @@ export default function DashboardPage() {
   const usage = userData?.dailyUsage ?? 0;
   const progressPercent = dailyLimit ? Math.min(100, (usage / dailyLimit) * 100) : 0;
 
-  // 플랜별 주요 기능 정의
+  // 플랜별 주요 기능 정의 (요금제 페이지와 동기화)
   const planFeatures = {
-    free: ["하루 3회 이용 가능", "기본 AI 시술 레시피", "AI 모발 미래 타임라인"],
-    basic: ["모든 기능 무제한 이용", "시술 히스토리 무제한 저장", "8주 미래 변화 정밀 분석"],
-    enterprise: ["Basic 모든 기능", "디자이너 무제한 연동", "매장 분석 리포트"],
+    free: ["하루 3회 이용 가능", "AI 종합분석", "AI 스타일 추천", "타임라인 예측"],
+    basic: ["모든 기능 무제한", "고객 관리 무제한", "시술 히스토리 관리"],
+    enterprise: ["매장 디자이너 무제한 연동 가능", "초대된 모든 디자이너에게 Basic 플랜 기능 제공", "매장 전체 디자이너별 고객 데이터 통합 관리 및 분석 시스템"],
   };
 
   const currentPlanFeatures = userData?.plan === "enterprise"

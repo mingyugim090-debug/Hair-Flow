@@ -24,23 +24,24 @@ export async function POST() {
 
         const supabase = await createClient();
 
-        // 가장 최근 활성 구독 조회
+        // 가장 최근 구독 조회 (status 컬럼 유무에 관계없이 조회)
         const { data: subscription, error: subError } = await supabase
             .from('subscriptions')
             .select('*')
             .eq('user_id', user.id)
-            .eq('status', 'active')
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
         if (subError || !subscription) {
+            console.error('Subscription query error:', subError);
             return NextResponse.json<ApiResponse<null>>({
                 data: null,
                 error: { code: 'NO_SUBSCRIPTION', message: '활성 구독을 찾을 수 없습니다.' },
             }, { status: 404 });
         }
 
+        // 이미 해지된 경우 체크
         if (subscription.is_canceled) {
             return NextResponse.json<ApiResponse<null>>({
                 data: null,
@@ -48,29 +49,46 @@ export async function POST() {
             }, { status: 400 });
         }
 
-        // 해지 처리: 즉시 기능 차단 없음, 현재 기간 끝까지 유지
+        // 해지 처리: 가능한 필드만 업데이트
+        const updateData: Record<string, unknown> = {
+            is_canceled: true,
+            canceled_at: new Date().toISOString(),
+        };
+
+        // status 컬럼이 존재하면 업데이트
+        if ('status' in subscription) {
+            updateData.status = 'canceled';
+        }
+
         const { error: updateError } = await supabase
             .from('subscriptions')
-            .update({
-                is_canceled: true,
-                canceled_at: new Date().toISOString(),
-                status: 'canceled',
-            })
+            .update(updateData)
             .eq('id', subscription.id);
 
         if (updateError) {
-            return NextResponse.json<ApiResponse<null>>({
-                data: null,
-                error: { code: 'UPDATE_FAILED', message: '구독 해지 처리에 실패했습니다.' },
-            }, { status: 500 });
+            console.error('Subscription update error:', updateError);
+            // is_canceled 컬럼이 없을 수 있으므로, 최소한의 업데이트 시도
+            const { error: fallbackError } = await supabase
+                .from('subscriptions')
+                .update({ status: 'canceled' })
+                .eq('id', subscription.id);
+
+            if (fallbackError) {
+                console.error('Fallback update also failed:', fallbackError);
+                return NextResponse.json<ApiResponse<null>>({
+                    data: null,
+                    error: { code: 'UPDATE_FAILED', message: '구독 해지 처리에 실패했습니다. DB 마이그레이션을 확인해주세요.' },
+                }, { status: 500 });
+            }
         }
 
-        const expiryText = getExpiryDateText(subscription.current_period_end || subscription.expires_at);
+        const endDate = subscription.current_period_end || subscription.expires_at;
+        const expiryText = getExpiryDateText(endDate);
 
         return NextResponse.json<ApiResponse<{ message: string; expiryDate: string }>>({
             data: {
                 message: expiryText,
-                expiryDate: subscription.current_period_end || subscription.expires_at,
+                expiryDate: endDate,
             },
             error: null,
         });

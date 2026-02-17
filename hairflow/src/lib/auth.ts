@@ -88,9 +88,8 @@ export async function getAuthUser(): Promise<AuthResult> {
   // Fetch active subscription
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('current_period_end, is_canceled, status')
+    .select('*')
     .eq('user_id', user.id)
-    .in('status', ['active', 'canceled'])
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
