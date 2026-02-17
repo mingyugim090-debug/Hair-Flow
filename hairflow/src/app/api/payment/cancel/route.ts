@@ -22,9 +22,18 @@ export async function POST() {
             }, { status: 400 });
         }
 
+        // 서비스 롤 키 확인
+        if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            console.error('SUPABASE_SERVICE_ROLE_KEY is not set');
+            return NextResponse.json<ApiResponse<null>>({
+                data: null,
+                error: { code: 'CONFIG_ERROR', message: '서버 설정 오류입니다. 관리자에게 문의하세요.' },
+            }, { status: 500 });
+        }
+
         const supabase = createAdminClient();
 
-        // 가장 최근 구독 조회 (status 컬럼 유무에 관계없이 조회)
+        // 가장 최근 구독 조회
         const { data: subscription, error: subError } = await supabase
             .from('subscriptions')
             .select('*')
@@ -49,37 +58,25 @@ export async function POST() {
             }, { status: 400 });
         }
 
-        // 해지 처리: 가능한 필드만 업데이트
-        const updateData: Record<string, unknown> = {
-            is_canceled: true,
-            canceled_at: new Date().toISOString(),
-        };
-
-        // status 컬럼이 존재하면 업데이트
-        if ('status' in subscription) {
-            updateData.status = 'canceled';
-        }
-
+        // 해지 처리
         const { error: updateError } = await supabase
             .from('subscriptions')
-            .update(updateData)
+            .update({
+                is_canceled: true,
+                canceled_at: new Date().toISOString(),
+                status: 'canceled',
+            })
             .eq('id', subscription.id);
 
         if (updateError) {
-            console.error('Subscription update error:', updateError);
-            // is_canceled 컬럼이 없을 수 있으므로, 최소한의 업데이트 시도
-            const { error: fallbackError } = await supabase
-                .from('subscriptions')
-                .update({ status: 'canceled' })
-                .eq('id', subscription.id);
-
-            if (fallbackError) {
-                console.error('Fallback update also failed:', fallbackError);
-                return NextResponse.json<ApiResponse<null>>({
-                    data: null,
-                    error: { code: 'UPDATE_FAILED', message: '구독 해지 처리에 실패했습니다. DB 마이그레이션을 확인해주세요.' },
-                }, { status: 500 });
-            }
+            console.error('Subscription update error:', JSON.stringify(updateError));
+            return NextResponse.json<ApiResponse<null>>({
+                data: null,
+                error: {
+                    code: 'UPDATE_FAILED',
+                    message: `해지 처리 실패: ${updateError.message || updateError.code || '알 수 없는 오류'}`
+                },
+            }, { status: 500 });
         }
 
         const endDate = subscription.current_period_end || subscription.expires_at;
@@ -94,9 +91,11 @@ export async function POST() {
         });
     } catch (error) {
         console.error('Cancel subscription error:', error);
+        const errMsg = error instanceof Error ? error.message : '알 수 없는 오류';
         return NextResponse.json<ApiResponse<null>>({
             data: null,
-            error: { code: 'CANCEL_ERROR', message: '구독 해지 처리 중 오류가 발생했습니다.' },
+            error: { code: 'CANCEL_ERROR', message: `구독 해지 처리 중 오류: ${errMsg}` },
         }, { status: 500 });
     }
 }
+
