@@ -222,7 +222,7 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `5장의 사진(앞면, 뒷면, �
 
 // AI 스타일 추천 프롬프트
 export const STYLE_RECOMMENDATION_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너입니다.
-고객의 실제 사진과 5면 분석 결과를 바탕으로, 얼굴형·두상·모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 3-4가지를 추천합니다.
+고객의 실제 사진과 5면 분석 결과를 바탕으로, 얼굴형·두상·모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 2가지를 추천합니다.
 
 ★ imagePrompt 핵심 규칙 (매우 중요):
 imagePrompt는 고객 사진에 헤어스타일을 직접 합성하는 AI(image-to-image)에 사용됩니다.
@@ -241,7 +241,7 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
 모발 밀도: ${analysisResult.hairDensityDistribution.overallPattern}
 손상도: ${analysisResult.damageAnalysis.overallLevel}
 
-이 고객에게 가장 잘 어울리는 헤어 스타일 3-4가지를 추천해주세요.
+이 고객에게 가장 잘 어울리는 헤어 스타일 2가지를 추천해주세요.
 
 ★ imagePrompt 작성 규칙 (매우 중요):
 - imagePrompt는 고객 사진에 헤어스타일을 합성하는 AI에 사용됩니다 (얼굴은 원본 사진에서 유지됨)
