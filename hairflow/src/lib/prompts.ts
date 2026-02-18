@@ -224,13 +224,12 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `5장의 사진(앞면, 뒷면, �
 export const STYLE_RECOMMENDATION_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너입니다.
 고객의 실제 사진과 5면 분석 결과를 바탕으로, 얼굴형·두상·모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 3-4가지를 추천합니다.
 
-★ 핵심 규칙 (반드시 준수):
-각 스타일의 imagePrompt는 고객의 실제 외모를 기반으로 작성해야 합니다.
-사진에서 고객의 성별, 인종, 나이대, 피부톤, 얼굴형을 직접 파악하여 imagePrompt 맨 앞에 명시하세요.
-예: "Korean male in his 20s, round face, fair skin, dark eyes, with [헤어스타일 묘사]..."
-또는: "Asian female in her 30s, oval face, warm skin tone, with [헤어스타일 묘사]..."
-
-imagePrompt는 반드시 영어로 작성하고, 고객 외모 특징 + 모발의 길이/질감/컬러/볼륨/스타일링을 구체적으로 묘사하세요.
+★ imagePrompt 핵심 규칙 (매우 중요):
+imagePrompt는 고객 사진에 헤어스타일을 직접 합성하는 AI(image-to-image)에 사용됩니다.
+따라서 imagePrompt에는 헤어스타일만 영어로 묘사하세요. 인물 특징(성별, 인종, 피부톤, 얼굴형)은 절대 포함하지 마세요.
+모발의 길이, 질감, 컬러, 볼륨, 레이어, 컷 방식, 스타일링을 구체적으로 묘사하세요.
+예: "Textured medium-length layered cut, natural dark brown hair, soft waves at ends, side-swept bangs, slight undercut on sides, casual natural finish"
+예: "Short two-block cut with undercut sides, slightly longer top, dark black hair, clean and polished finish, light hold product"
 
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
 
@@ -245,10 +244,11 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
 이 고객에게 가장 잘 어울리는 헤어 스타일 3-4가지를 추천해주세요.
 
 ★ imagePrompt 작성 규칙 (매우 중요):
-- 사진에서 확인한 고객의 성별, 인종, 나이대, 피부톤을 imagePrompt 맨 앞에 반드시 포함하세요
-- 예: "Ultra-realistic portrait of a Korean male in his 20s, round face, fair skin, [헤어스타일 묘사], professional salon lighting..."
-- 고객과 다른 인종/성별의 인물이 생성되지 않도록, 외모 특징을 구체적으로 명시하세요
-- 그 다음 모발의 길이/질감/컬러/볼륨/레이어/스타일링을 상세히 묘사하세요
+- imagePrompt는 고객 사진에 헤어스타일을 합성하는 AI에 사용됩니다 (얼굴은 원본 사진에서 유지됨)
+- 인물 특징(성별, 인종, 피부톤, 나이대)은 절대 포함하지 마세요
+- 헤어스타일만 영어로 구체적으로 묘사하세요: 길이, 질감, 컬러, 볼륨, 레이어, 컷 방식, 스타일링
+- 예: "Textured medium-length layered haircut, natural dark brown hair color, soft waves at ends, side-swept bangs, slight undercut on sides"
+- 예: "Short two-block cut with undercut sides, black hair, polished finish, light natural styling"
 
 반드시 아래 JSON 형식으로만 응답하세요:
 
@@ -258,7 +258,7 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
     {
       "id": "style-1",
       "name": "스타일 이름 (예: 레이어드 숏컷)",
-      "imagePrompt": "Ultra-realistic portrait of a [고객 성별/인종/나이대/피부톤], [얼굴형], with [헤어스타일 상세 묘사], professional salon lighting, Canon EOS R5, fashion magazine quality, no text or watermarks",
+      "imagePrompt": "[헤어스타일만 영어로 묘사: 길이/질감/컬러/볼륨/레이어/스타일링. 인물 특징 제외]",
       "description": "스타일 설명 (3-4문장, 특징과 효과)",
       "suitability": 95,
       "difficulty": "easy | medium | hard 중 택1",
