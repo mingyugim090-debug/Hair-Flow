@@ -154,7 +154,7 @@ export async function POST(
             // (Flux Img2Img는 얼굴이 너무 많이 바뀌어서 IP-Adapter로 롤백)
             generatedImageUrl = await Promise.race<string>([
               generateStyledFaceImage(frontPhotoUrl, rec.imagePrompt),
-              new Promise<string>((resolve) => setTimeout(() => resolve(''), 30000)),
+              new Promise<string>((resolve) => setTimeout(() => resolve(''), 45000)),
             ]);
           } else {
             // 얼굴 사진 없음: text-to-image 폴백 (20s 타임아웃)
@@ -174,7 +174,7 @@ export async function POST(
                 urlToCache,
                 `ai-generated/style/${customerId}-${index}-${Date.now()}.jpg`
               ),
-              new Promise<string>((resolve) => setTimeout(() => resolve(urlToCache), 12000)),
+              new Promise<string>((resolve) => setTimeout(() => resolve(urlToCache), 10000)),
             ]);
           }
 
