@@ -34,6 +34,9 @@ export default function WorkCard({
         'style-recommendation': 'Style',
         'recipe': 'Recipe',
         'timeline': 'Timeline',
+        'five-view-analysis': '5-View Analysis',
+        'style-based-recipe': 'Recipe',
+        'post-treatment-timeline': 'Timeline',
     }[consultation.treatmentType] || consultation.treatmentType;
 
     return (

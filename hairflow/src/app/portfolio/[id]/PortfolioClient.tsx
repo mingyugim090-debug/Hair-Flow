@@ -40,6 +40,9 @@ const treatmentLabel: Record<string, string> = {
   color: "염색",
   cut: "커트",
   perm: "펌",
+  "five-view-analysis": "5면 분석",
+  "style-based-recipe": "레시피",
+  "post-treatment-timeline": "타임라인",
 };
 
 export default function PortfolioClient({ designerId }: { designerId: string }) {
