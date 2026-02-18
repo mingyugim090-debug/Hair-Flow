@@ -88,13 +88,9 @@ export default function CustomerDetailPage() {
       }
     }
 
-    // 2. 스타일 추천 복원
-    const styleRow = sessionRows.find(c => c.treatmentType === 'style-recommendation');
-    if (styleRow?.styleRecommendations) {
-      setStyleRecommendations(styleRow.styleRecommendations);
-    } else {
-      setStyleRecommendations(null); // Reset if not found in this session
-    }
+    // 2. 스타일 추천: DB에 저장된 이미지 URL이 만료될 수 있으므로 복원하지 않음
+    // → 스타일 탭 진입 시 항상 새로 생성
+    setStyleRecommendations(null);
 
     // 3. 레시피 복원
     const recipeRow = sessionRows.find(c => c.treatmentType === 'style-based-recipe');
@@ -234,7 +230,7 @@ export default function CustomerDetailPage() {
 
     if (result.data) {
       setStyleRecipe(result.data.recipe);
-      await fetchData();
+      // fetchData() 호출 제거: restoreSession이 DB에서 레시피를 못 찾으면 null로 초기화하는 race condition 방지
     } else if (result.error?.code === "USAGE_LIMIT") {
       setLimitMessage(result.error.message);
       setShowLimitModal(true);

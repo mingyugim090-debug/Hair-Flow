@@ -108,8 +108,12 @@ export async function POST(
     // 사용량 증가
     await incrementUsage(user.id);
 
+    // Admin 클라이언트 (RLS 우회하여 안정적 저장)
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const adminSupabase = createAdminClient();
+
     // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
-    const { data: latestSession } = await supabase
+    const { data: latestSession } = await adminSupabase
       .from('consultations')
       .select('session_number')
       .eq('customer_id', customerId)
@@ -121,7 +125,7 @@ export async function POST(
     const currentSessionNumber = latestSession?.session_number ?? 1;
 
     // consultations 테이블에 저장
-    const { data: consultationRow, error: consultationError } = await supabase
+    const { data: consultationRow, error: consultationError } = await adminSupabase
       .from('consultations')
       .insert({
         customer_id: customerId,

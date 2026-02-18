@@ -45,19 +45,17 @@ export async function cacheGeneratedImage(
             return tempUrl; // 실패 시 원본 URL 반환
         }
 
-        // 3. 영구 public URL 대신 Signed URL 생성 (10년 유효)
-        // Public Bucket 설정 문제와 관계없이 접근 가능하도록 함
-        const tenYears = 60 * 60 * 24 * 365 * 10;
-        const { data: urlData, error: urlError } = await supabase.storage
+        // 3. 영구 Public URL 반환 (customer-photos 버킷은 public)
+        const { data: urlData } = supabase.storage
             .from('customer-photos')
-            .createSignedUrl(path, tenYears);
+            .getPublicUrl(path);
 
-        if (urlError || !urlData) {
-            console.error('Signed URL 생성 실패:', urlError);
+        if (!urlData?.publicUrl) {
+            console.error('Public URL 생성 실패');
             return tempUrl;
         }
 
-        return urlData.signedUrl;
+        return urlData.publicUrl;
     } catch (error) {
         console.error('이미지 캐싱 실패:', error);
         return tempUrl; // 에러 시 원본 URL로 fallback

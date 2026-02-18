@@ -20,6 +20,8 @@ interface StyleRecommendationResponse {
   faceShapeNote: string;
 }
 
+export const maxDuration = 60; // Fal.ai 이미지 생성 시간 확보 (Vercel 최대 60s)
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
