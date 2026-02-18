@@ -155,7 +155,7 @@ export async function POST(
     // GPT-4o Vision으로 분석
     const openai = getOpenAI();
     const analysisResponse = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: TIMELINE_ANALYSIS_SYSTEM_PROMPT },
         {

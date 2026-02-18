@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Step 1: GPT-4o Vision으로 현재 상태 분석 + 이미지 생성 프롬프트 생성
     const openai = getOpenAI();
     const analysisResponse = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: TIMELINE_ANALYSIS_SYSTEM_PROMPT },
         {

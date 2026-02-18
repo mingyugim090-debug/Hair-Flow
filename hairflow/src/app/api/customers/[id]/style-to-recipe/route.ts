@@ -80,7 +80,7 @@ export async function POST(
     // GPT-4o로 레시피 생성
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: STYLE_TO_RECIPE_SYSTEM_PROMPT },
         { role: 'user', content: getStyleToRecipePrompt(styleName, styleDescription, currentHairState) },

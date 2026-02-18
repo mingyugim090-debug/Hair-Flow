@@ -93,7 +93,7 @@ export async function POST(
     // GPT-4o로 스타일 추천
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: STYLE_RECOMMENDATION_SYSTEM_PROMPT },
         { role: 'user', content: getStyleRecommendationPrompt(fiveViewAnalysis) },

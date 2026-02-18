@@ -111,7 +111,7 @@ export async function POST(
     // GPT-4o Vision으로 모발 분석
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: CUSTOMER_ANALYSIS_SYSTEM_PROMPT },
         {
