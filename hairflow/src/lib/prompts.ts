@@ -259,11 +259,11 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
       "id": "style-1",
       "name": "스타일 이름 (예: 레이어드 숏컷)",
       "imagePrompt": "[헤어스타일만 영어로 묘사: 길이/질감/컬러/볼륨/레이어/스타일링. 인물 특징 제외]",
-      "description": "스타일 설명 (3-4문장, 특징과 효과)",
+      "description": "스타일 설명 (3-4문장, 특징과 효과, 반드시 한국어로 작성)",
       "suitability": 95,
       "difficulty": "easy | medium | hard 중 택1",
       "estimatedTime": "예상 시술 시간 (예: 1시간 30분)",
-      "matchReason": "고객에게 잘 어울리는 이유 (얼굴형, 두상, 모발 상태 근거)"
+      "matchReason": "고객에게 잘 어울리는 이유 (얼굴형, 두상, 모발 상태 근거, 반드시 한국어로 작성)"
     }
   ],
   "faceShapeNote": "얼굴형과 두상에 맞는 추가 조언 (2-3문장)"

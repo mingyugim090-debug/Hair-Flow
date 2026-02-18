@@ -102,15 +102,15 @@ export async function POST(
 
     const userContent: string | UserContentPart[] = frontPhotoUrl
       ? [
-          {
-            type: 'image_url' as const,
-            image_url: { url: frontPhotoUrl, detail: 'low' as const },
-          },
-          {
-            type: 'text' as const,
-            text: getStyleRecommendationPrompt(fiveViewAnalysis),
-          },
-        ]
+        {
+          type: 'image_url' as const,
+          image_url: { url: frontPhotoUrl, detail: 'low' as const },
+        },
+        {
+          type: 'text' as const,
+          text: getStyleRecommendationPrompt(fiveViewAnalysis),
+        },
+      ]
       : getStyleRecommendationPrompt(fiveViewAnalysis);
 
     const response = await openai.chat.completions.create({
@@ -137,9 +137,8 @@ export async function POST(
 
     const styleRecommendation: StyleRecommendationResponse = JSON.parse(content);
 
-    // 이미지 생성: 얼굴 사진이 있으면 FLUX Dev image-to-image (동일 얼굴 + 헤어스타일 변경)
-    //             없으면 FLUX Pro text-to-image
-    const { generateHairImage, generateHairImageFromFace } = await import('@/lib/fal');
+    // 이미지 생성: 얼굴 사진이 있으면 IP-Adapter FaceID (얼굴 보존), 없으면 FLUX Pro
+    const { generateHairImage, generateStyledFaceImage } = await import('@/lib/fal');
     const { cacheGeneratedImage } = await import('@/lib/storage');
     // Admin Client 초기화 (한 번만)
     const { createAdminClient } = await import('@/lib/supabase/admin');
@@ -151,9 +150,10 @@ export async function POST(
           let generatedImageUrl: string;
 
           if (frontPhotoUrl) {
-            // 얼굴 사진 있음: image-to-image로 동일 얼굴 유지 + 헤어스타일 변경 (30s 타임아웃)
+            // 얼굴 사진 있음: IP-Adapter Face ID로 얼굴 보존 + 헤어스타일 변경 (30s 타임아웃)
+            // (Flux Img2Img는 얼굴이 너무 많이 바뀌어서 IP-Adapter로 롤백)
             generatedImageUrl = await Promise.race<string>([
-              generateHairImageFromFace(frontPhotoUrl, rec.imagePrompt),
+              generateStyledFaceImage(frontPhotoUrl, rec.imagePrompt),
               new Promise<string>((resolve) => setTimeout(() => resolve(''), 30000)),
             ]);
           } else {
