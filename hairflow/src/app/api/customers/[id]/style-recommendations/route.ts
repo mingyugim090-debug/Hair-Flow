@@ -10,7 +10,7 @@ interface StyleRecommendationResponse {
   recommendations: {
     id: string;
     name: string;
-    dallePrompt: string;
+    imagePrompt: string;
     description: string;
     suitability: number;
     difficulty: 'easy' | 'medium' | 'hard';
@@ -75,7 +75,10 @@ export async function POST(
 
     // Request body에서 5면 분석 결과 가져오기
     const body = await request.json();
-    const { fiveViewAnalysis } = body as { fiveViewAnalysis: FiveViewAnalysisResult };
+    const { fiveViewAnalysis, frontPhotoUrl } = body as {
+      fiveViewAnalysis: FiveViewAnalysisResult;
+      frontPhotoUrl?: string;
+    };
 
     if (!fiveViewAnalysis) {
       return NextResponse.json<ApiResponse<null>>(
@@ -113,25 +116,44 @@ export async function POST(
 
     const styleRecommendation: StyleRecommendationResponse = JSON.parse(content);
 
-    // DALL-E 3로 각 스타일 이미지 생성
-    const recommendationsWithImages = await Promise.all(
-      styleRecommendation.recommendations.map(async (rec) => {
-        try {
-          const dalleResponse = await openai.images.generate({
-            model: 'dall-e-3',
-            prompt: `Professional hair salon photography. ${rec.dallePrompt}. High quality, natural lighting, realistic hair texture. No text or watermarks.`,
-            n: 1,
-            size: '1024x1024',
-            quality: 'standard',
-          });
+    // 이미지 생성: 고객 얼굴 사진이 있으면 IP-Adapter Face ID, 없으면 Flux.1 Pro
+    const { generateHairImage, generateStyledFaceImage } = await import('@/lib/fal');
+    const { cacheGeneratedImage } = await import('@/lib/storage');
+    // Admin Client 초기화 (한 번만)
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const adminSupabase = createAdminClient();
 
-          const generatedImageUrl = dalleResponse.data?.[0]?.url ?? '';
+    const recommendationsWithImages = await Promise.all(
+      styleRecommendation.recommendations.map(async (rec, index) => {
+        try {
+          let generatedImageUrl: string;
+
+          if (frontPhotoUrl) {
+            // IP-Adapter Face ID
+            generatedImageUrl = await generateStyledFaceImage(
+              frontPhotoUrl,
+              rec.imagePrompt
+            );
+          } else {
+            // Flux.1 Pro
+            const fluxPrompt = `Ultra-realistic professional salon portrait photograph of a person with ${rec.imagePrompt}. Shot with Canon EOS R5, 85mm f/1.4 lens. Soft studio lighting, individual hair strands visible. Fashion magazine quality, no text or watermarks.`;
+            generatedImageUrl = await generateHairImage(fluxPrompt);
+          }
+
+          // Supabase Storage에 영구 저장
+          if (generatedImageUrl) {
+            generatedImageUrl = await cacheGeneratedImage(
+              adminSupabase,
+              generatedImageUrl,
+              `ai-generated/style/${customerId}-${index}-${Date.now()}.jpg`
+            );
+          }
 
           return {
             id: rec.id,
             name: rec.name,
             imageUrl: generatedImageUrl,
-            dallePrompt: rec.dallePrompt,
+            imagePrompt: rec.imagePrompt,
             description: rec.description,
             suitability: rec.suitability,
             difficulty: rec.difficulty,
@@ -139,12 +161,12 @@ export async function POST(
             matchReason: rec.matchReason,
           };
         } catch (error) {
-          console.error(`DALL-E 이미지 생성 실패 (${rec.name}):`, error);
+          console.error(`스타일 이미지 생성 실패 (${rec.name}):`, error);
           return {
             id: rec.id,
             name: rec.name,
             imageUrl: '',
-            dallePrompt: rec.dallePrompt,
+            imagePrompt: rec.imagePrompt,
             description: rec.description,
             suitability: rec.suitability,
             difficulty: rec.difficulty,
@@ -161,15 +183,31 @@ export async function POST(
       faceShapeNote: styleRecommendation.faceShapeNote,
     };
 
+    // 이미지 생성 실패 여부 체크
+    const imageGenerationFailed = recommendationsWithImages.some(r => !r.imageUrl);
+
+    // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
+    const { data: latestSession } = await adminSupabase
+      .from('consultations')
+      .select('session_number')
+      .eq('customer_id', customerId)
+      .not('session_number', 'is', null) // Ensure we get a valid session
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const currentSessionNumber = latestSession?.session_number ?? 1;
+
     // 사용량 증가
     await incrementUsage(user.id);
 
     // consultations 테이블에 저장
-    const { data: consultationRow, error: consultationError } = await supabase
+    const { data: consultationRow, error: consultationError } = await adminSupabase
       .from('consultations')
       .insert({
         customer_id: customerId,
         designer_id: user.id,
+        session_number: currentSessionNumber,
         treatment_type: 'style-recommendation',
         style_recommendations: result,
         notes: 'AI 스타일 추천',
@@ -181,10 +219,11 @@ export async function POST(
       console.error('Consultation insert error:', consultationError);
     }
 
-    return NextResponse.json<ApiResponse<{ id: string; styleRecommendations: StyleRecommendationResult }>>({
+    return NextResponse.json<ApiResponse<{ id: string; styleRecommendations: StyleRecommendationResult; imageGenerationFailed: boolean }>>({
       data: {
         id: consultationRow?.id ?? '',
         styleRecommendations: result,
+        imageGenerationFailed,
       },
       error: null,
     });

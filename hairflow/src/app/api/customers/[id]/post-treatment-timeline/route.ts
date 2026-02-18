@@ -12,7 +12,7 @@ interface TimelineAnalysisResponse {
   weeklyPredictions: {
     week: number;
     label: string;
-    dallePrompt: string;
+    imagePrompt: string;
     description: string;
     careTips: string[];
   }[];
@@ -189,19 +189,30 @@ export async function POST(
 
     const analysisResult: TimelineAnalysisResponse = JSON.parse(analysisContent);
 
-    // DALL-E 3로 각 주차별 변화 이미지 생성
+    // ControlNet (Canny) + SDXL로 각 주차별 변화 이미지 생성 — 동일인물 유지
+    const { generateTimelineImage, getTimelineStrength } = await import('@/lib/replicate');
+    const { cacheGeneratedImage } = await import('@/lib/storage');
     const predictionsWithImages = await Promise.all(
       analysisResult.weeklyPredictions.map(async (pred) => {
         try {
-          const dalleResponse = await openai.images.generate({
-            model: 'dall-e-3',
-            prompt: `Professional hair salon photography. ${pred.dallePrompt}. High quality, natural lighting, realistic hair texture showing natural changes over time. No text or watermarks.`,
-            n: 1,
-            size: '1024x1024',
-            quality: 'standard',
-          });
+          const strength = getTimelineStrength(pred.week);
+          let generatedImageUrl = await generateTimelineImage(
+            completedPhotoUrl, // 시술 완료 사진을 ControlNet에 전달
+            pred.imagePrompt,
+            strength
+          );
 
-          const generatedImageUrl = dalleResponse.data?.[0]?.url ?? '';
+          // Supabase Storage에 영구 저장
+          const { createAdminClient } = await import('@/lib/supabase/admin');
+          const adminSupabase = createAdminClient();
+
+          if (generatedImageUrl) {
+            generatedImageUrl = await cacheGeneratedImage(
+              adminSupabase,
+              generatedImageUrl,
+              `ai-generated/post-timeline/${customerId}-week${pred.week}-${Date.now()}.jpg`
+            );
+          }
 
           return {
             week: pred.week,
@@ -211,7 +222,7 @@ export async function POST(
             careTips: pred.careTips,
           };
         } catch (error) {
-          console.error(`DALL-E 이미지 생성 실패 (${pred.label}):`, error);
+          console.error(`ControlNet 이미지 생성 실패 (${pred.label}):`, error);
           return {
             week: pred.week,
             label: pred.label,
@@ -231,16 +242,35 @@ export async function POST(
       revisitRecommendation: analysisResult.revisitRecommendation,
     };
 
+    // 이미지 생성 실패 여부 체크
+    const imageGenerationFailed = predictionsWithImages.some(p => !p.imageUrl);
+
     // 사용량 증가
     await incrementUsage(user.id);
 
+    // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const adminSupabase = createAdminClient();
+
+    const { data: latestSession } = await adminSupabase
+      .from('consultations')
+      .select('session_number')
+      .eq('customer_id', customerId)
+      .not('session_number', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const currentSessionNumber = latestSession?.session_number ?? 1;
+
     // consultations 테이블에 저장
-    const { data: consultationRow, error: consultationError } = await supabase
+    const { data: consultationRow, error: consultationError } = await adminSupabase
       .from('consultations')
       .insert({
         customer_id: customerId,
         designer_id: user.id,
-        treatment_type: 'timeline',
+        session_number: currentSessionNumber,
+        treatment_type: 'post-treatment-timeline',
         post_treatment_timeline: timelineResult,
         notes: `시술 후 타임라인 예측 (${treatmentType})`,
       })
@@ -251,10 +281,11 @@ export async function POST(
       console.error('Consultation insert error:', consultationError);
     }
 
-    return NextResponse.json<ApiResponse<{ id: string; timeline: PostTreatmentTimeline }>>({
+    return NextResponse.json<ApiResponse<{ id: string; timeline: PostTreatmentTimeline; imageGenerationFailed: boolean }>>({
       data: {
         id: consultationRow?.id ?? '',
         timeline: timelineResult,
+        imageGenerationFailed,
       },
       error: null,
     });

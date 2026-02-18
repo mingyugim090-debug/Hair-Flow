@@ -241,7 +241,7 @@ export interface StyleRecommendation {
   id: string;
   name: string; // "레이어드 숏컷"
   imageUrl: string; // DALL-E 3 생성 이미지
-  dallePrompt: string; // 생성에 사용된 프롬프트
+  imagePrompt: string; // 생성에 사용된 프롬프트
   description: string; // 스타일 설명
   suitability: number; // 0-100 어울림 점수
   difficulty: 'easy' | 'medium' | 'hard'; // 시술 난이도
@@ -329,7 +329,7 @@ export interface Consultation {
   customerId: string;
   designerId: string;
   sessionNumber: number; // 회차 (1차, 2차...)
-  treatmentType: 'analysis' | 'style-recommendation' | 'recipe' | 'timeline';
+  treatmentType: 'analysis' | 'style-recommendation' | 'recipe' | 'timeline' | 'five-view-analysis' | 'style-based-recipe' | 'post-treatment-timeline';
   photos: {
     front?: string;
     back?: string;

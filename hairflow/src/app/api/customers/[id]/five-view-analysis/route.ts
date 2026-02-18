@@ -193,13 +193,25 @@ export async function POST(
     // 사용량 증가
     await incrementUsage(user.id);
 
+    // 세션 번호 계산 (기존 최대값 + 1)
+    const { data: maxSession } = await supabase
+      .from('consultations')
+      .select('session_number')
+      .eq('customer_id', customerId)
+      .order('session_number', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextSessionNumber = (maxSession?.session_number ?? 0) + 1;
+
     // consultations 테이블에 저장
     const { data: consultationRow, error: consultationError } = await supabase
       .from('consultations')
       .insert({
         customer_id: customerId,
         designer_id: user.id,
-        treatment_type: 'analysis',
+        session_number: nextSessionNumber,
+        treatment_type: 'five-view-analysis', // Fixed type name to match DB enum if needed, wait. types says 'five-view-analysis'
         photo_front: uploadedUrls.front,
         photo_back: uploadedUrls.back,
         photo_left: uploadedUrls.left,

@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server';
 import {
   TIMELINE_ANALYSIS_SYSTEM_PROMPT,
   getTimelineAnalysisPrompt,
-  getDallePrompt,
 } from '@/lib/prompts';
 import type { TimelineResult, ApiResponse } from '@/types';
 
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Step 1: GPT-4o Vision으로 현재 상태 분석 + DALL-E 프롬프트 생성
+    // Step 1: GPT-4o Vision으로 현재 상태 분석 + 이미지 생성 프롬프트 생성
     const openai = getOpenAI();
     const analysisResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -89,26 +88,40 @@ export async function POST(request: NextRequest) {
 
     const analysis = JSON.parse(analysisContent);
 
-    // Step 2: DALL-E 3로 각 시점의 변화 이미지 생성
+    // Step 2: ControlNet (Canny) + SDXL로 각 시점의 변화 이미지 생성 — 동일인물 유지
+    const { generateTimelineImage, getTimelineStrength } = await import('@/lib/replicate');
+    const { cacheGeneratedImage } = await import('@/lib/storage');
+    const supabase = await createClient();
+    const sourceImageUrl = treatmentImage.startsWith('data:')
+      ? treatmentImage
+      : `data:image/jpeg;base64,${treatmentImage}`;
     const imagePromises = analysis.predictions.map(
-      async (pred: { week: number; label: string; dallePrompt: string; description: string }) => {
+      async (pred: { week: number; label: string; imagePrompt: string; description: string }) => {
         try {
-          const imageResponse = await openai.images.generate({
-            model: 'dall-e-3',
-            prompt: getDallePrompt(pred.dallePrompt, pred.label),
-            n: 1,
-            size: '1024x1024',
-            quality: 'standard',
-          });
+          const strength = getTimelineStrength(pred.week);
+          let generatedImageUrl = await generateTimelineImage(
+            sourceImageUrl,
+            pred.imagePrompt,
+            strength
+          );
+
+          // Supabase Storage에 영구 저장
+          if (generatedImageUrl) {
+            generatedImageUrl = await cacheGeneratedImage(
+              supabase,
+              generatedImageUrl,
+              `ai-generated/legacy-timeline/week${pred.week}-${Date.now()}.jpg`
+            );
+          }
 
           return {
             week: pred.week,
             label: pred.label,
-            imageUrl: imageResponse.data?.[0]?.url ?? '',
+            imageUrl: generatedImageUrl,
             description: pred.description,
           };
         } catch (imgError) {
-          console.error(`DALL-E generation failed for week ${pred.week}:`, imgError);
+          console.error(`ControlNet generation failed for week ${pred.week}:`, imgError);
           return {
             week: pred.week,
             label: pred.label,
@@ -132,7 +145,6 @@ export async function POST(request: NextRequest) {
     await incrementUsage(user.id);
 
     // DB에 결과 저장
-    const supabase = await createClient();
     await supabase.from('timelines').insert({
       user_id: user.id,
       treatment_type: treatmentType,

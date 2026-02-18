@@ -74,7 +74,7 @@ export function getTimelineAnalysisPrompt(treatmentType: 'color' | 'cut' | 'perm
       "week": ${w},
       "label": "${w}주 후",
       "description": "${w}주 후 예상되는 변화 상세 설명 (2-3문장)",
-      "dallePrompt": "DALL-E 3에서 ${w}주 후 모발 변화를 생성하기 위한 영어 프롬프트 (현재 사진 기반, 사실적 묘사)"
+      "imagePrompt": "${w}주 후 모발 변화를 실사 수준으로 표현하는 상세 영어 프롬프트 (모발 질감, 길이, 컬러 변화 포함)"
     }`).join(',\n    ')}
   ],
   "revisitRecommendation": {
@@ -133,9 +133,9 @@ export const CUSTOMER_ANALYSIS_USER_PROMPT = `이 사진은 고객의 현재 모
   }
 }`;
 
-// DALL-E 3 이미지 생성 프롬프트 래퍼
-export function getDallePrompt(baseDescription: string, weekLabel: string): string {
-  return `A realistic close-up photograph of hair showing natural changes after ${weekLabel}. ${baseDescription}. Professional hair salon photography style, natural lighting, high detail, photorealistic. Do not include any text or watermarks.`;
+// Flux.1 Pro 이미지 생성 프롬프트 래퍼
+export function getFluxPrompt(baseDescription: string, weekLabel: string): string {
+  return `Ultra-realistic close-up photograph of hair in a professional salon setting, showing natural changes after ${weekLabel}. ${baseDescription}. Shot with a Canon EOS R5, 85mm f/1.4 lens. Soft studio lighting with subtle hair shine. Individual hair strands visible with natural texture and movement. Professional color-graded, fashion magazine quality.`;
 }
 
 // 3면 사진 종합 분석 프롬프트 (앞/뒤/옆)
@@ -163,7 +163,7 @@ export const THREE_VIEW_ANALYSIS_USER_PROMPT = `3장의 사진(앞면, 뒷면, �
         "name": "추천 스타일 이름 (예: 레이어드 롱 웨이브)",
         "reason": "이 스타일을 추천하는 이유 (얼굴형과의 조화, 효과 등)",
         "suitability": 95,
-        "imageDescription": "스타일 시각적 설명 (영어, DALL-E에 활용 가능)"
+        "imageDescription": "스타일 시각적 설명 (영어, Flux.1 Pro에 활용 가능)"
       }
     ]
   },
@@ -223,7 +223,8 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `5장의 사진(앞면, 뒷면, �
 // AI 스타일 추천 프롬프트
 export const STYLE_RECOMMENDATION_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너입니다.
 고객의 얼굴형, 두상 형태, 모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 3-4가지를 추천합니다.
-각 스타일은 DALL-E 3로 생성 가능한 상세한 시각적 설명을 포함해야 합니다.
+각 스타일에 대해 Flux.1 Pro 이미지 생성을 위한 매우 상세한 영어 시각 묘사를 포함해야 합니다.
+imagePrompt는 반드시 영어로 작성하고, 모발의 길이/질감/컬러/볼륨/스타일링을 구체적으로 묘사하세요. (Flux.1 Pro 최적화)
 
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
 
@@ -235,7 +236,8 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
 모발 밀도: ${analysisResult.hairDensityDistribution.overallPattern}
 손상도: ${analysisResult.damageAnalysis.overallLevel}
 
-이 고객에게 가장 잘 어울리는 헤어 스타일 3-4가지를 추천하고, 각 스타일을 DALL-E 3로 생성하기 위한 영어 프롬프트를 작성해주세요.
+이 고객에게 가장 잘 어울리는 헤어 스타일 3-4가지를 추천하고, 각 스타일의 실사 이미지 생성을 위한 매우 상세한 영어 프롬프트를 작성해주세요.
+imagePrompt는 반드시 영어로, 카메라/조명/모발 질감/길이/컬러/볼륨/레이어 등을 구체적으로 묘사하세요.
 
 반드시 아래 JSON 형식으로만 응답하세요:
 
@@ -245,7 +247,7 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
     {
       "id": "style-1",
       "name": "스타일 이름 (예: 레이어드 숏컷)",
-      "dallePrompt": "DALL-E 3 영어 프롬프트 (사실적인 헤어 스타일 사진, 고객의 얼굴형과 두상에 맞게)",
+      "imagePrompt": "Ultra-realistic portrait photograph... (영어, 모발 묘사 매우 상세하게)",
       "description": "스타일 설명 (3-4문장, 특징과 효과)",
       "suitability": 95,
       "difficulty": "easy | medium | hard 중 택1",
@@ -343,7 +345,8 @@ export function getStyleToRecipePrompt(
 // 시술 후 타임라인 예측 프롬프트
 export const POST_TREATMENT_TIMELINE_SYSTEM_PROMPT = `당신은 모발 과학 전문가입니다.
 시술이 완료된 직후의 사진을 분석하여, 1주차부터 8주차까지 시간 경과에 따른 모발 변화를 예측합니다.
-각 주차별로 DALL-E 3로 생성 가능한 상세한 시각적 설명과 관리 팁을 제공합니다.
+각 주차별로 실사 이미지 생성을 위한 매우 상세한 영어 시각 묘사와 관리 팁을 제공합니다.
+imagePrompt는 영어로, 모발의 길이/질감/컬러 변화를 구체적으로 묘사해야 합니다. (Flux.1 Pro 최적화)
 
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
 
@@ -358,7 +361,7 @@ export function getPostTreatmentTimelinePrompt(treatmentType: 'cut' | 'perm' | '
   return `이 사진은 ${typeLabel} 시술이 완료된 직후의 사진입니다.
 
 시술 완료 상태를 분석하고, ${timePoints.map(w => `${w}주 후`).join(', ')} 각 시점에서 모발이 어떻게 변할지 예측해주세요.
-각 주차별로 DALL-E 3로 생성 가능한 영어 프롬프트와 관리 팁을 포함해주세요.
+각 주차별로 실사 이미지 생성을 위한 상세 영어 프롬프트와 관리 팁을 포함해주세요.
 
 반드시 아래 JSON 형식으로만 응답하세요:
 
@@ -370,13 +373,13 @@ export function getPostTreatmentTimelinePrompt(treatmentType: 'cut' | 'perm' | '
     ${timePoints.map(w => `{
       "week": ${w},
       "label": "${w}주 후",
-      "dallePrompt": "DALL-E 3 영어 프롬프트 (${w}주 후 모발 변화를 사실적으로 표현)",
+      "imagePrompt": "${w}주 후 모발 변화를 실사 수준으로 표현하는 상세 영어 프롬프트 (모발 질감, 길이, 컬러 변화 포함)",
       "description": "${w}주 후 예상 변화 상세 설명 (2-3문장)",
       "careTips": ["관리 팁 1", "관리 팁 2", "관리 팁 3"]
     }`).join(',\n    ')}
   ],
   "revisitRecommendation": {
-    "week": 추천 재방문 주차 (숫자),
+    "week": "추천 재방문 주차 (숫자)",
     "reason": "재방문 추천 이유 (2-3문장)"
   }
 }`;

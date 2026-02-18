@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAI } from '@/lib/openai';
 import { getAuthUser, checkUsageLimit, incrementUsage } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { TIMELINE_ANALYSIS_SYSTEM_PROMPT, getTimelineAnalysisPrompt, getDallePrompt } from '@/lib/prompts';
+import { TIMELINE_ANALYSIS_SYSTEM_PROMPT, getTimelineAnalysisPrompt } from '@/lib/prompts';
 import type { TimelinePredictionResult, ApiResponse } from '@/types';
 
 interface TimelineAnalysisResponse {
@@ -11,7 +11,7 @@ interface TimelineAnalysisResponse {
     week: number;
     label: string;
     description: string;
-    dallePrompt: string;
+    imagePrompt: string;
   }[];
   revisitRecommendation: {
     week: number;
@@ -187,19 +187,27 @@ export async function POST(
 
     const analysisResult: TimelineAnalysisResponse = JSON.parse(analysisContent);
 
-    // DALL-E 3로 각 주차별 이미지 생성
+    // ControlNet (Canny) + SDXL로 각 주차별 이미지 생성 — 동일인물 유지
+    const { generateTimelineImage, getTimelineStrength } = await import('@/lib/replicate');
+    const { cacheGeneratedImage } = await import('@/lib/storage');
     const predictionsWithImages = await Promise.all(
       analysisResult.predictions.map(async (pred) => {
         try {
-          const dalleResponse = await openai.images.generate({
-            model: 'dall-e-3',
-            prompt: getDallePrompt(pred.dallePrompt, pred.label),
-            n: 1,
-            size: '1024x1024',
-            quality: 'standard',
-          });
+          const strength = getTimelineStrength(pred.week);
+          let generatedImageUrl = await generateTimelineImage(
+            imageUrl, // 시술 완료 사진을 ControlNet에 전달
+            pred.imagePrompt,
+            strength
+          );
 
-          const generatedImageUrl = dalleResponse.data?.[0]?.url ?? '';
+          // Supabase Storage에 영구 저장
+          if (generatedImageUrl) {
+            generatedImageUrl = await cacheGeneratedImage(
+              supabase,
+              generatedImageUrl,
+              `ai-generated/timeline/${customerId}-week${pred.week}-${Date.now()}.jpg`
+            );
+          }
 
           return {
             week: pred.week,
@@ -208,7 +216,7 @@ export async function POST(
             description: pred.description,
           };
         } catch (error) {
-          console.error(`DALL-E 이미지 생성 실패 (${pred.label}):`, error);
+          console.error(`ControlNet 이미지 생성 실패 (${pred.label}):`, error);
           return {
             week: pred.week,
             label: pred.label,

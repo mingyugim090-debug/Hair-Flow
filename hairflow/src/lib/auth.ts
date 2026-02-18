@@ -182,7 +182,8 @@ export async function checkUsageLimit(userId: string): Promise<{ allowed: boolea
 }
 
 export async function incrementUsage(userId: string): Promise<void> {
-  const supabase = await createClient();
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const supabase = createAdminClient();
   const today = new Date().toISOString().split('T')[0];
 
   const { data: profile } = await supabase
