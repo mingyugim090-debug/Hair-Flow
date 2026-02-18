@@ -92,13 +92,32 @@ export async function POST(
       );
     }
 
-    // GPT-4o로 스타일 추천
+    // GPT-4o-mini Vision으로 스타일 추천 (앞면 사진 포함 시 고객 외모 파악)
     const openai = getOpenAI();
+
+    // frontPhotoUrl이 있으면 Vision으로 고객 얼굴을 직접 분석하여 imagePrompt에 외모 반영
+    type UserContentPart =
+      | { type: 'image_url'; image_url: { url: string; detail: 'low' } }
+      | { type: 'text'; text: string };
+
+    const userContent: string | UserContentPart[] = frontPhotoUrl
+      ? [
+          {
+            type: 'image_url' as const,
+            image_url: { url: frontPhotoUrl, detail: 'low' as const },
+          },
+          {
+            type: 'text' as const,
+            text: getStyleRecommendationPrompt(fiveViewAnalysis),
+          },
+        ]
+      : getStyleRecommendationPrompt(fiveViewAnalysis);
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: STYLE_RECOMMENDATION_SYSTEM_PROMPT },
-        { role: 'user', content: getStyleRecommendationPrompt(fiveViewAnalysis) },
+        { role: 'user', content: userContent },
       ],
       max_tokens: 3000,
       temperature: 0.5,
