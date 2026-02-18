@@ -119,7 +119,7 @@ export async function POST(
     const styleRecommendation: StyleRecommendationResponse = JSON.parse(content);
 
     // 이미지 생성: 고객 얼굴 사진이 있으면 IP-Adapter Face ID, 없으면 Flux.1 Pro
-    const { generateHairImage, generateStyledFaceImage } = await import('@/lib/fal');
+    const { generateHairImage } = await import('@/lib/fal');
     const { cacheGeneratedImage } = await import('@/lib/storage');
     // Admin Client 초기화 (한 번만)
     const { createAdminClient } = await import('@/lib/supabase/admin');
@@ -128,27 +128,26 @@ export async function POST(
     const recommendationsWithImages = await Promise.all(
       styleRecommendation.recommendations.map(async (rec, index) => {
         try {
-          let generatedImageUrl: string;
+          // IP-Adapter Face ID는 이미지당 30-90초로 Vercel 60s 한도 초과 → 항상 Flux.1 Pro 사용
+          const fluxPrompt = `Ultra-realistic professional salon portrait photograph of a person with ${rec.imagePrompt}. Shot with Canon EOS R5, 85mm f/1.4 lens. Soft studio lighting, individual hair strands visible. Fashion magazine quality, no text or watermarks.`;
 
-          if (frontPhotoUrl) {
-            // IP-Adapter Face ID
-            generatedImageUrl = await generateStyledFaceImage(
-              frontPhotoUrl,
-              rec.imagePrompt
-            );
-          } else {
-            // Flux.1 Pro
-            const fluxPrompt = `Ultra-realistic professional salon portrait photograph of a person with ${rec.imagePrompt}. Shot with Canon EOS R5, 85mm f/1.4 lens. Soft studio lighting, individual hair strands visible. Fashion magazine quality, no text or watermarks.`;
-            generatedImageUrl = await generateHairImage(fluxPrompt);
-          }
+          // 이미지 생성: 20초 타임아웃 (초과 시 빈 URL로 처리)
+          let generatedImageUrl = await Promise.race<string>([
+            generateHairImage(fluxPrompt),
+            new Promise<string>((resolve) => setTimeout(() => resolve(''), 20000)),
+          ]);
 
-          // Supabase Storage에 영구 저장
+          // Supabase Storage에 영구 저장: 12초 타임아웃 (초과 시 원본 URL 유지)
           if (generatedImageUrl) {
-            generatedImageUrl = await cacheGeneratedImage(
-              adminSupabase,
-              generatedImageUrl,
-              `ai-generated/style/${customerId}-${index}-${Date.now()}.jpg`
-            );
+            const urlToCache = generatedImageUrl;
+            generatedImageUrl = await Promise.race<string>([
+              cacheGeneratedImage(
+                adminSupabase,
+                urlToCache,
+                `ai-generated/style/${customerId}-${index}-${Date.now()}.jpg`
+              ),
+              new Promise<string>((resolve) => setTimeout(() => resolve(urlToCache), 12000)),
+            ]);
           }
 
           return {

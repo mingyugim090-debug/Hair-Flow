@@ -19,8 +19,16 @@ export async function cacheGeneratedImage(
     if (!tempUrl) return '';
 
     try {
-        // 1. 임시 URL에서 이미지 다운로드
-        const response = await fetch(tempUrl);
+        // 1. 임시 URL에서 이미지 다운로드 (12초 타임아웃)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        let response: Response;
+        try {
+            response = await fetch(tempUrl, { signal: controller.signal });
+        } finally {
+            clearTimeout(timeoutId);
+        }
+
         if (!response.ok) {
             console.error(`이미지 다운로드 실패: ${response.status}`);
             return tempUrl;

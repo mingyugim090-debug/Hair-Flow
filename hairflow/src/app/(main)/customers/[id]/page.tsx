@@ -186,28 +186,40 @@ export default function CustomerDetailPage() {
   // AI 스타일 추천 자동 호출
   const handleStyleRecommendation = async (analysis: FiveViewAnalysisResult) => {
     setLoadingStyles(true);
-    const res = await fetch(`/api/customers/${id}/style-recommendations`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fiveViewAnalysis: analysis,
-        frontPhotoUrl: fiveViewPhotos?.front,
-      }),
-    });
-    const result = await res.json();
+    try {
+      const res = await fetch(`/api/customers/${id}/style-recommendations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fiveViewAnalysis: analysis,
+          frontPhotoUrl: fiveViewPhotos?.front,
+        }),
+      });
 
-    if (result.data) {
-      setStyleRecommendations(result.data.styleRecommendations);
-      if (result.data.imageGenerationFailed) {
-        setImageGenerationFailed(true);
+      if (!res.ok) {
+        console.error('Style recommendation 오류:', res.status);
+        throw new Error(`서버 오류 (${res.status})`);
       }
-    } else if (result.error?.code === "USAGE_LIMIT") {
-      setLimitMessage(result.error.message);
-      setShowLimitModal(true);
-    } else {
-      alert(result.error?.message ?? "스타일 추천에 실패했습니다.");
+
+      const result = await res.json();
+
+      if (result.data) {
+        setStyleRecommendations(result.data.styleRecommendations);
+        if (result.data.imageGenerationFailed) {
+          setImageGenerationFailed(true);
+        }
+      } else if (result.error?.code === "USAGE_LIMIT") {
+        setLimitMessage(result.error.message);
+        setShowLimitModal(true);
+      } else {
+        alert(result.error?.message ?? "스타일 추천에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error('스타일 추천 생성 오류:', error);
+      alert("스타일 추천 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setLoadingStyles(false);
     }
-    setLoadingStyles(false);
   };
 
   // 스타일 선택 시 레시피 생성
