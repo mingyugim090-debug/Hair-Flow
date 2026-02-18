@@ -137,8 +137,8 @@ export async function POST(
 
     const styleRecommendation: StyleRecommendationResponse = JSON.parse(content);
 
-    // 이미지 생성: 얼굴 사진이 있으면 IP-Adapter FaceID (얼굴 보존), 없으면 FLUX Pro
-    const { generateHairImage, generateStyledFaceImage } = await import('@/lib/fal');
+    // 이미지 생성: 얼굴 사진이 있으면 FLUX Dev image-to-image (동일 얼굴 + 헤어스타일 변경), 없으면 FLUX Pro
+    const { generateHairImage, generateHairImageFromFace } = await import('@/lib/fal');
     const { cacheGeneratedImage } = await import('@/lib/storage');
     // Admin Client 초기화 (한 번만)
     const { createAdminClient } = await import('@/lib/supabase/admin');
@@ -150,11 +150,11 @@ export async function POST(
           let generatedImageUrl: string;
 
           if (frontPhotoUrl) {
-            // 얼굴 사진 있음: IP-Adapter Face ID로 얼굴 보존 + 헤어스타일 변경 (30s 타임아웃)
-            // (Flux Img2Img는 얼굴이 너무 많이 바뀌어서 IP-Adapter로 롤백)
+            // 얼굴 사진 있음: FLUX Dev image-to-image로 동일 얼굴 유지 + 헤어스타일 변경 (35s 타임아웃)
+            // strength=0.45로 얼굴 최대 보존, IP-Adapter(30~90s)보다 빠름(15~25s)
             generatedImageUrl = await Promise.race<string>([
-              generateStyledFaceImage(frontPhotoUrl, rec.imagePrompt),
-              new Promise<string>((resolve) => setTimeout(() => resolve(''), 45000)),
+              generateHairImageFromFace(frontPhotoUrl, rec.imagePrompt),
+              new Promise<string>((resolve) => setTimeout(() => resolve(''), 35000)),
             ]);
           } else {
             // 얼굴 사진 없음: text-to-image 폴백 (20s 타임아웃)
