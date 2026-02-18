@@ -576,16 +576,23 @@ export default function CustomerDetailPage() {
                         onClick={() => handleStyleSelect(style)}
                       >
                         {style.imageUrl ? (
-                          <div className="relative aspect-square w-full overflow-hidden">
-                            <Image
+                          <div className="aspect-square w-full overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
                               src={style.imageUrl}
                               alt={style.name}
-                              fill
-                              className="object-cover"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const parent = e.currentTarget.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><div class="text-center text-white/30 p-4"><span class="text-3xl block mb-2">✂️</span><span class="text-[11px]">이미지 로딩 실패</span></div></div>';
+                                }
+                              }}
                             />
                           </div>
                         ) : (
-                          <div className="relative aspect-square w-full overflow-hidden bg-dark-800 flex items-center justify-center">
+                          <div className="aspect-square w-full overflow-hidden bg-white/5 flex items-center justify-center">
                             <div className="text-center text-white/30 p-4">
                               <span className="text-3xl block mb-2">✂️</span>
                               <span className="text-[11px]">이미지 생성 실패</span>
@@ -648,12 +655,12 @@ export default function CustomerDetailPage() {
                   >
                     <div className="flex items-center gap-4 mb-4">
                       {styleRecipe.selectedStyle.imageUrl && (
-                        <div className="relative w-24 h-24 overflow-hidden border border-gold/30">
-                          <Image
+                        <div className="w-24 h-24 overflow-hidden border border-gold/30 flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
                             src={styleRecipe.selectedStyle.imageUrl}
                             alt={styleRecipe.selectedStyle.name}
-                            fill
-                            className="object-cover"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       )}
@@ -883,12 +890,12 @@ export default function CustomerDetailPage() {
                     </h3>
                     <div className="flex gap-4">
                       {timeline.completedPhotoUrl && (
-                        <div className="relative w-32 h-32 overflow-hidden border border-gold/30">
-                          <Image
+                        <div className="w-32 h-32 overflow-hidden border border-gold/30 flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
                             src={timeline.completedPhotoUrl}
                             alt="시술 완료"
-                            fill
-                            className="object-cover"
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       )}
@@ -922,16 +929,23 @@ export default function CustomerDetailPage() {
                           className="border border-gold/20 overflow-hidden"
                         >
                           {pred.imageUrl ? (
-                            <div className="relative aspect-square w-full overflow-hidden">
-                              <Image
+                            <div className="aspect-square w-full overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
                                 src={pred.imageUrl}
                                 alt={pred.label}
-                                fill
-                                className="object-cover"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><div class="text-center text-white/30 p-4"><span class="text-3xl block mb-2">📸</span><span class="text-[11px]">이미지 로딩 실패</span></div></div>';
+                                  }
+                                }}
                               />
                             </div>
                           ) : (
-                            <div className="relative aspect-square w-full overflow-hidden bg-dark-800 flex items-center justify-center">
+                            <div className="aspect-square w-full overflow-hidden bg-white/5 flex items-center justify-center">
                               <div className="text-center text-white/30 p-4">
                                 <span className="text-3xl block mb-2">📸</span>
                                 <span className="text-[11px]">이미지 생성 실패</span>

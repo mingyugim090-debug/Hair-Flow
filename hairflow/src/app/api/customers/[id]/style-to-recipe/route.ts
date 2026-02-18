@@ -108,13 +108,26 @@ export async function POST(
     // 사용량 증가
     await incrementUsage(user.id);
 
+    // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
+    const { data: latestSession } = await supabase
+      .from('consultations')
+      .select('session_number')
+      .eq('customer_id', customerId)
+      .not('session_number', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const currentSessionNumber = latestSession?.session_number ?? 1;
+
     // consultations 테이블에 저장
     const { data: consultationRow, error: consultationError } = await supabase
       .from('consultations')
       .insert({
         customer_id: customerId,
         designer_id: user.id,
-        treatment_type: 'recipe',
+        session_number: currentSessionNumber,
+        treatment_type: 'style-based-recipe',
         style_based_recipe: recipeResult,
         notes: `선택 스타일: ${styleName}`,
       })
