@@ -69,7 +69,8 @@ export default function CustomerDetailPage() {
 
   // 세션 데이터 복원 (Persistence)
   const restoreSession = (sessionNum: number, consultations: Consultation[]) => {
-    const sessionRows = consultations.filter(c => c.sessionNumber === sessionNum);
+    // DB의 sessionNumber가 null이거나 0일 경우 1로 취급하여 필터링
+    const sessionRows = consultations.filter(c => (c.sessionNumber || 1) === sessionNum);
 
     // 1. 5면 분석 결과 복원
     const analysisRow = sessionRows.find(c => c.treatmentType === 'five-view-analysis');
