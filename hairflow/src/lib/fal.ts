@@ -130,8 +130,8 @@ export async function generateStyledFaceImage(
 }
 
 /**
- * fal-ai/image-editing/hair-change 전용 모델을 사용하여
- * 고객 얼굴 사진에서 얼굴은 100% 보존하고 헤어스타일만 변경합니다.
+ * Flux Kontext Pro (fal-ai/flux-kontext/pro/image-to-image) 사용
+ * 컨텍스트 인식 편집으로 얼굴·옷·배경은 100% 보존, 헤어스타일만 변경.
  * 실패 시 빈 문자열을 반환합니다 (throw 하지 않음).
  */
 export async function generateHairImageFromFace(
@@ -146,14 +146,10 @@ export async function generateHairImageFromFace(
     }
 
     try {
-        const result = await fal.subscribe('fal-ai/image-editing/hair-change', {
+        const result = await fal.subscribe('fal-ai/flux-kontext/pro/image-to-image', {
             input: {
                 image_url: faceImageUrl,
-                prompt: hairStylePrompt,
-                guidance_scale: 3.5,
-                num_inference_steps: 30,
-                safety_tolerance: '5' as const,
-                output_format: 'jpeg' as const,
+                prompt: `Change this person's hairstyle to: ${hairStylePrompt}. Keep the face, facial features, expression, skin tone, clothing, and background exactly the same. Only modify the hair.`,
             },
         });
 
@@ -161,7 +157,7 @@ export async function generateHairImageFromFace(
         return data.images?.[0]?.url ?? '';
     } catch (error) {
         const userMessage = classifyFalError(error);
-        console.error('Hair-change 이미지 생성 실패:', userMessage, error);
+        console.error('Kontext Pro 이미지 생성 실패:', userMessage, error);
         return '';
     }
 }
