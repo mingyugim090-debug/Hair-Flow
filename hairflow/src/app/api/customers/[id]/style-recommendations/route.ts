@@ -156,9 +156,28 @@ export async function POST(
 
           if (frontPhotoUrl) {
             // 얼굴 사진 있음: hair-change 모델로 동일 얼굴 유지 + 헤어스타일 변경
+            // frontPhotoUrl은 public URL 형태일 수 있으므로 (DB에 저장된 형태),
+            // Fal.ai에서 접근 가능하도록 admin 권한으로 Signed URL 생성
+            let accessibleFrontUrl = frontPhotoUrl;
+            try {
+              // URL에서 'customer-photos/' 이후의 경로 추출
+              const pathMatch = frontPhotoUrl.match(/customer-photos\/(.+)$/);
+              if (pathMatch && pathMatch[1]) {
+                const filePath = pathMatch[1].split('?')[0]; // 쿼리 파라미터 제거
+                const { data } = await adminSupabase.storage
+                  .from('customer-photos')
+                  .createSignedUrl(filePath, 300); // 5분 유효
+                if (data?.signedUrl) {
+                  accessibleFrontUrl = data.signedUrl;
+                }
+              }
+            } catch (err) {
+              console.error('Signed URL 생성 실패 (기존 URL 사용):', err);
+            }
+
             generatedImageUrl = await Promise.race<string>([
-              generateHairImageFromFace(frontPhotoUrl, imagePromptToUse),
-              new Promise<string>((resolve) => setTimeout(() => resolve(''), 35000)),
+              generateHairImageFromFace(accessibleFrontUrl, imagePromptToUse),
+              new Promise<string>((resolve) => setTimeout(() => resolve(''), 45000)),
             ]);
           } else {
             // 얼굴 사진 없음: text-to-image 폴백 (20s 타임아웃)

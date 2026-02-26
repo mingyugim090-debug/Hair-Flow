@@ -130,7 +130,22 @@ export async function generateStyledFaceImage(
 }
 
 /**
- * Flux Kontext Pro (fal-ai/flux-kontext/pro/image-to-image) 사용
+ * 외부 이미지 URL을 Fal.ai CDN에 업로드하여 접근 가능한 URL로 변환합니다.
+ * Supabase Storage 등 Fal.ai가 직접 접근할 수 없는 URL을 프록시합니다.
+ */
+async function uploadToFalCdn(imageUrl: string): Promise<string> {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+        throw new Error(`이미지 다운로드 실패: ${response.status}`);
+    }
+    const blob = await response.blob();
+    const file = new File([blob], 'input.jpg', { type: blob.type || 'image/jpeg' });
+    const falCdnUrl = await fal.storage.upload(file);
+    return falCdnUrl;
+}
+
+/**
+ * Flux Kontext Pro (fal-ai/flux-pro/kontext) 사용
  * 컨텍스트 인식 편집으로 얼굴·옷·배경은 100% 보존, 헤어스타일만 변경.
  * 실패 시 빈 문자열을 반환합니다 (throw 하지 않음).
  */
@@ -146,9 +161,14 @@ export async function generateHairImageFromFace(
     }
 
     try {
-        const result = await fal.subscribe('fal-ai/flux-kontext/pro/image-to-image', {
+        // Fal.ai가 직접 접근할 수 없는 URL(Supabase 등)을 Fal CDN으로 프록시
+        console.log('Fal CDN에 이미지 업로드 중...');
+        const accessibleUrl = await uploadToFalCdn(faceImageUrl);
+        console.log('Fal CDN 업로드 완료:', accessibleUrl);
+
+        const result = await fal.subscribe('fal-ai/flux-pro/kontext', {
             input: {
-                image_url: faceImageUrl,
+                image_url: accessibleUrl,
                 prompt: `Change this person's hairstyle to: ${hairStylePrompt}. Keep the face, facial features, expression, skin tone, clothing, and background exactly the same. Only modify the hair.`,
             },
         });

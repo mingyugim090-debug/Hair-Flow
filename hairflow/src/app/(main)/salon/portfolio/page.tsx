@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ExtendedConsultation } from "@/types";
+
 import DashboardWidget from "@/components/salon/DashboardWidget";
 import DesignerWorkList from "@/components/salon/DesignerWorkList";
 import WorkDetailDialog from "@/components/salon/WorkDetailDialog";
@@ -125,8 +126,8 @@ export default function SalonPortfolioPage() {
                             key={type}
                             onClick={() => setFilter(type as any)}
                             className={`px-6 py-2 rounded-full text-sm tracking-widest uppercase transition-all ${filter === type
-                                    ? 'bg-gold text-charcoal font-medium'
-                                    : 'bg-white/5 text-white/50 hover:bg-white/10'
+                                ? 'bg-gold text-charcoal font-medium'
+                                : 'bg-white/5 text-white/50 hover:bg-white/10'
                                 }`}
                         >
                             {type}
