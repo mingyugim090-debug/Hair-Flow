@@ -32,25 +32,15 @@ export default function CustomerDetailPage() {
   const [limitMessage, setLimitMessage] = useState("");
   const [activeTab, setActiveTab] = useState<string>("analysis");
 
-  // 5면 사진 업로드 ref
+  // 앞면 사진 업로드 ref
   const frontInputRef = useRef<HTMLInputElement>(null);
-  const backInputRef = useRef<HTMLInputElement>(null);
-  const leftInputRef = useRef<HTMLInputElement>(null);
-  const rightInputRef = useRef<HTMLInputElement>(null);
-  const topInputRef = useRef<HTMLInputElement>(null);
 
-  // 선택된 5면 사진
-  const [selectedPhotos, setSelectedPhotos] = useState<{
-    front?: File;
-    back?: File;
-    left?: File;
-    right?: File;
-    top?: File;
-  }>({});
+  // 선택된 앞면 사진
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
 
-  // 5면 분석 결과 (스타일 추천용)
+  // 앞면 분석 결과 (스타일 추천용)
   const [fiveViewAnalysisResult, setFiveViewAnalysisResult] = useState<FiveViewAnalysisResult | null>(null);
-  const [fiveViewPhotos, setFiveViewPhotos] = useState<Record<string, string> | null>(null);
+  const [frontPhotoUrl, setFrontPhotoUrl] = useState<string | null>(null);
 
   // AI 스타일 추천 관련
   const [styleRecommendations, setStyleRecommendations] = useState<StyleRecommendationResult | null>(null);
@@ -72,19 +62,12 @@ export default function CustomerDetailPage() {
     // DB의 sessionNumber가 null이거나 0일 경우 1로 취급하여 필터링
     const sessionRows = consultations.filter(c => (c.sessionNumber || 1) === sessionNum);
 
-    // 1. 5면 분석 결과 복원
+    // 1. 앞면 분석 결과 복원
     const analysisRow = sessionRows.find(c => c.treatmentType === 'five-view-analysis');
     if (analysisRow?.fiveViewAnalysis) {
       setFiveViewAnalysisResult(analysisRow.fiveViewAnalysis);
-      // Photos restoration (map explicitly)
-      if (analysisRow.photos) {
-        setFiveViewPhotos({
-          front: analysisRow.photos.front ?? '',
-          back: analysisRow.photos.back ?? '',
-          left: analysisRow.photos.left ?? '',
-          right: analysisRow.photos.right ?? '',
-          top: analysisRow.photos.top ?? '',
-        });
+      if (analysisRow.photos?.front) {
+        setFrontPhotoUrl(analysisRow.photos.front);
       }
     }
 
@@ -131,7 +114,7 @@ export default function CustomerDetailPage() {
     setLoading(false);
   };
 
-  const handlePhotoSelect = (file: File, position: 'front' | 'back' | 'left' | 'right' | 'top') => {
+  const handlePhotoSelect = (file: File) => {
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       alert("이미지는 10MB 이하여야 합니다.");
@@ -144,22 +127,18 @@ export default function CustomerDetailPage() {
       return;
     }
 
-    setSelectedPhotos((prev) => ({ ...prev, [position]: file }));
+    setSelectedPhoto(file);
   };
 
   const handleFiveViewAnalysis = async () => {
-    if (!selectedPhotos.front || !selectedPhotos.back || !selectedPhotos.left || !selectedPhotos.right || !selectedPhotos.top) {
-      alert("앞면, 뒷면, 좌측, 우측, 윗면 사진 5장을 모두 선택해주세요.");
+    if (!selectedPhoto) {
+      alert("앞면 사진을 선택해주세요.");
       return;
     }
 
     setAnalyzing(true);
     const formData = new FormData();
-    formData.append("front", selectedPhotos.front);
-    formData.append("back", selectedPhotos.back);
-    formData.append("left", selectedPhotos.left);
-    formData.append("right", selectedPhotos.right);
-    formData.append("top", selectedPhotos.top);
+    formData.append("front", selectedPhoto);
 
     const res = await fetch(`/api/customers/${id}/five-view-analysis`, {
       method: "POST",
@@ -169,11 +148,11 @@ export default function CustomerDetailPage() {
 
     if (result.data) {
       setFiveViewAnalysisResult(result.data.analysis);
-      setFiveViewPhotos(result.data.photos);
+      setFrontPhotoUrl(result.data.photos?.front ?? null);
       await fetchData();
-      setSelectedPhotos({});
-      alert("5면 사진 종합 분석이 완료되었습니다! AI 스타일 추천 탭으로 이동합니다.");
-      setActiveTab("style"); // 자동으로 스타일 추천 탭으로 전환
+      setSelectedPhoto(null);
+      alert("AI 종합 분석이 완료되었습니다! AI 스타일 추천 탭으로 이동합니다.");
+      setActiveTab("style");
     } else if (result.error?.code === "USAGE_LIMIT") {
       setLimitMessage(result.error.message);
       setShowLimitModal(true);
@@ -192,7 +171,7 @@ export default function CustomerDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fiveViewAnalysis: analysis,
-          frontPhotoUrl: fiveViewPhotos?.front,
+          frontPhotoUrl: frontPhotoUrl,
         }),
       });
 
@@ -376,68 +355,61 @@ export default function CustomerDetailPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Tab 1: AI 종합 분석 (5면 사진) */}
+          {/* Tab 1: AI 종합 분석 */}
           <TabsContent value="analysis" className="mt-6 space-y-6">
             <div className="space-y-8">
               <div>
-                <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-4 font-bold">5면 사진 업로드</h2>
-                <div className="grid sm:grid-cols-5 gap-4">
-                  {(['front', 'back', 'left', 'right', 'top'] as const).map((position) => {
-                    const labels = { front: '앞면', back: '뒷면', left: '좌측', right: '우측', top: '윗면' };
-                    const refs = { front: frontInputRef, back: backInputRef, left: leftInputRef, right: rightInputRef, top: topInputRef };
-                    const selected = selectedPhotos[position];
-
-                    return (
-                      <div key={position}>
-                        <input
-                          ref={refs[position]}
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handlePhotoSelect(file, position);
-                            e.target.value = "";
-                          }}
-                          className="hidden"
-                        />
-                        <button
-                          onClick={() => refs[position].current?.click()}
-                          className="w-full aspect-square border-2 border-dashed border-gold/30 hover:border-gold/60 transition-all flex flex-col items-center justify-center gap-3 group relative overflow-hidden"
-                        >
-                          {selected ? (
-                            <div className="absolute inset-0">
-                              <Image
-                                src={URL.createObjectURL(selected)}
-                                alt={labels[position]}
-                                fill
-                                className="object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gold/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-[13px] text-white font-bold tracking-[2px]">변경</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <span className="text-[32px] text-gold/50 group-hover:text-gold transition-colors">+</span>
-                              <span className="text-[12px] text-white/50 font-bold tracking-[2px]">{labels[position]}</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })}
+                <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-4 font-bold">고객 사진 업로드</h2>
+                <div className="flex justify-center">
+                  <div className="w-full max-w-sm">
+                    <input
+                      ref={frontInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePhotoSelect(file);
+                        e.target.value = "";
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => frontInputRef.current?.click()}
+                      className="w-full aspect-[3/4] border-2 border-dashed border-gold/30 hover:border-gold/60 transition-all flex flex-col items-center justify-center gap-3 group relative overflow-hidden"
+                    >
+                      {selectedPhoto ? (
+                        <div className="absolute inset-0">
+                          <Image
+                            src={URL.createObjectURL(selectedPhoto)}
+                            alt="앞면 사진"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gold/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-[13px] text-white font-bold tracking-[2px]">변경</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-[40px] text-gold/50 group-hover:text-gold transition-colors">📷</span>
+                          <span className="text-[13px] text-white/50 font-bold tracking-[2px]">앞면 사진</span>
+                          <span className="text-[11px] text-white/30 font-light">클릭하여 업로드</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <button
                   onClick={handleFiveViewAnalysis}
-                  disabled={analyzing || !selectedPhotos.front || !selectedPhotos.back || !selectedPhotos.left || !selectedPhotos.right || !selectedPhotos.top}
+                  disabled={analyzing || !selectedPhoto}
                   className="w-full mt-6 px-8 py-5 bg-gold text-charcoal font-bold text-[13px] tracking-[2px] uppercase hover:bg-gold/90 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 >
-                  {analyzing ? "AI 종합 분석 중..." : "5면 사진 종합 분석 시작"}
+                  {analyzing ? "AI 종합 분석 중..." : "AI 종합 분석 시작"}
                 </button>
                 <p className="text-[12px] text-white/30 font-light mt-3 text-center">
-                  앞/뒤/좌/우/윗 사진 5장을 모두 촬영하면, AI가 두상 형태, 모발 밀도 분포, 손상도를 종합 분석합니다.
+                  앞면 사진 1장으로 AI가 얼굴형, 두상 형태, 모발 상태, 손상도를 종합 분석합니다.
                 </p>
               </div>
 
@@ -458,10 +430,10 @@ export default function CustomerDetailPage() {
                           AI 종합 분석 중
                         </p>
                         <p className="text-[13px] text-white/40 font-light">
-                          두상 형태, 모발 밀도 분포, 손상도를 정밀 분석 중입니다...
+                          얼굴형, 두상 형태, 모발 상태를 분석 중입니다...
                         </p>
                         <p className="text-[11px] text-white/20 font-light mt-2">
-                          약 15~30초 정도 소요됩니다
+                          약 10~20초 정도 소요됩니다
                         </p>
                       </div>
                     </div>
@@ -471,7 +443,7 @@ export default function CustomerDetailPage() {
 
               <div className="border border-gold/10 p-16 text-center">
                 <p className="font-heading text-[24px] font-light text-white/40 mb-2">
-                  5면 사진 분석 결과
+                  AI 종합 분석 결과
                 </p>
                 <p className="text-[13px] text-white/30 font-light">
                   위 버튼으로 첫 분석을 시작해보세요.
@@ -536,7 +508,7 @@ export default function CustomerDetailPage() {
 
                 {/* 스켈레톤 카드 */}
                 <div className="grid sm:grid-cols-2 gap-6">
-                  {[1, 2, 3].map((i) => (
+                  {[1, 2].map((i) => (
                     <div key={i} className="border border-gold/10 overflow-hidden animate-pulse">
                       <div className="aspect-square bg-gold/5" />
                       <div className="p-6 space-y-3">

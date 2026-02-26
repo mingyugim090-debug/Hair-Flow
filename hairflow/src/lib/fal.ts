@@ -149,9 +149,9 @@ export async function generateHairImageFromFace(
             input: {
                 prompt: `Keep the exact same face, facial features, skin tone, and identity. Only change the hairstyle: ${hairStylePrompt}. Same person, same face, different hair only. Professional salon portrait, studio lighting, fashion magazine quality, no text, no watermarks.`,
                 image_url: faceImageUrl,
-                strength: 0.45,          // 낮을수록 원본 얼굴 보존 (0.45 = 얼굴 최대한 유지, 헤어만 변경)
-                num_inference_steps: 28,
-                guidance_scale: 3.5,
+                strength: 0.35,          // 낮을수록 원본 얼굴 보존 (0.35 = 최대 보존, 헤어만 변경)
+                num_inference_steps: 30,
+                guidance_scale: 4.0,
                 num_images: 1,
                 output_format: 'jpeg' as const,
             },

@@ -180,13 +180,13 @@ export const THREE_VIEW_ANALYSIS_USER_PROMPT = `3장의 사진(앞면, 뒷면, �
   "comprehensiveAdvice": "종합 조언: 얼굴형과 모발 상태를 고려한 전체적인 스타일링 방향 제시 (3-5문장)"
 }`;
 
-// 5면 사진 종합 분석 프롬프트 (앞/뒤/좌/우/윗)
+// 앞면 사진 분석 프롬프트
 export const FIVE_VIEW_ANALYSIS_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너이자 모발 과학 전문가입니다.
-고객의 앞면, 뒷면, 좌측면, 우측면, 윗면(정수리) 사진 5장을 종합 분석하여, 두상 전체의 형태, 모발 밀도 분포, 손상도를 정밀 진단합니다.
+고객의 앞면 사진 1장을 정밀 분석하여, 얼굴형, 두상 형태, 모발 상태, 손상도를 진단합니다.
 
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
 
-export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `5장의 사진(앞면, 뒷면, 좌측면, 우측면, 윗면)을 통해 고객의 두상 형태, 모발 밀도 분포, 손상도를 종합 분석해주세요.
+export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `고객의 앞면 사진 1장을 분석하여 얼굴형, 두상 형태, 모발 상태, 손상도를 진단해주세요.
 
 반드시 아래 JSON 형식으로만 응답하세요:
 
@@ -198,18 +198,18 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `5장의 사진(앞면, 뒷면, �
   },
   "hairDensityDistribution": {
     "front": "앞머리 밀도 (높음/보통/낮음)",
-    "back": "뒷머리 밀도 (높음/보통/낮음)",
-    "left": "왼쪽 밀도 (높음/보통/낮음)",
-    "right": "오른쪽 밀도 (높음/보통/낮음)",
-    "top": "정수리 밀도 (높음/보통/낮음)",
+    "back": "뒷머리 밀도 추정 (높음/보통/낮음)",
+    "left": "왼쪽 밀도 추정 (높음/보통/낮음)",
+    "right": "오른쪽 밀도 추정 (높음/보통/낮음)",
+    "top": "정수리 밀도 추정 (높음/보통/낮음)",
     "overallPattern": "전체적인 밀도 패턴 설명 (2-3문장)"
   },
   "damageAnalysis": {
     "overallLevel": "전체 손상도 (1~5 단계)",
     "frontDamage": "앞머리 손상도 설명",
-    "backDamage": "뒷머리 손상도 설명",
-    "sideDamage": "옆머리 손상도 설명",
-    "topDamage": "정수리 손상도 설명",
+    "backDamage": "뒷머리 손상도 추정",
+    "sideDamage": "옆머리 손상도 추정",
+    "topDamage": "정수리 손상도 추정",
     "summary": "손상도 종합 평가 (3-4문장)"
   },
   "faceShape": {
@@ -217,7 +217,7 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `5장의 사진(앞면, 뒷면, �
     "description": "얼굴형 특징 설명 (2-3문장)",
     "confidence": 85
   },
-  "comprehensiveAdvice": "5면 사진 분석을 바탕으로 한 종합 조언 (4-6문장)"
+  "comprehensiveAdvice": "앞면 사진 분석을 바탕으로 한 종합 조언 (4-6문장)"
 }`;
 
 // AI 스타일 추천 프롬프트
