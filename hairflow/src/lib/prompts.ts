@@ -222,7 +222,8 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `고객의 앞면 사진 1장을 �
 
 // AI 스타일 추천 프롬프트
 export const STYLE_RECOMMENDATION_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너입니다.
-고객의 실제 사진과 5면 분석 결과를 바탕으로, 얼굴형·두상·모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 2가지를 추천합니다.
+고객의 실제 사진과 5면 분석 결과를 바탕으로, 얼굴형·두상·모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 1가지를 추천합니다.
+추천과 함께 실전적인 스타일링 팁, 홈케어 조언, 미용실 주문 팁을 제공합니다.
 
 ★ imagePrompt 핵심 규칙 (매우 중요):
 imagePrompt는 고객 사진에 헤어스타일을 직접 합성하는 AI(image-to-image)에 사용됩니다.
@@ -241,7 +242,8 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
 모발 밀도: ${analysisResult.hairDensityDistribution.overallPattern}
 손상도: ${analysisResult.damageAnalysis.overallLevel}
 
-이 고객에게 가장 잘 어울리는 헤어 스타일 2가지를 추천해주세요.
+이 고객에게 가장 잘 어울리는 헤어 스타일 1가지만 추천해주세요.
+추천과 함께 실전적인 스타일링 팁, 홈케어 조언, 미용실 주문 팁을 반드시 포함해주세요.
 
 ★ imagePrompt 작성 규칙 (매우 중요):
 - imagePrompt는 고객 사진에 헤어스타일을 합성하는 AI에 사용됩니다 (얼굴은 원본 사진에서 유지됨)
@@ -263,7 +265,10 @@ export function getStyleRecommendationPrompt(analysisResult: any): string {
       "suitability": 95,
       "difficulty": "easy | medium | hard 중 택1",
       "estimatedTime": "예상 시술 시간 (예: 1시간 30분)",
-      "matchReason": "고객에게 잘 어울리는 이유 (얼굴형, 두상, 모발 상태 근거, 반드시 한국어로 작성)"
+      "matchReason": "고객에게 잘 어울리는 이유 (얼굴형, 두상, 모발 상태 근거, 반드시 한국어로 작성)",
+      "stylingTips": ["매일 스타일링하는 구체적인 방법/팁 (예: 드라이 시 앞머리를 손가락으로 감아 볼륨감 연출)", "사용하면 좋은 제품 추천과 사용법", "간단한 변형 스타일링 제안"],
+      "dailyCareTips": ["이 스타일 유지를 위한 홈케어 팁 (예: 주 2회 헤어팩 사용 권장)", "피해야 할 습관", "추천 샴푸/트리트먼트 종류"],
+      "orderTip": "미용실에서 이 스타일을 주문할 때 디자이너에게 전달할 핵심 포인트 (예: '옆은 3cm 정도 남기고 투블럭으로, 윗머리는 텍스처 살려서 레이어드해주세요')"
     }
   ],
   "faceShapeNote": "얼굴형과 두상에 맞는 추가 조언 (2-3문장)"

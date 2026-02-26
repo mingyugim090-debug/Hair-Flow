@@ -506,23 +506,21 @@ export default function CustomerDetailPage() {
                   </div>
                 </div>
 
-                {/* 스켈레톤 카드 */}
-                <div className="grid sm:grid-cols-2 gap-6">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="border border-gold/10 overflow-hidden animate-pulse">
-                      <div className="aspect-square bg-gold/5" />
-                      <div className="p-6 space-y-3">
-                        <div className="flex justify-between">
-                          <div className="h-4 bg-gold/10 rounded w-24" />
-                          <div className="h-4 bg-gold/10 rounded w-16" />
-                        </div>
-                        <div className="space-y-2">
-                          <div className="h-3 bg-white/5 rounded w-full" />
-                          <div className="h-3 bg-white/5 rounded w-3/4" />
-                        </div>
+                {/* 스켈레톤 카드 - 1개 */}
+                <div className="max-w-lg mx-auto">
+                  <div className="border border-gold/10 overflow-hidden animate-pulse">
+                    <div className="aspect-square bg-gold/5" />
+                    <div className="p-6 space-y-3">
+                      <div className="flex justify-between">
+                        <div className="h-4 bg-gold/10 rounded w-24" />
+                        <div className="h-4 bg-gold/10 rounded w-16" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-white/5 rounded w-full" />
+                        <div className="h-3 bg-white/5 rounded w-3/4" />
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             ) : styleRecommendations ? (
@@ -536,14 +534,14 @@ export default function CustomerDetailPage() {
 
                 <div>
                   <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-4 font-bold">
-                    추천 스타일 ({styleRecommendations.recommendations.length}개)
+                    AI 추천 스타일
                   </h3>
                   {imageGenerationFailed && (
                     <div className="mb-4 p-3 bg-amber-900/30 border border-amber-500/30 rounded text-amber-200 text-[12px]">
                       ⚠️ 이미지 생성에 일부 실패했습니다. AI 분석 결과는 아래 텍스트로 확인할 수 있습니다.
                     </div>
                   )}
-                  <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="max-w-lg mx-auto">
                     {styleRecommendations.recommendations.map((style) => (
                       <motion.div
                         key={style.id}
@@ -604,6 +602,54 @@ export default function CustomerDetailPage() {
                     ))}
                   </div>
                 </div>
+
+                {/* 실전 팁 섹션 */}
+                {styleRecommendations.recommendations[0] && (
+                  <div className="space-y-4">
+                    {/* 스타일링 팁 */}
+                    {styleRecommendations.recommendations[0].stylingTips && styleRecommendations.recommendations[0].stylingTips.length > 0 && (
+                      <div className="border border-gold/10 p-6">
+                        <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">💇 스타일링 팁</h3>
+                        <ul className="space-y-2">
+                          {styleRecommendations.recommendations[0].stylingTips.map((tip, i) => (
+                            <li key={i} className="text-[13px] text-white/60 font-light flex items-start gap-2">
+                              <span className="text-gold mt-0.5">•</span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* 홈케어 팁 */}
+                    {styleRecommendations.recommendations[0].dailyCareTips && styleRecommendations.recommendations[0].dailyCareTips.length > 0 && (
+                      <div className="border border-gold/10 p-6">
+                        <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">🏠 홈케어 가이드</h3>
+                        <ul className="space-y-2">
+                          {styleRecommendations.recommendations[0].dailyCareTips.map((tip, i) => (
+                            <li key={i} className="text-[13px] text-white/60 font-light flex items-start gap-2">
+                              <span className="text-gold mt-0.5">•</span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* 미용실 주문 팁 */}
+                    {styleRecommendations.recommendations[0].orderTip && (
+                      <div className="border border-gold p-6 bg-gold/5">
+                        <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">🗣️ 미용실 주문 팁</h3>
+                        <p className="text-[14px] text-white/80 font-light leading-relaxed italic">
+                          &ldquo;{styleRecommendations.recommendations[0].orderTip}&rdquo;
+                        </p>
+                        <p className="text-[11px] text-white/30 font-light mt-2">
+                          위 문구를 디자이너에게 전달하면 원하는 스타일을 정확하게 소통할 수 있습니다.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {styleRecommendations.faceShapeNote && (
                   <div className="border border-gold/10 p-6">

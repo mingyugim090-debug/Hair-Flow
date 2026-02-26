@@ -240,13 +240,16 @@ export interface FiveViewAnalysisResult {
 export interface StyleRecommendation {
   id: string;
   name: string; // "레이어드 숏컷"
-  imageUrl: string; // DALL-E 3 생성 이미지
+  imageUrl: string; // AI 생성 이미지
   imagePrompt: string; // 생성에 사용된 프롬프트
   description: string; // 스타일 설명
   suitability: number; // 0-100 어울림 점수
   difficulty: 'easy' | 'medium' | 'hard'; // 시술 난이도
   estimatedTime: string; // "1시간 30분"
   matchReason: string; // 고객에게 잘 어울리는 이유
+  stylingTips?: string[]; // 매일 스타일링 팁
+  dailyCareTips?: string[]; // 홈케어 팁
+  orderTip?: string; // 미용실 주문 시 핵심 포인트
 }
 
 export interface StyleRecommendationResult {

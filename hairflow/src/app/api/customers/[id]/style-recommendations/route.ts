@@ -16,6 +16,9 @@ interface StyleRecommendationResponse {
     difficulty: 'easy' | 'medium' | 'hard';
     estimatedTime: string;
     matchReason: string;
+    stylingTips?: string[];
+    dailyCareTips?: string[];
+    orderTip?: string;
   }[];
   faceShapeNote: string;
 }
@@ -188,6 +191,9 @@ export async function POST(
             difficulty: rec.difficulty,
             estimatedTime: rec.estimatedTime,
             matchReason: rec.matchReason,
+            stylingTips: rec.stylingTips,
+            dailyCareTips: rec.dailyCareTips,
+            orderTip: rec.orderTip,
           };
         } catch (error) {
           console.error(`스타일 이미지 생성 실패 (${rec.name}):`, error);
@@ -201,6 +207,9 @@ export async function POST(
             difficulty: rec.difficulty,
             estimatedTime: rec.estimatedTime,
             matchReason: rec.matchReason,
+            stylingTips: rec.stylingTips,
+            dailyCareTips: rec.dailyCareTips,
+            orderTip: rec.orderTip,
           };
         }
       })
