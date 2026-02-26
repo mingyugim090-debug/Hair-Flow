@@ -130,14 +130,15 @@ export async function generateStyledFaceImage(
 }
 
 /**
- * FLUX.1 Dev image-to-image를 사용하여 고객 얼굴 사진에서 헤어스타일만 변경합니다.
- * strength=0.55로 얼굴을 그대로 유지하면서 헤어스타일만 변환합니다.
+ * fal-ai/image-editing/hair-change 전용 모델을 사용하여
+ * 고객 얼굴 사진에서 얼굴은 100% 보존하고 헤어스타일만 변경합니다.
  * 실패 시 빈 문자열을 반환합니다 (throw 하지 않음).
  */
 export async function generateHairImageFromFace(
     faceImageUrl: string,
     hairStylePrompt: string,
-    size: 'square_hd' | 'square' | 'portrait_4_3' | 'landscape_4_3' = 'square_hd'
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _size?: 'square_hd' | 'square' | 'portrait_4_3' | 'landscape_4_3'
 ): Promise<string> {
     if (!process.env.FAL_KEY) {
         console.warn('FAL_KEY 환경변수 미설정 — 얼굴 기반 이미지 생성 건너뜀');
@@ -145,14 +146,13 @@ export async function generateHairImageFromFace(
     }
 
     try {
-        const result = await fal.subscribe('fal-ai/flux/dev/image-to-image', {
+        const result = await fal.subscribe('fal-ai/image-editing/hair-change', {
             input: {
-                prompt: `Keep the exact same face, facial features, skin tone, and identity. Only change the hairstyle: ${hairStylePrompt}. Same person, same face, different hair only. Professional salon portrait, studio lighting, fashion magazine quality, no text, no watermarks.`,
                 image_url: faceImageUrl,
-                strength: 0.35,          // 낮을수록 원본 얼굴 보존 (0.35 = 최대 보존, 헤어만 변경)
+                prompt: hairStylePrompt,
+                guidance_scale: 3.5,
                 num_inference_steps: 30,
-                guidance_scale: 4.0,
-                num_images: 1,
+                safety_tolerance: '5' as const,
                 output_format: 'jpeg' as const,
             },
         });
@@ -161,7 +161,7 @@ export async function generateHairImageFromFace(
         return data.images?.[0]?.url ?? '';
     } catch (error) {
         const userMessage = classifyFalError(error);
-        console.error('FLUX Dev image-to-image 실패:', userMessage, error);
+        console.error('Hair-change 이미지 생성 실패:', userMessage, error);
         return '';
     }
 }
