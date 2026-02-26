@@ -220,58 +220,43 @@ export const FIVE_VIEW_ANALYSIS_USER_PROMPT = `고객의 앞면 사진 1장을 �
   "comprehensiveAdvice": "앞면 사진 분석을 바탕으로 한 종합 조언 (4-6문장)"
 }`;
 
-// AI 스타일 추천 프롬프트
+// AI 스타일 분석 프롬프트 (선택된 스타일 기반)
 export const STYLE_RECOMMENDATION_SYSTEM_PROMPT = `당신은 20년 경력의 최고급 헤어 디자이너입니다.
-고객의 실제 사진과 5면 분석 결과를 바탕으로, 얼굴형·두상·모발 상태를 고려하여 가장 잘 어울리는 헤어 스타일 1가지를 추천합니다.
-추천과 함께 실전적인 스타일링 팁, 홈케어 조언, 미용실 주문 팁을 제공합니다.
-
-★ imagePrompt 핵심 규칙 (매우 중요):
-imagePrompt는 고객 사진에 헤어스타일을 직접 합성하는 AI(image-to-image)에 사용됩니다.
-따라서 imagePrompt에는 헤어스타일만 영어로 묘사하세요. 인물 특징(성별, 인종, 피부톤, 얼굴형)은 절대 포함하지 마세요.
-모발의 길이, 질감, 컬러, 볼륨, 레이어, 컷 방식, 스타일링을 구체적으로 묘사하세요.
-예: "Textured medium-length layered cut, natural dark brown hair, soft waves at ends, side-swept bangs, slight undercut on sides, casual natural finish"
-예: "Short two-block cut with undercut sides, slightly longer top, dark black hair, clean and polished finish, light hold product"
+고객의 사진과 분석 결과를 바탕으로, 고객이 선택한 헤어스타일이 이 고객에게 얼마나 잘 어울리는지 분석합니다.
+결과는 헤어 디자이너가 시술 시 참고할 수 있는 실전적이고 간결한 내용으로 작성합니다.
+불필요한 미사여구 없이 핵심만 전달하세요.
 
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 포함하지 마세요.`;
 
-export function getStyleRecommendationPrompt(analysisResult: any): string {
+export function getStyleRecommendationPrompt(analysisResult: any, selectedStyleName?: string): string {
+  const styleInfo = selectedStyleName ? `\n선택한 스타일: ${selectedStyleName}` : '';
   return `아래는 고객의 5면 사진 분석 결과입니다:
 
 얼굴형: ${analysisResult.faceShape.type}
 두상 형태: ${analysisResult.headShape.type}
 모발 밀도: ${analysisResult.hairDensityDistribution.overallPattern}
-손상도: ${analysisResult.damageAnalysis.overallLevel}
+손상도: ${analysisResult.damageAnalysis.overallLevel}${styleInfo}
 
-이 고객에게 가장 잘 어울리는 헤어 스타일 1가지만 추천해주세요.
-추천과 함께 실전적인 스타일링 팁, 홈케어 조언, 미용실 주문 팁을 반드시 포함해주세요.
-
-★ imagePrompt 작성 규칙 (매우 중요):
-- imagePrompt는 고객 사진에 헤어스타일을 합성하는 AI에 사용됩니다 (얼굴은 원본 사진에서 유지됨)
-- 인물 특징(성별, 인종, 피부톤, 나이대)은 절대 포함하지 마세요
-- 헤어스타일만 영어로 구체적으로 묘사하세요: 길이, 질감, 컬러, 볼륨, 레이어, 컷 방식, 스타일링
-- 예: "Textured medium-length layered haircut, natural dark brown hair color, soft waves at ends, side-swept bangs, slight undercut on sides"
-- 예: "Short two-block cut with undercut sides, black hair, polished finish, light natural styling"
+이 고객에게 선택된 스타일이 얼마나 잘 어울리는지 분석하고, 시술 시 핵심 포인트를 알려주세요.
 
 반드시 아래 JSON 형식으로만 응답하세요:
 
 {
-  "currentAnalysis": "현재 고객의 헤어 상태 종합 분석 (2-3문장)",
+  "currentAnalysis": "현재 고객 모발 상태 핵심 요약 (1-2문장, 간결하게)",
   "recommendations": [
     {
       "id": "style-1",
-      "name": "스타일 이름 (예: 레이어드 숏컷)",
-      "imagePrompt": "[헤어스타일만 영어로 묘사: 길이/질감/컬러/볼륨/레이어/스타일링. 인물 특징 제외]",
-      "description": "스타일 설명 (3-4문장, 특징과 효과, 반드시 한국어로 작성)",
-      "suitability": 95,
+      "name": "${selectedStyleName || '추천 스타일'}",
+      "imagePrompt": "not used",
+      "description": "이 스타일이 고객에게 주는 효과 (2문장 이내, 핵심만)",
+      "suitability": 85,
       "difficulty": "easy | medium | hard 중 택1",
-      "estimatedTime": "예상 시술 시간 (예: 1시간 30분)",
-      "matchReason": "고객에게 잘 어울리는 이유 (얼굴형, 두상, 모발 상태 근거, 반드시 한국어로 작성)",
-      "stylingTips": ["매일 스타일링하는 구체적인 방법/팁 (예: 드라이 시 앞머리를 손가락으로 감아 볼륨감 연출)", "사용하면 좋은 제품 추천과 사용법", "간단한 변형 스타일링 제안"],
-      "dailyCareTips": ["이 스타일 유지를 위한 홈케어 팁 (예: 주 2회 헤어팩 사용 권장)", "피해야 할 습관", "추천 샴푸/트리트먼트 종류"],
-      "orderTip": "미용실에서 이 스타일을 주문할 때 디자이너에게 전달할 핵심 포인트 (예: '옆은 3cm 정도 남기고 투블럭으로, 윗머리는 텍스처 살려서 레이어드해주세요')"
+      "estimatedTime": "예상 시술 시간",
+      "matchReason": "이 얼굴형/두상에 어울리는 구체적 이유 (1-2문장)",
+      "designerNote": "시술 시 주의할 핵심 포인트 (예: 앞머리 길이 눈썹 아래로, 옆볼륨 최소화 등 1-2문장)"
     }
   ],
-  "faceShapeNote": "얼굴형과 두상에 맞는 추가 조언 (2-3문장)"
+  "faceShapeNote": "이 얼굴형에 맞는 커트 핵심 포인트 (1문장)"
 }`;
 }
 

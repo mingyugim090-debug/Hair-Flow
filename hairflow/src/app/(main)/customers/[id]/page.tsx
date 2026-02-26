@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { UsageLimitModal } from "@/components/UsageLimitModal";
+import { getStylesByCategory } from "@/lib/hairStyles";
+import type { HairStyleOption } from "@/lib/hairStyles";
 import type {
   Customer,
   Consultation,
@@ -49,6 +51,10 @@ export default function CustomerDetailPage() {
   const [styleRecipe, setStyleRecipe] = useState<StyleBasedRecipeResult | null>(null);
   const [loadingRecipe, setLoadingRecipe] = useState(false);
   const [imageGenerationFailed, setImageGenerationFailed] = useState(false);
+
+  // 헤어스타일 카탈로그 선택
+  const [catalogGender, setCatalogGender] = useState<'M' | 'F'>('M');
+  const [selectedCatalogStyle, setSelectedCatalogStyle] = useState<HairStyleOption | null>(null);
 
   // 미래 예측 타임라인 관련
   const completedPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -162,9 +168,11 @@ export default function CustomerDetailPage() {
     setAnalyzing(false);
   };
 
-  // AI 스타일 추천 자동 호출
-  const handleStyleRecommendation = async (analysis: FiveViewAnalysisResult) => {
+  // 선택된 스타일로 이미지 생성 + AI 분석
+  const handleStyleRecommendation = async (analysis: FiveViewAnalysisResult, style?: HairStyleOption) => {
+    if (!style) return;
     setLoadingStyles(true);
+    setImageGenerationFailed(false);
     try {
       const res = await fetch(`/api/customers/${id}/style-recommendations`, {
         method: "POST",
@@ -172,6 +180,8 @@ export default function CustomerDetailPage() {
         body: JSON.stringify({
           fiveViewAnalysis: analysis,
           frontPhotoUrl: frontPhotoUrl,
+          selectedStyleName: style.name,
+          selectedStyleNameEn: style.nameEn,
         }),
       });
 
@@ -191,11 +201,11 @@ export default function CustomerDetailPage() {
         setLimitMessage(result.error.message);
         setShowLimitModal(true);
       } else {
-        alert(result.error?.message ?? "스타일 추천에 실패했습니다.");
+        alert(result.error?.message ?? "스타일 이미지 생성에 실패했습니다.");
       }
     } catch (error) {
-      console.error('스타일 추천 생성 오류:', error);
-      alert("스타일 추천 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      console.error('스타일 이미지 생성 오류:', error);
+      alert("이미지 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setLoadingStyles(false);
     }
@@ -265,12 +275,7 @@ export default function CustomerDetailPage() {
     setLoadingTimeline(false);
   };
 
-  // 스타일 추천 탭 진입 시 자동으로 추천 생성
-  useEffect(() => {
-    if (activeTab === "style" && fiveViewAnalysisResult && !styleRecommendations && !loadingStyles) {
-      handleStyleRecommendation(fiveViewAnalysisResult);
-    }
-  }, [activeTab, fiveViewAnalysisResult]);
+  // (자동 추천 제거 — 고객이 스타일을 직접 선택하는 방식으로 변경)
 
   if (loading) {
     return (
@@ -452,15 +457,15 @@ export default function CustomerDetailPage() {
             </div>
           </TabsContent>
 
-          {/* Tab 2: AI 스타일 추천 */}
+          {/* Tab 2: AI 스타일 시뮬레이션 */}
           <TabsContent value="style" className="mt-6 space-y-6">
             {!fiveViewAnalysisResult ? (
               <div className="border border-gold/10 p-16 text-center">
                 <p className="font-heading text-[24px] font-light text-white/40 mb-2">
-                  AI 스타일 추천
+                  AI 스타일 시뮬레이션
                 </p>
                 <p className="text-[13px] text-white/30 font-light mb-4">
-                  먼저 AI 종합 분석을 진행하면, AI가 고객 얼굴에 맞는 스타일을 추천합니다.
+                  먼저 AI 종합 분석을 진행한 후, 원하는 헤어스타일을 선택하세요.
                 </p>
                 <button
                   onClick={() => setActiveTab("analysis")}
@@ -469,197 +474,176 @@ export default function CustomerDetailPage() {
                   AI 종합 분석으로 이동
                 </button>
               </div>
-            ) : loadingStyles ? (
+            ) : (
               <div className="space-y-6">
-                {/* 프로그레스 스텝 */}
-                <div className="border border-gold/20 p-8">
-                  <div className="flex flex-col items-center gap-6">
-                    <p className="font-heading text-[18px] font-light text-gold">
-                      AI 스타일 추천 생성 중
-                    </p>
-                    <div className="w-full max-w-md space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center animate-pulse">
-                          <span className="text-[14px]">📊</span>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-[13px] text-gold font-medium">얼굴형 · 모질 분석 중...</p>
-                          <div className="mt-1 h-1 bg-gold/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-gold rounded-full animate-[loading_2s_ease-in-out_infinite]" style={{ width: '80%' }} />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 opacity-50">
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                          <span className="text-[14px]">🎨</span>
-                        </div>
-                        <p className="text-[13px] text-white/40 font-light">스타일 이미지 생성 대기 중</p>
-                      </div>
-                      <div className="flex items-center gap-3 opacity-30">
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                          <span className="text-[14px]">✅</span>
-                        </div>
-                        <p className="text-[13px] text-white/30 font-light">완료</p>
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-white/20 font-light">약 30~60초 소요</p>
-                  </div>
+                {/* 성별 토글 */}
+                <div className="flex gap-2">
+                  {(['M', 'F'] as const).map(g => (
+                    <button
+                      key={g}
+                      onClick={() => { setCatalogGender(g); setSelectedCatalogStyle(null); }}
+                      className={`px-5 py-2 border font-bold text-[12px] tracking-[2px] transition-all ${catalogGender === g
+                        ? 'border-gold bg-gold/20 text-gold'
+                        : 'border-gold/20 text-white/50 hover:border-gold/50'
+                        }`}
+                    >
+                      {g === 'M' ? '남성' : '여성'}
+                    </button>
+                  ))}
                 </div>
 
-                {/* 스켈레톤 카드 - 1개 */}
-                <div className="max-w-lg mx-auto">
-                  <div className="border border-gold/10 overflow-hidden animate-pulse">
-                    <div className="aspect-square bg-gold/5" />
-                    <div className="p-6 space-y-3">
-                      <div className="flex justify-between">
-                        <div className="h-4 bg-gold/10 rounded w-24" />
-                        <div className="h-4 bg-gold/10 rounded w-16" />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-white/5 rounded w-full" />
-                        <div className="h-3 bg-white/5 rounded w-3/4" />
-                      </div>
+                {/* 카테고리별 스타일 목록 */}
+                {getStylesByCategory(catalogGender).map(group => (
+                  <div key={group.category}>
+                    <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">
+                      {group.category}
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {group.styles.map(style => (
+                        <button
+                          key={style.id}
+                          onClick={() => setSelectedCatalogStyle(style)}
+                          disabled={loadingStyles}
+                          className={`border p-3 text-left transition-all ${selectedCatalogStyle?.id === style.id
+                            ? 'border-gold bg-gold/15 text-gold'
+                            : 'border-gold/15 hover:border-gold/40 text-white/70 hover:text-white/90'
+                            } disabled:opacity-40`}
+                        >
+                          <p className="text-[13px] font-bold">{style.name}</p>
+                          <p className="text-[10px] text-white/40 font-light mt-1">{style.description}</p>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : styleRecommendations ? (
-              <div className="space-y-8">
-                <div className="border border-gold/10 p-6">
-                  <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">현재 헤어 분석</h3>
-                  <p className="text-[14px] text-white/70 font-light leading-relaxed">
-                    {styleRecommendations.currentAnalysis}
-                  </p>
-                </div>
+                ))}
 
-                <div>
-                  <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-4 font-bold">
-                    AI 추천 스타일
-                  </h3>
-                  {imageGenerationFailed && (
-                    <div className="mb-4 p-3 bg-amber-900/30 border border-amber-500/30 rounded text-amber-200 text-[12px]">
-                      ⚠️ 이미지 생성에 일부 실패했습니다. AI 분석 결과는 아래 텍스트로 확인할 수 있습니다.
-                    </div>
+                {/* 이미지 생성 버튼 */}
+                <button
+                  onClick={() => selectedCatalogStyle && handleStyleRecommendation(fiveViewAnalysisResult, selectedCatalogStyle)}
+                  disabled={!selectedCatalogStyle || loadingStyles}
+                  className="w-full px-8 py-5 bg-gold text-charcoal font-bold text-[13px] tracking-[2px] uppercase hover:bg-gold/90 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {loadingStyles
+                    ? `${selectedCatalogStyle?.name || '스타일'} 이미지 생성 중...`
+                    : selectedCatalogStyle
+                      ? `${selectedCatalogStyle.name} 시뮬레이션 시작`
+                      : '헤어스타일을 선택하세요'}
+                </button>
+
+                {/* 로딩 */}
+                <AnimatePresence>
+                  {loadingStyles && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="border border-gold/20 p-8"
+                    >
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
+                        <p className="text-[14px] text-gold font-light">
+                          {selectedCatalogStyle?.name} 스타일 이미지 생성 중...
+                        </p>
+                        <p className="text-[11px] text-white/20 font-light">약 30~60초 소요</p>
+                      </div>
+                    </motion.div>
                   )}
-                  <div className="max-w-lg mx-auto">
-                    {styleRecommendations.recommendations.map((style) => (
-                      <motion.div
-                        key={style.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`border cursor-pointer transition-all ${selectedStyle?.id === style.id
-                          ? "border-gold bg-gold/5"
-                          : "border-gold/20 hover:border-gold/50"
-                          }`}
-                        onClick={() => handleStyleSelect(style)}
-                      >
-                        {style.imageUrl ? (
-                          <div className="aspect-square w-full overflow-hidden">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={style.imageUrl}
-                              alt={style.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                const parent = e.currentTarget.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><div class="text-center text-white/30 p-4"><span class="text-3xl block mb-2">✂️</span><span class="text-[11px]">이미지 로딩 실패</span></div></div>';
-                                }
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="aspect-square w-full overflow-hidden bg-white/5 flex items-center justify-center">
-                            <div className="text-center text-white/30 p-4">
-                              <span className="text-3xl block mb-2">✂️</span>
-                              <span className="text-[11px]">이미지 생성 실패</span>
+                </AnimatePresence>
+
+                {/* 결과 표시 */}
+                {styleRecommendations && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    {imageGenerationFailed && (
+                      <div className="p-3 bg-amber-900/30 border border-amber-500/30 rounded text-amber-200 text-[12px]">
+                        ⚠️ 이미지 생성에 실패했습니다. 분석 결과는 텍스트로 확인할 수 있습니다.
+                      </div>
+                    )}
+
+                    {/* 생성된 이미지 */}
+                    <div className="max-w-lg mx-auto">
+                      {styleRecommendations.recommendations.map((style) => (
+                        <div
+                          key={style.id}
+                          className="border border-gold/20 cursor-pointer hover:border-gold/50 transition-all"
+                          onClick={() => handleStyleSelect(style)}
+                        >
+                          {style.imageUrl ? (
+                            <div className="aspect-square w-full overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={style.imageUrl}
+                                alt={style.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><div class="text-center text-white/30 p-4"><span class="text-3xl block mb-2">✂️</span><span class="text-[11px]">이미지 로딩 실패</span></div></div>';
+                                  }
+                                }}
+                              />
                             </div>
-                          </div>
-                        )}
-                        <div className="p-6 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-[16px] font-bold text-gold">{style.name}</h4>
-                            <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] font-bold">
-                              {style.suitability}% 어울림
-                            </Badge>
-                          </div>
-                          <p className="text-[13px] text-white/60 font-light leading-relaxed">
-                            {style.description}
-                          </p>
-                          <div className="flex items-center gap-3 text-[11px] text-white/40 font-light">
-                            <span>난이도: {style.difficulty === 'easy' ? '쉬움' : style.difficulty === 'medium' ? '보통' : '어려움'}</span>
-                            <span>•</span>
-                            <span>예상 시간: {style.estimatedTime}</span>
-                          </div>
-                          <div className="pt-3 border-t border-gold/10">
-                            <p className="text-[12px] text-white/50 font-light">
-                              💡 {style.matchReason}
+                          ) : (
+                            <div className="aspect-square w-full bg-white/5 flex items-center justify-center">
+                              <div className="text-center text-white/30 p-4">
+                                <span className="text-3xl block mb-2">✂️</span>
+                                <span className="text-[11px]">이미지 생성 실패</span>
+                              </div>
+                            </div>
+                          )}
+                          <div className="p-5 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-[16px] font-bold text-gold">{style.name}</h4>
+                              <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] font-bold">
+                                {style.suitability}% 어울림
+                              </Badge>
+                            </div>
+                            <p className="text-[13px] text-white/60 font-light leading-relaxed">
+                              {style.description}
                             </p>
+                            <div className="flex items-center gap-3 text-[11px] text-white/40">
+                              <span>난이도: {style.difficulty === 'easy' ? '쉬움' : style.difficulty === 'medium' ? '보통' : '어려움'}</span>
+                              <span>•</span>
+                              <span>{style.estimatedTime}</span>
+                            </div>
+                            {style.matchReason && (
+                              <p className="text-[12px] text-white/50 font-light pt-2 border-t border-gold/10">
+                                💡 {style.matchReason}
+                              </p>
+                            )}
+                            {style.designerNote && (
+                              <p className="text-[12px] text-gold/80 font-medium pt-2 border-t border-gold/10">
+                                ✂️ {style.designerNote}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
+                      ))}
+                    </div>
 
-                {/* 실전 팁 섹션 */}
-                {styleRecommendations.recommendations[0] && (
-                  <div className="space-y-4">
-                    {/* 스타일링 팁 */}
-                    {styleRecommendations.recommendations[0].stylingTips && styleRecommendations.recommendations[0].stylingTips.length > 0 && (
-                      <div className="border border-gold/10 p-6">
-                        <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">💇 스타일링 팁</h3>
-                        <ul className="space-y-2">
-                          {styleRecommendations.recommendations[0].stylingTips.map((tip, i) => (
-                            <li key={i} className="text-[13px] text-white/60 font-light flex items-start gap-2">
-                              <span className="text-gold mt-0.5">•</span>
-                              <span>{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* 홈케어 팁 */}
-                    {styleRecommendations.recommendations[0].dailyCareTips && styleRecommendations.recommendations[0].dailyCareTips.length > 0 && (
-                      <div className="border border-gold/10 p-6">
-                        <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">🏠 홈케어 가이드</h3>
-                        <ul className="space-y-2">
-                          {styleRecommendations.recommendations[0].dailyCareTips.map((tip, i) => (
-                            <li key={i} className="text-[13px] text-white/60 font-light flex items-start gap-2">
-                              <span className="text-gold mt-0.5">•</span>
-                              <span>{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* 미용실 주문 팁 */}
-                    {styleRecommendations.recommendations[0].orderTip && (
-                      <div className="border border-gold p-6 bg-gold/5">
-                        <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">🗣️ 미용실 주문 팁</h3>
-                        <p className="text-[14px] text-white/80 font-light leading-relaxed italic">
-                          &ldquo;{styleRecommendations.recommendations[0].orderTip}&rdquo;
-                        </p>
-                        <p className="text-[11px] text-white/30 font-light mt-2">
-                          위 문구를 디자이너에게 전달하면 원하는 스타일을 정확하게 소통할 수 있습니다.
+                    {styleRecommendations.faceShapeNote && (
+                      <div className="border border-gold/10 p-4">
+                        <p className="text-[12px] text-white/50 font-light">
+                          📐 {styleRecommendations.faceShapeNote}
                         </p>
                       </div>
                     )}
-                  </div>
+
+                    {/* 다른 스타일 시도 버튼 */}
+                    <button
+                      onClick={() => { setStyleRecommendations(null); setSelectedCatalogStyle(null); }}
+                      className="w-full px-6 py-3 border border-gold/30 text-gold font-bold text-[12px] tracking-[2px] uppercase hover:bg-gold/10 transition-all"
+                    >
+                      다른 스타일 시도
+                    </button>
+                  </motion.div>
                 )}
 
-                {styleRecommendations.faceShapeNote && (
-                  <div className="border border-gold/10 p-6">
-                    <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">얼굴형 조언</h3>
-                    <p className="text-[13px] text-white/60 font-light leading-relaxed">
-                      {styleRecommendations.faceShapeNote}
-                    </p>
-                  </div>
-                )}
-
+                {/* 레시피 로딩 */}
                 {loadingRecipe && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
@@ -695,7 +679,7 @@ export default function CustomerDetailPage() {
                           {styleRecipe.selectedStyle.name} 시술 레시피
                         </h3>
                         <p className="text-[12px] text-white/40 font-light">
-                          예상 소요 시간: {styleRecipe.estimatedTotalTime} / 난이도: {styleRecipe.difficulty === 'easy' ? '쉬움' : styleRecipe.difficulty === 'medium' ? '보통' : '어려움'}
+                          {styleRecipe.estimatedTotalTime} / {styleRecipe.difficulty === 'easy' ? '쉬움' : styleRecipe.difficulty === 'medium' ? '보통' : '어려움'}
                         </p>
                       </div>
                     </div>
@@ -744,7 +728,7 @@ export default function CustomerDetailPage() {
                   </motion.div>
                 )}
               </div>
-            ) : null}
+            )}
           </TabsContent>
 
           {/* Tab 3: 미래 예측 */}

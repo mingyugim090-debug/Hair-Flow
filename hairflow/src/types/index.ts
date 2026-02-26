@@ -247,9 +247,7 @@ export interface StyleRecommendation {
   difficulty: 'easy' | 'medium' | 'hard'; // 시술 난이도
   estimatedTime: string; // "1시간 30분"
   matchReason: string; // 고객에게 잘 어울리는 이유
-  stylingTips?: string[]; // 매일 스타일링 팁
-  dailyCareTips?: string[]; // 홈케어 팁
-  orderTip?: string; // 미용실 주문 시 핵심 포인트
+  designerNote?: string; // 시술 핵심 포인트 (디자이너용)
 }
 
 export interface StyleRecommendationResult {

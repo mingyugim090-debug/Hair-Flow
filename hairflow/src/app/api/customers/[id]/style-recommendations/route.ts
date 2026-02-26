@@ -16,9 +16,7 @@ interface StyleRecommendationResponse {
     difficulty: 'easy' | 'medium' | 'hard';
     estimatedTime: string;
     matchReason: string;
-    stylingTips?: string[];
-    dailyCareTips?: string[];
-    orderTip?: string;
+    designerNote?: string;
   }[];
   faceShapeNote: string;
 }
@@ -80,9 +78,11 @@ export async function POST(
 
     // Request body에서 5면 분석 결과 가져오기
     const body = await request.json();
-    const { fiveViewAnalysis, frontPhotoUrl } = body as {
+    const { fiveViewAnalysis, frontPhotoUrl, selectedStyleName, selectedStyleNameEn } = body as {
       fiveViewAnalysis: FiveViewAnalysisResult;
       frontPhotoUrl?: string;
+      selectedStyleName?: string;
+      selectedStyleNameEn?: string;
     };
 
     if (!fiveViewAnalysis) {
@@ -111,10 +111,10 @@ export async function POST(
         },
         {
           type: 'text' as const,
-          text: getStyleRecommendationPrompt(fiveViewAnalysis),
+          text: getStyleRecommendationPrompt(fiveViewAnalysis, selectedStyleName),
         },
       ]
-      : getStyleRecommendationPrompt(fiveViewAnalysis);
+      : getStyleRecommendationPrompt(fiveViewAnalysis, selectedStyleName);
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -149,14 +149,15 @@ export async function POST(
 
     const recommendationsWithImages = await Promise.all(
       styleRecommendation.recommendations.map(async (rec, index) => {
+        // 이미지 생성: selectedStyleNameEn이 있으면 그걸 사용, 없으면 rec.imagePrompt 사용
+        const imagePromptToUse = selectedStyleNameEn || rec.imagePrompt;
         try {
           let generatedImageUrl: string;
 
           if (frontPhotoUrl) {
-            // 얼굴 사진 있음: FLUX Dev image-to-image로 동일 얼굴 유지 + 헤어스타일 변경 (35s 타임아웃)
-            // strength=0.45로 얼굴 최대 보존, IP-Adapter(30~90s)보다 빠름(15~25s)
+            // 얼굴 사진 있음: hair-change 모델로 동일 얼굴 유지 + 헤어스타일 변경
             generatedImageUrl = await Promise.race<string>([
-              generateHairImageFromFace(frontPhotoUrl, rec.imagePrompt),
+              generateHairImageFromFace(frontPhotoUrl, imagePromptToUse),
               new Promise<string>((resolve) => setTimeout(() => resolve(''), 35000)),
             ]);
           } else {
@@ -185,15 +186,13 @@ export async function POST(
             id: rec.id,
             name: rec.name,
             imageUrl: generatedImageUrl,
-            imagePrompt: rec.imagePrompt,
+            imagePrompt: imagePromptToUse,
             description: rec.description,
             suitability: rec.suitability,
             difficulty: rec.difficulty,
             estimatedTime: rec.estimatedTime,
             matchReason: rec.matchReason,
-            stylingTips: rec.stylingTips,
-            dailyCareTips: rec.dailyCareTips,
-            orderTip: rec.orderTip,
+            designerNote: rec.designerNote,
           };
         } catch (error) {
           console.error(`스타일 이미지 생성 실패 (${rec.name}):`, error);
@@ -201,15 +200,13 @@ export async function POST(
             id: rec.id,
             name: rec.name,
             imageUrl: '',
-            imagePrompt: rec.imagePrompt,
+            imagePrompt: imagePromptToUse,
             description: rec.description,
             suitability: rec.suitability,
             difficulty: rec.difficulty,
             estimatedTime: rec.estimatedTime,
             matchReason: rec.matchReason,
-            stylingTips: rec.stylingTips,
-            dailyCareTips: rec.dailyCareTips,
-            orderTip: rec.orderTip,
+            designerNote: rec.designerNote,
           };
         }
       })
