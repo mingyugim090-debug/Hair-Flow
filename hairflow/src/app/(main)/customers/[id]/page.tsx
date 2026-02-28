@@ -181,8 +181,10 @@ export default function CustomerDetailPage() {
       if (result.data.sessionNumber) {
         setCurrentSessionNumber(result.data.sessionNumber);
       }
-      await fetchData();
+      // fetchData() 호출 제거: restoreSession이 fiveViewAnalysisResult를 null로 초기화하는 race condition 방지
       setSelectedPhoto(null);
+      setStyleRecommendations(null);
+      setStyleRecipe(null);
       alert("AI 종합 분석이 완료되었습니다! AI 스타일 추천 탭으로 이동합니다.");
       setActiveTab("style");
     } else if (result.error?.code === "USAGE_LIMIT") {
@@ -1107,15 +1109,12 @@ export default function CustomerDetailPage() {
                       const latestDate = new Date(Math.max(...sessionData.map(c => new Date(c.createdAt).getTime())));
 
                       const hasAnalysis = sessionData.some(c => c.treatmentType === 'five-view-analysis');
-                      const hasStyle = sessionData.some(c => c.treatmentType === 'style-recommendation');
                       const hasRecipe = sessionData.some(c => c.treatmentType === 'style-based-recipe');
                       const hasTimeline = sessionData.some(c => c.treatmentType === 'post-treatment-timeline');
 
-                      // 스타일 추천 이미지 추출
-                      const styleConsultation = sessionData.find(c => c.treatmentType === 'style-recommendation');
-                      const styleImages = styleConsultation?.styleRecommendations?.recommendations?.filter(
-                        (r: StyleRecommendation) => r.imageUrl
-                      ) ?? [];
+                      // 결정된 스타일 (레시피 생성된 스타일) 추출
+                      const recipeConsultation = sessionData.find(c => c.treatmentType === 'style-based-recipe');
+                      const decidedStyle = recipeConsultation?.styleBasedRecipe?.selectedStyle;
 
                       return (
                         <motion.div
@@ -1124,77 +1123,56 @@ export default function CustomerDetailPage() {
                           animate={{ opacity: 1, y: 0 }}
                           className="border border-gold/20 bg-gold/5 overflow-hidden hover:border-gold/50 transition-colors"
                         >
-                          <div className="p-6 space-y-4">
-                            <div className="flex items-start justify-between">
+                          <div className="flex">
+                            {/* 결정된 스타일 이미지 */}
+                            <div className="w-32 sm:w-40 flex-shrink-0">
+                              {decidedStyle?.imageUrl ? (
+                                <div className="aspect-[3/4] w-full overflow-hidden">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={decidedStyle.imageUrl}
+                                    alt={decidedStyle.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                      const parent = e.currentTarget.parentElement;
+                                      if (parent) {
+                                        parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><div class="text-center"><span class="text-2xl block mb-1">✂️</span><span class="text-white/20 text-[10px]">이미지 없음</span></div></div>';
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              ) : (
+                                <div className="aspect-[3/4] w-full bg-white/5 flex items-center justify-center">
+                                  <div className="text-center">
+                                    <span className="text-2xl block mb-1">✂️</span>
+                                    <span className="text-white/15 text-[10px]">스타일 미선택</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* 세션 정보 */}
+                            <div className="flex-1 p-5 flex flex-col justify-between">
                               <div>
                                 <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="text-[16px] font-bold text-gold">Session {sessionNum || '?'}</h3>
-                                  <span className="text-[12px] text-white/40 font-light">
+                                  <h3 className="text-[16px] font-bold text-gold">{sessionNum}회차</h3>
+                                  <span className="text-[11px] text-white/30 font-light">
                                     {latestDate.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
                                   </span>
                                 </div>
-                                <div className="flex gap-2">
+                                {decidedStyle?.name && (
+                                  <p className="text-[14px] text-white/80 font-medium mb-2">
+                                    {decidedStyle.name}
+                                  </p>
+                                )}
+                                <div className="flex flex-wrap gap-1.5 mt-2">
                                   {hasAnalysis && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">종합 분석</Badge>}
-                                  {hasStyle && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">스타일 추천</Badge>}
-                                  {hasRecipe && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">레시피</Badge>}
+                                  {hasRecipe && <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px]">레시피 완료</Badge>}
                                   {hasTimeline && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">미래 예측</Badge>}
                                 </div>
                               </div>
-                              <button
-                                onClick={() => {
-                                  setCurrentSessionNumber(sessionNum);
-                                  restoreSession(sessionNum, consultations);
-                                  setActiveTab('analysis');
-                                }}
-                                className="px-4 py-2 bg-gold text-charcoal font-bold text-[11px] tracking-[1px] uppercase hover:bg-gold/90 transition-all rounded-sm flex-shrink-0"
-                              >
-                                상세보기
-                              </button>
                             </div>
-
-                            {/* 스타일 추천 이미지 썸네일 그리드 */}
-                            {styleImages.length > 0 ? (
-                              <div>
-                                <p className="text-[11px] tracking-[2px] uppercase text-white/40 mb-3 font-bold">추천 스타일 이미지</p>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                                  {styleImages.map((style: StyleRecommendation) => (
-                                    <div
-                                      key={style.id}
-                                      className="border border-gold/15 overflow-hidden group cursor-pointer hover:border-gold/40 transition-all"
-                                      onClick={() => {
-                                        setCurrentSessionNumber(sessionNum);
-                                        restoreSession(sessionNum, consultations);
-                                        setActiveTab('style');
-                                      }}
-                                    >
-                                      <div className="aspect-square relative overflow-hidden">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                          src={style.imageUrl}
-                                          alt={style.name}
-                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                          onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                            const parent = e.currentTarget.parentElement;
-                                            if (parent) {
-                                              parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><span class="text-white/20 text-[11px]">이미지 로딩 실패</span></div>';
-                                            }
-                                          }}
-                                        />
-                                      </div>
-                                      <div className="p-2">
-                                        <p className="text-[11px] font-bold text-white/70 truncate">{style.name}</p>
-                                        <p className="text-[10px] text-gold/70">{style.suitability}% 어울림</p>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : hasStyle ? (
-                              <div className="py-3 text-center">
-                                <p className="text-[11px] text-white/20 font-light">스타일 추천 이미지가 생성되지 않았습니다.</p>
-                              </div>
-                            ) : null}
                           </div>
                         </motion.div>
                       );
