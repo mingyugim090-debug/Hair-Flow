@@ -34,6 +34,10 @@ export default function CustomerDetailPage() {
   const [limitMessage, setLimitMessage] = useState("");
   const [activeTab, setActiveTab] = useState<string>("analysis");
 
+  // 시술 회차 관리
+  const [currentSessionNumber, setCurrentSessionNumber] = useState<number | 'new'>('new');
+  const [sessionList, setSessionList] = useState<number[]>([]);
+
   // 앞면 사진 업로드 ref
   const frontInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,13 +102,20 @@ export default function CustomerDetailPage() {
     }
   };
 
-  // 최신 세션 자동 복원
+  // 최신 세션 자동 복원 + 세션 목록 업데이트
   useEffect(() => {
     if (data?.consultations && data.consultations.length > 0) {
+      // 세션 목록 업데이트
+      const sessions = Array.from(new Set(data.consultations.map(c => c.sessionNumber ?? 0))).filter(s => s > 0).sort((a, b) => b - a);
+      setSessionList(sessions);
+
       // Find max session number
       const maxSession = Math.max(...data.consultations.map(c => c.sessionNumber ?? 0));
       if (maxSession > 0) {
         restoreSession(maxSession, data.consultations);
+        if (currentSessionNumber === 'new') {
+          setCurrentSessionNumber('new');
+        }
       }
     }
   }, [data]);
@@ -145,6 +156,10 @@ export default function CustomerDetailPage() {
     setAnalyzing(true);
     const formData = new FormData();
     formData.append("front", selectedPhoto);
+    // 세션 번호 전달
+    if (currentSessionNumber !== 'new') {
+      formData.append("sessionNumber", String(currentSessionNumber));
+    }
 
     const res = await fetch(`/api/customers/${id}/five-view-analysis`, {
       method: "POST",
@@ -155,6 +170,10 @@ export default function CustomerDetailPage() {
     if (result.data) {
       setFiveViewAnalysisResult(result.data.analysis);
       setFrontPhotoUrl(result.data.photos?.front ?? null);
+      // 새 세션 번호 업데이트
+      if (result.data.sessionNumber) {
+        setCurrentSessionNumber(result.data.sessionNumber);
+      }
       await fetchData();
       setSelectedPhoto(null);
       alert("AI 종합 분석이 완료되었습니다! AI 스타일 추천 탭으로 이동합니다.");
@@ -264,7 +283,7 @@ export default function CustomerDetailPage() {
       if (result.data.imageGenerationFailed) {
         setImageGenerationFailed(true);
       }
-      await fetchData();
+      // fetchData() 호출 제거: restoreSession이 timeline을 null로 초기화하는 race condition 방지
       setCompletedPhoto(null);
     } else if (result.error?.code === "USAGE_LIMIT") {
       setLimitMessage(result.error.message);
@@ -363,6 +382,44 @@ export default function CustomerDetailPage() {
           {/* Tab 1: AI 종합 분석 */}
           <TabsContent value="analysis" className="mt-6 space-y-6">
             <div className="space-y-8">
+              {/* 시술 회차 선택 */}
+              <div>
+                <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-4 font-bold">시술 회차 설정</h2>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <button
+                    onClick={() => setCurrentSessionNumber('new')}
+                    className={`px-5 py-3 border font-bold text-[12px] tracking-[2px] transition-all ${currentSessionNumber === 'new'
+                        ? 'border-gold bg-gold/20 text-gold'
+                        : 'border-gold/20 text-white/50 hover:border-gold/50'
+                      }`}
+                  >
+                    + 새 회차
+                  </button>
+                  {sessionList.map((sNum) => (
+                    <button
+                      key={sNum}
+                      onClick={() => {
+                        setCurrentSessionNumber(sNum);
+                        if (data?.consultations) {
+                          restoreSession(sNum, data.consultations);
+                        }
+                      }}
+                      className={`px-5 py-3 border font-bold text-[12px] tracking-[2px] transition-all ${currentSessionNumber === sNum
+                          ? 'border-gold bg-gold/20 text-gold'
+                          : 'border-gold/20 text-white/50 hover:border-gold/50'
+                        }`}
+                    >
+                      {sNum}회차
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-white/30 font-light">
+                  {currentSessionNumber === 'new'
+                    ? '새로운 시술 회차를 시작합니다.'
+                    : `${currentSessionNumber}회차 데이터를 이어서 작업합니다.`}
+                </p>
+              </div>
+
               <div>
                 <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-4 font-bold">고객 사진 업로드</h2>
                 <div className="flex justify-center">
@@ -1034,7 +1091,7 @@ export default function CustomerDetailPage() {
               </div>
 
               {consultations.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {/* 세션별 그룹화 */}
                   {Array.from(new Set(consultations.map(c => c.sessionNumber ?? 0)))
                     .sort((a, b) => b - a) // 최신순 정렬
@@ -1047,38 +1104,90 @@ export default function CustomerDetailPage() {
                       const hasRecipe = sessionData.some(c => c.treatmentType === 'style-based-recipe');
                       const hasTimeline = sessionData.some(c => c.treatmentType === 'post-treatment-timeline');
 
+                      // 스타일 추천 이미지 추출
+                      const styleConsultation = sessionData.find(c => c.treatmentType === 'style-recommendation');
+                      const styleImages = styleConsultation?.styleRecommendations?.recommendations?.filter(
+                        (r: StyleRecommendation) => r.imageUrl
+                      ) ?? [];
+
                       return (
                         <motion.div
                           key={sessionNum}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="border border-gold/20 bg-gold/5 p-6 space-y-4 hover:border-gold/50 transition-colors"
+                          className="border border-gold/20 bg-gold/5 overflow-hidden hover:border-gold/50 transition-colors"
                         >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-[16px] font-bold text-gold">Session {sessionNum || '?'}</h3>
-                                <span className="text-[12px] text-white/40 font-light">
-                                  {latestDate.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
-                                </span>
+                          <div className="p-6 space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-[16px] font-bold text-gold">Session {sessionNum || '?'}</h3>
+                                  <span className="text-[12px] text-white/40 font-light">
+                                    {latestDate.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+                                  </span>
+                                </div>
+                                <div className="flex gap-2">
+                                  {hasAnalysis && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">종합 분석</Badge>}
+                                  {hasStyle && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">스타일 추천</Badge>}
+                                  {hasRecipe && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">레시피</Badge>}
+                                  {hasTimeline && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">미래 예측</Badge>}
+                                </div>
                               </div>
-                              <div className="flex gap-2">
-                                {hasAnalysis && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">종합 분석</Badge>}
-                                {hasStyle && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">스타일 추천</Badge>}
-                                {hasRecipe && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">레시피</Badge>}
-                                {hasTimeline && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">미래 예측</Badge>}
-                              </div>
+                              <button
+                                onClick={() => {
+                                  setCurrentSessionNumber(sessionNum);
+                                  restoreSession(sessionNum, consultations);
+                                  setActiveTab('analysis');
+                                }}
+                                className="px-4 py-2 bg-gold text-charcoal font-bold text-[11px] tracking-[1px] uppercase hover:bg-gold/90 transition-all rounded-sm flex-shrink-0"
+                              >
+                                상세보기
+                              </button>
                             </div>
-                            <button
-                              onClick={() => {
-                                restoreSession(sessionNum, consultations);
-                                setActiveTab('analysis');
-                                alert(`${sessionNum}차 시술 데이터를 불러왔습니다. 확인해보세요!`);
-                              }}
-                              className="px-4 py-2 bg-gold text-charcoal font-bold text-[11px] tracking-[1px] uppercase hover:bg-gold/90 transition-all rounded-sm"
-                            >
-                              상세보기
-                            </button>
+
+                            {/* 스타일 추천 이미지 썸네일 그리드 */}
+                            {styleImages.length > 0 ? (
+                              <div>
+                                <p className="text-[11px] tracking-[2px] uppercase text-white/40 mb-3 font-bold">추천 스타일 이미지</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                  {styleImages.map((style: StyleRecommendation) => (
+                                    <div
+                                      key={style.id}
+                                      className="border border-gold/15 overflow-hidden group cursor-pointer hover:border-gold/40 transition-all"
+                                      onClick={() => {
+                                        setCurrentSessionNumber(sessionNum);
+                                        restoreSession(sessionNum, consultations);
+                                        setActiveTab('style');
+                                      }}
+                                    >
+                                      <div className="aspect-square relative overflow-hidden">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                          src={style.imageUrl}
+                                          alt={style.name}
+                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            const parent = e.currentTarget.parentElement;
+                                            if (parent) {
+                                              parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><span class="text-white/20 text-[11px]">이미지 로딩 실패</span></div>';
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="p-2">
+                                        <p className="text-[11px] font-bold text-white/70 truncate">{style.name}</p>
+                                        <p className="text-[10px] text-gold/70">{style.suitability}% 어울림</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : hasStyle ? (
+                              <div className="py-3 text-center">
+                                <p className="text-[11px] text-white/20 font-light">스타일 추천 이미지가 생성되지 않았습니다.</p>
+                              </div>
+                            ) : null}
                           </div>
                         </motion.div>
                       );

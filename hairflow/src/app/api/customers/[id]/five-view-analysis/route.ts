@@ -165,16 +165,23 @@ export async function POST(
     // 사용량 증가
     await incrementUsage(user.id);
 
-    // 세션 번호 계산 (기존 최대값 + 1)
-    const { data: maxSession } = await supabase
-      .from('consultations')
-      .select('session_number')
-      .eq('customer_id', customerId)
-      .order('session_number', { ascending: false })
-      .limit(1)
-      .single();
+    // 세션 번호 계산 (요청에서 전달된 세션 번호 우선 사용)
+    const requestedSessionNumber = formData.get('sessionNumber') as string | null;
+    let nextSessionNumber: number;
 
-    const nextSessionNumber = (maxSession?.session_number ?? 0) + 1;
+    if (requestedSessionNumber && !isNaN(Number(requestedSessionNumber))) {
+      nextSessionNumber = Number(requestedSessionNumber);
+    } else {
+      const { data: maxSession } = await supabase
+        .from('consultations')
+        .select('session_number')
+        .eq('customer_id', customerId)
+        .order('session_number', { ascending: false })
+        .limit(1)
+        .single();
+
+      nextSessionNumber = (maxSession?.session_number ?? 0) + 1;
+    }
 
     // consultations 테이블에 저장 (앞면 사진만)
     const { data: consultationRow, error: consultationError } = await supabase
@@ -195,11 +202,12 @@ export async function POST(
       console.error('Consultation insert error:', consultationError);
     }
 
-    return NextResponse.json<ApiResponse<{ id: string; analysis: FiveViewAnalysisResult; photos: Record<string, string> }>>({
+    return NextResponse.json<ApiResponse<{ id: string; analysis: FiveViewAnalysisResult; photos: Record<string, string>; sessionNumber: number }>>({
       data: {
         id: consultationRow?.id ?? '',
         analysis: analysisResult,
         photos: { front: frontPhotoUrl },
+        sessionNumber: nextSessionNumber,
       },
       error: null,
     });
