@@ -17,7 +17,6 @@ import type {
   StyleRecommendation,
   StyleRecommendationResult,
   StyleBasedRecipeResult,
-  PostTreatmentTimeline
 } from "@/types";
 
 interface CustomerDetailResponse {
@@ -60,13 +59,6 @@ export default function CustomerDetailPage() {
   const [catalogGender, setCatalogGender] = useState<'M' | 'F'>('M');
   const [selectedCatalogStyle, setSelectedCatalogStyle] = useState<HairStyleOption | null>(null);
 
-  // 미래 예측 타임라인 관련
-  const completedPhotoInputRef = useRef<HTMLInputElement>(null);
-  const [completedPhoto, setCompletedPhoto] = useState<File | null>(null);
-  const [treatmentType, setTreatmentType] = useState<'cut' | 'perm' | 'color'>('cut');
-  const [timeline, setTimeline] = useState<PostTreatmentTimeline | null>(null);
-  const [loadingTimeline, setLoadingTimeline] = useState(false);
-
   // 세션 데이터 복원 (Persistence)
   const restoreSession = (sessionNum: number, consultations: Consultation[]) => {
     // DB의 sessionNumber가 null이거나 0일 경우 1로 취급하여 필터링
@@ -98,14 +90,6 @@ export default function CustomerDetailPage() {
       setStyleRecipe(recipeRow.styleBasedRecipe);
     } else {
       setStyleRecipe(null);
-    }
-
-    // 4. 타임라인 복원
-    const timelineRow = sessionRows.find(c => c.treatmentType === 'post-treatment-timeline');
-    if (timelineRow?.postTreatmentTimeline) {
-      setTimeline(timelineRow.postTreatmentTimeline);
-    } else {
-      setTimeline(null);
     }
   };
 
@@ -269,40 +253,6 @@ export default function CustomerDetailPage() {
     setLoadingRecipe(false);
   };
 
-  // 타임라인 예측
-  const handleTimelinePrediction = async () => {
-    if (!completedPhoto) {
-      alert("시술 완료 사진을 업로드해주세요.");
-      return;
-    }
-
-    setLoadingTimeline(true);
-    const formData = new FormData();
-    formData.append("completedPhoto", completedPhoto);
-    formData.append("treatmentType", treatmentType);
-
-    const res = await fetch(`/api/customers/${id}/post-treatment-timeline`, {
-      method: "POST",
-      body: formData,
-    });
-    const result = await res.json();
-
-    if (result.data) {
-      setTimeline(result.data.timeline);
-      if (result.data.imageGenerationFailed) {
-        setImageGenerationFailed(true);
-      }
-      // fetchData() 호출 제거: restoreSession이 timeline을 null로 초기화하는 race condition 방지
-      setCompletedPhoto(null);
-    } else if (result.error?.code === "USAGE_LIMIT") {
-      setLimitMessage(result.error.message);
-      setShowLimitModal(true);
-    } else {
-      alert(result.error?.message ?? "타임라인 예측에 실패했습니다.");
-    }
-    setLoadingTimeline(false);
-  };
-
   // (자동 추천 제거 — 고객이 스타일을 직접 선택하는 방식으로 변경)
 
   if (loading) {
@@ -358,10 +308,10 @@ export default function CustomerDetailPage() {
         </div>
       </motion.div>
 
-      {/* 4 Tabs */}
+      {/* 3 Tabs */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-charcoal border border-gold/20 p-1 gap-1">
+          <TabsList className="grid w-full grid-cols-3 bg-charcoal border border-gold/20 p-1 gap-1">
             <TabsTrigger
               value="analysis"
               className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[10px] sm:text-[11px] tracking-[1px] uppercase transition-all duration-500 px-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
@@ -373,12 +323,6 @@ export default function CustomerDetailPage() {
               className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[10px] sm:text-[11px] tracking-[1px] uppercase transition-all duration-500 px-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
             >
               AI 스타일 추천
-            </TabsTrigger>
-            <TabsTrigger
-              value="timeline"
-              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[10px] sm:text-[11px] tracking-[1px] uppercase transition-all duration-500 px-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
-            >
-              미래 예측
             </TabsTrigger>
             <TabsTrigger
               value="history"
@@ -797,296 +741,8 @@ export default function CustomerDetailPage() {
             )}
           </TabsContent>
 
-          {/* Tab 3: 미래 예측 */}
-          <TabsContent value="timeline" className="mt-6 space-y-6">
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-4 font-bold">
-                  시술 완료 사진 업로드
-                </h2>
-                <div className="grid sm:grid-cols-3 gap-4 mb-4">
-                  <div className="col-span-2">
-                    <input
-                      ref={completedPhotoInputRef}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const maxSize = 10 * 1024 * 1024;
-                          const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-                          if (file.size > maxSize) {
-                            alert("이미지는 10MB 이하여야 합니다.");
-                            return;
-                          }
-                          if (!allowedTypes.includes(file.type)) {
-                            alert("JPG, PNG, WebP 형식만 지원합니다.");
-                            return;
-                          }
-                          setCompletedPhoto(file);
-                        }
-                        e.target.value = "";
-                      }}
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => completedPhotoInputRef.current?.click()}
-                      className="w-full aspect-video border-2 border-dashed border-gold/30 hover:border-gold/60 transition-all flex flex-col items-center justify-center gap-3 group relative overflow-hidden"
-                    >
-                      {completedPhoto ? (
-                        <div className="absolute inset-0">
-                          <Image
-                            src={URL.createObjectURL(completedPhoto)}
-                            alt="시술 완료 사진"
-                            fill
-                            className="object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gold/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-[13px] text-white font-bold tracking-[2px]">변경</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <span className="text-[32px] text-gold/50 group-hover:text-gold transition-colors">+</span>
-                          <span className="text-[12px] text-white/50 font-bold tracking-[2px]">시술 완료 사진</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
 
-                  <div className="space-y-3">
-                    <label className="text-[11px] tracking-[2px] uppercase text-white/50 font-bold block">
-                      시술 타입
-                    </label>
-                    <div className="space-y-2">
-                      {(['cut', 'perm', 'color'] as const).map((type) => {
-                        const labels = { cut: '커트', perm: '펌', color: '염색' };
-                        return (
-                          <button
-                            key={type}
-                            onClick={() => setTreatmentType(type)}
-                            className={`w-full px-4 py-3 border font-bold text-[12px] tracking-[2px] uppercase transition-all ${treatmentType === type
-                              ? "border-gold bg-gold/20 text-gold"
-                              : "border-gold/20 text-white/50 hover:border-gold/50 hover:text-white/80"
-                              }`}
-                          >
-                            {labels[type]}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleTimelinePrediction}
-                  disabled={loadingTimeline || !completedPhoto}
-                  className="w-full px-8 py-5 bg-gold text-charcoal font-bold text-[13px] tracking-[2px] uppercase hover:bg-gold/90 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                >
-                  {loadingTimeline ? "AI 타임라인 예측 중..." : "미래 변화 예측 시작"}
-                </button>
-                <p className="text-[12px] text-white/30 font-light mt-3 text-center">
-                  시술 완료 직후 사진을 업로드하면, 1주차부터 8주차까지 모발 변화를 예측합니다.
-                </p>
-              </div>
-
-              <AnimatePresence>
-                {loadingTimeline && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-6"
-                  >
-                    {/* 프로그레스 스텝 */}
-                    <div className="border border-gold/20 p-8">
-                      <div className="flex flex-col items-center gap-6">
-                        <p className="font-heading text-[18px] font-light text-gold">
-                          AI 타임라인 예측 중
-                        </p>
-                        <div className="w-full max-w-md space-y-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center animate-pulse">
-                              <span className="text-[14px]">📸</span>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-[13px] text-gold font-medium">시술 사진 분석 중...</p>
-                              <div className="mt-1 h-1 bg-gold/10 rounded-full overflow-hidden">
-                                <div className="h-full bg-gold rounded-full animate-[loading_2s_ease-in-out_infinite]" style={{ width: '70%' }} />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 opacity-50">
-                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                              <span className="text-[14px]">🔮</span>
-                            </div>
-                            <p className="text-[13px] text-white/40 font-light">주차별 변화 이미지 생성 대기</p>
-                          </div>
-                          <div className="flex items-center gap-3 opacity-30">
-                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                              <span className="text-[14px]">✅</span>
-                            </div>
-                            <p className="text-[13px] text-white/30 font-light">완료</p>
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-white/20 font-light">약 1~2분 소요</p>
-                      </div>
-                    </div>
-
-                    {/* 스켈레톤 카드 */}
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="border border-gold/10 overflow-hidden animate-pulse">
-                          <div className="aspect-square bg-gold/5" />
-                          <div className="p-4 space-y-2">
-                            <div className="flex justify-between">
-                              <div className="h-4 bg-gold/10 rounded w-20" />
-                              <div className="h-4 bg-gold/10 rounded w-14" />
-                            </div>
-                            <div className="h-3 bg-white/5 rounded w-full" />
-                            <div className="h-3 bg-white/5 rounded w-2/3" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {timeline ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-8"
-                >
-                  <div className="border border-gold/10 p-6">
-                    <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">
-                      시술 완료 상태 분석
-                    </h3>
-                    <div className="flex gap-4">
-                      {timeline.completedPhotoUrl && (
-                        <div className="w-32 h-32 overflow-hidden border border-gold/30 flex-shrink-0">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={timeline.completedPhotoUrl}
-                            alt="시술 완료"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px] font-bold mb-2">
-                          {timeline.treatmentType === 'cut' ? '커트' : timeline.treatmentType === 'perm' ? '펌' : '염색'}
-                        </Badge>
-                        <p className="text-[13px] text-white/70 font-light leading-relaxed">
-                          {timeline.currentAnalysis}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-4 font-bold">
-                      주차별 변화 예측
-                    </h3>
-                    {imageGenerationFailed && (
-                      <div className="mb-4 p-3 bg-amber-900/30 border border-amber-500/30 rounded text-amber-200 text-[12px]">
-                        ⚠️ 이미지 생성에 일부 실패했습니다. AI 분석 결과는 아래 텍스트로 확인할 수 있습니다.
-                      </div>
-                    )}
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {timeline.weeklyPredictions.map((pred) => (
-                        <motion.div
-                          key={pred.week}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: pred.week * 0.05 }}
-                          className="border border-gold/20 overflow-hidden"
-                        >
-                          {pred.imageUrl ? (
-                            <div className="aspect-square w-full overflow-hidden">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={pred.imageUrl}
-                                alt={pred.label}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  const parent = e.currentTarget.parentElement;
-                                  if (parent) {
-                                    parent.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-white/5"><div class="text-center text-white/30 p-4"><span class="text-3xl block mb-2">📸</span><span class="text-[11px]">이미지 로딩 실패</span></div></div>';
-                                  }
-                                }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="aspect-square w-full overflow-hidden bg-white/5 flex items-center justify-center">
-                              <div className="text-center text-white/30 p-4">
-                                <span className="text-3xl block mb-2">📸</span>
-                                <span className="text-[11px]">이미지 생성 실패</span>
-                              </div>
-                            </div>
-                          )}
-                          <div className="p-4 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-[14px] font-bold text-gold">{pred.label}</h4>
-                              <Badge className="bg-gold/10 text-gold border-gold/20 text-[10px] font-bold">
-                                Week {pred.week}
-                              </Badge>
-                            </div>
-                            <p className="text-[12px] text-white/60 font-light leading-relaxed">
-                              {pred.description}
-                            </p>
-                            {pred.careTips.length > 0 && (
-                              <div className="pt-3 border-t border-gold/10">
-                                <p className="text-[11px] tracking-[2px] uppercase text-white/40 mb-2 font-bold">
-                                  관리 팁
-                                </p>
-                                <ul className="space-y-1">
-                                  {pred.careTips.map((tip, i) => (
-                                    <li key={i} className="text-[11px] text-white/50 font-light flex items-start gap-1">
-                                      <span className="text-gold">•</span>
-                                      <span>{tip}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {timeline.revisitRecommendation && (
-                    <div className="border border-gold p-6 bg-gold/5">
-                      <h3 className="text-[12px] tracking-[3px] uppercase text-gold mb-3 font-bold">
-                        💡 재방문 추천
-                      </h3>
-                      <p className="text-[14px] text-white/80 font-light mb-2">
-                        <span className="font-bold text-gold">{timeline.revisitRecommendation.week}주 후</span> 재방문을 권장합니다.
-                      </p>
-                      <p className="text-[13px] text-white/60 font-light">
-                        {timeline.revisitRecommendation.reason}
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              ) : (
-                <div className="border border-gold/10 p-16 text-center">
-                  <p className="font-heading text-[24px] font-light text-white/40 mb-2">
-                    미래 예측 타임라인
-                  </p>
-                  <p className="text-[13px] text-white/30 font-light">
-                    위 버튼으로 첫 예측을 시작해보세요.
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Tab 4: 시술 히스토리 */}
+          {/* Tab 3: 시술 히스토리 */}
           <TabsContent value="history" className="mt-6 space-y-6">
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-6">
