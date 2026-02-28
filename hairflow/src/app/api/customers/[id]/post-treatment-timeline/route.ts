@@ -194,19 +194,35 @@ export async function POST(
     // ControlNet (Canny) + SDXL로 각 주차별 변화 이미지 생성 — 동일인물 유지
     const { generateTimelineImage, getTimelineStrength } = await import('@/lib/replicate');
     const { cacheGeneratedImage } = await import('@/lib/storage');
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const adminSupabase = createAdminClient();
+
+    // Replicate가 Supabase Storage에 접근 가능하도록 Signed URL 생성
+    let accessiblePhotoUrl = completedPhotoUrl;
+    try {
+      const pathMatch = completedPhotoUrl.match(/customer-photos\/(.+)$/);
+      if (pathMatch && pathMatch[1]) {
+        const filePath = pathMatch[1].split('?')[0];
+        const { data } = await adminSupabase.storage
+          .from('customer-photos')
+          .createSignedUrl(filePath, 600); // 10분 유효
+        if (data?.signedUrl) {
+          accessiblePhotoUrl = data.signedUrl;
+        }
+      }
+    } catch (err) {
+      console.error('Signed URL 생성 실패 (기존 URL 사용):', err);
+    }
+
     const predictionsWithImages = await Promise.all(
       analysisResult.weeklyPredictions.map(async (pred) => {
         try {
           const strength = getTimelineStrength(pred.week);
           let generatedImageUrl = await generateTimelineImage(
-            completedPhotoUrl, // 시술 완료 사진을 ControlNet에 전달
+            accessiblePhotoUrl, // Signed URL로 Replicate에 전달
             pred.imagePrompt,
             strength
           );
-
-          // Supabase Storage에 영구 저장
-          const { createAdminClient } = await import('@/lib/supabase/admin');
-          const adminSupabase = createAdminClient();
 
           if (generatedImageUrl) {
             generatedImageUrl = await cacheGeneratedImage(
@@ -251,8 +267,6 @@ export async function POST(
     await incrementUsage(user.id);
 
     // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
-    const { createAdminClient } = await import('@/lib/supabase/admin');
-    const adminSupabase = createAdminClient();
 
     const { data: latestSession } = await adminSupabase
       .from('consultations')

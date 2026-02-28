@@ -79,11 +79,18 @@ export default function CustomerDetailPage() {
       if (analysisRow.photos?.front) {
         setFrontPhotoUrl(analysisRow.photos.front);
       }
+    } else {
+      setFiveViewAnalysisResult(null);
+      setFrontPhotoUrl(null);
     }
 
-    // 2. 스타일 추천: DB에 저장된 이미지 URL이 만료될 수 있으므로 복원하지 않음
-    // → 스타일 탭 진입 시 항상 새로 생성
-    setStyleRecommendations(null);
+    // 2. 스타일 추천 복원 (DB에서 복원)
+    const styleRow = sessionRows.find(c => c.treatmentType === 'style-recommendation');
+    if (styleRow?.styleRecommendations) {
+      setStyleRecommendations(styleRow.styleRecommendations);
+    } else {
+      setStyleRecommendations(null);
+    }
 
     // 3. 레시피 복원
     const recipeRow = sessionRows.find(c => c.treatmentType === 'style-based-recipe');
@@ -389,8 +396,8 @@ export default function CustomerDetailPage() {
                   <button
                     onClick={() => setCurrentSessionNumber('new')}
                     className={`px-5 py-3 border font-bold text-[12px] tracking-[2px] transition-all ${currentSessionNumber === 'new'
-                        ? 'border-gold bg-gold/20 text-gold'
-                        : 'border-gold/20 text-white/50 hover:border-gold/50'
+                      ? 'border-gold bg-gold/20 text-gold'
+                      : 'border-gold/20 text-white/50 hover:border-gold/50'
                       }`}
                   >
                     + 새 회차
@@ -405,8 +412,8 @@ export default function CustomerDetailPage() {
                         }
                       }}
                       className={`px-5 py-3 border font-bold text-[12px] tracking-[2px] transition-all ${currentSessionNumber === sNum
-                          ? 'border-gold bg-gold/20 text-gold'
-                          : 'border-gold/20 text-white/50 hover:border-gold/50'
+                        ? 'border-gold bg-gold/20 text-gold'
+                        : 'border-gold/20 text-white/50 hover:border-gold/50'
                         }`}
                     >
                       {sNum}회차
