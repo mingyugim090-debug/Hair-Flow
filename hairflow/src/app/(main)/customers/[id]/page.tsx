@@ -256,6 +256,25 @@ export default function CustomerDetailPage() {
     setLoadingRecipe(false);
   };
 
+  // 세션 삭제
+  const handleDeleteSession = async (sessionNum: number) => {
+    if (!confirm(`${sessionNum}회차 시술 기록을 삭제하시겠습니까?`)) return;
+    try {
+      const res = await fetch(`/api/customers/${id}/consultations?sessionNumber=${sessionNum}`, {
+        method: 'DELETE',
+      });
+      const result = await res.json();
+      if (result.data) {
+        await fetchData();
+        alert(`${sessionNum}회차 기록이 삭제되었습니다.`);
+      } else {
+        alert(result.error?.message ?? '삭제에 실패했습니다.');
+      }
+    } catch {
+      alert('삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   // (자동 추천 제거 — 고객이 스타일을 직접 선택하는 방식으로 변경)
 
   if (loading) {
@@ -861,6 +880,12 @@ export default function CustomerDetailPage() {
                                   {hasStyleRec && !hasRecipe && <Badge className="bg-amber-800/30 text-amber-300 border-amber-500/20 text-[10px]">스타일 추천</Badge>}
                                   {hasRecipe && <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px]">레시피 완료</Badge>}
                                 </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteSession(sessionNum); }}
+                                  className="mt-3 text-[11px] text-white/20 hover:text-red-400 transition-colors"
+                                >
+                                  🗑 삭제
+                                </button>
                               </div>
                             </div>
                           </div>

@@ -179,7 +179,7 @@ export default function DashboardPage() {
       : planFeatures.free;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-10 overflow-x-hidden">
       {/* Welcome */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <span className="section-label">Dashboard</span>
@@ -192,11 +192,11 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Quick Actions: Search & Add */}
-      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="glass-luxury border border-white/10 p-6 sm:p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
+          <div className="glass-luxury border border-white/10 p-4 sm:p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
             <div className="font-heading text-[14px] text-gold tracking-[2px] mb-4 transition-all duration-300 group-hover:tracking-[3px]">01</div>
-            <h3 className="font-heading text-[24px] font-normal mb-4 italic">고객 검색</h3>
+            <h3 className="font-heading text-[20px] sm:text-[24px] font-normal mb-3 sm:mb-4 italic">고객 검색</h3>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -204,11 +204,11 @@ export default function DashboardPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="flex-1 bg-transparent border border-gold/15 px-4 py-2 text-[13px] font-light text-white placeholder:text-white/30 focus:border-gold/40 focus:outline-none transition-colors"
+                className="flex-1 min-w-0 bg-transparent border border-gold/15 px-3 sm:px-4 py-2 text-[13px] font-light text-white placeholder:text-white/30 focus:border-gold/40 focus:outline-none transition-colors"
               />
               <button
                 onClick={handleSearch}
-                className="px-6 py-2 border border-gold/30 text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500"
+                className="px-4 sm:px-6 py-2 border border-gold/30 text-gold text-[11px] tracking-[1px] sm:tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500 whitespace-nowrap flex-shrink-0"
               >
                 검색
               </button>
@@ -217,9 +217,9 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="glass-luxury border border-white/10 p-6 sm:p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
-            <div className="font-heading text-[14px] text-gold tracking-[2px] mb-4 transition-all duration-300 group-hover:tracking-[3px]">02</div>
-            <h3 className="font-heading text-[24px] font-normal mb-4 italic">신규 고객 등록</h3>
+          <div className="glass-luxury border border-white/10 p-4 sm:p-8 hover:border-gold/40 transition-all duration-500 shadow-luxury-sm hover-gold-glow group">
+            <div className="font-heading text-[14px] text-gold tracking-[2px] mb-3 sm:mb-4 transition-all duration-300 group-hover:tracking-[3px]">02</div>
+            <h3 className="font-heading text-[20px] sm:text-[24px] font-normal mb-3 sm:mb-4 italic">신규 고객 등록</h3>
             <button
               onClick={() => setShowNewCustomerForm(!showNewCustomerForm)}
               className="w-full px-6 py-2 border border-gold text-gold text-[11px] tracking-[2px] uppercase hover:bg-gold hover:text-charcoal transition-all duration-500"
