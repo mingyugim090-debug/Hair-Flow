@@ -280,19 +280,19 @@ export default function CustomerDetailPage() {
   const { customer, consultations } = data;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-4 sm:space-y-8 pb-20">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Link
           href="/customers"
-          className="text-[12px] tracking-[2px] text-white/40 hover:text-gold transition-colors uppercase mb-6 inline-block font-bold"
+          className="text-[11px] tracking-[2px] text-white/40 hover:text-gold transition-colors uppercase mb-3 inline-block font-bold"
         >
           ← 고객 목록
         </Link>
-        <div className="border border-gold/15 p-8 mt-2">
+        <div className="border border-gold/15 p-4 sm:p-8 mt-1">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-light mb-2">
+              <h1 className="font-heading text-[clamp(24px,4vw,42px)] font-light mb-1">
                 {customer.name}
               </h1>
               {customer.phone && (
@@ -314,37 +314,37 @@ export default function CustomerDetailPage() {
       {/* 3 Tabs */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-charcoal border border-gold/20 p-1 gap-1">
+          <TabsList className="grid w-full grid-cols-3 bg-charcoal border border-gold/20 p-0.5 sm:p-1 gap-0.5 sm:gap-1">
             <TabsTrigger
               value="analysis"
-              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[10px] sm:text-[11px] tracking-[1px] uppercase transition-all duration-500 px-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[9px] sm:text-[11px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-1.5 sm:px-2 py-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
             >
               AI 종합 분석
             </TabsTrigger>
             <TabsTrigger
               value="style"
-              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[10px] sm:text-[11px] tracking-[1px] uppercase transition-all duration-500 px-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[9px] sm:text-[11px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-1.5 sm:px-2 py-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
             >
               AI 스타일 추천
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[10px] sm:text-[11px] tracking-[1px] uppercase transition-all duration-500 px-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
+              className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold data-[state=active]:border data-[state=active]:border-gold/60 text-[9px] sm:text-[11px] tracking-[0.5px] sm:tracking-[1px] uppercase transition-all duration-500 px-1.5 sm:px-2 py-2 font-bold text-white/70 hover:text-white/90 hover:bg-gold/10 border border-transparent"
             >
               시술 히스토리
             </TabsTrigger>
           </TabsList>
 
           {/* Tab 1: AI 종합 분석 */}
-          <TabsContent value="analysis" className="mt-6 space-y-6">
+          <TabsContent value="analysis" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
             <div className="space-y-8">
               {/* 시술 회차 선택 */}
               <div>
-                <h2 className="text-[12px] tracking-[4px] uppercase text-gold mb-4 font-bold">시술 회차 설정</h2>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <h2 className="text-[11px] sm:text-[12px] tracking-[3px] sm:tracking-[4px] uppercase text-gold mb-3 font-bold">시술 회차 설정</h2>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2">
                   <button
                     onClick={() => setCurrentSessionNumber('new')}
-                    className={`px-5 py-3 border font-bold text-[12px] tracking-[2px] transition-all ${currentSessionNumber === 'new'
+                    className={`px-3 sm:px-5 py-2 sm:py-3 border font-bold text-[11px] sm:text-[12px] tracking-[1px] sm:tracking-[2px] transition-all ${currentSessionNumber === 'new'
                       ? 'border-gold bg-gold/20 text-gold'
                       : 'border-gold/20 text-white/50 hover:border-gold/50'
                       }`}
@@ -360,7 +360,7 @@ export default function CustomerDetailPage() {
                           restoreSession(sNum, data.consultations);
                         }
                       }}
-                      className={`px-5 py-3 border font-bold text-[12px] tracking-[2px] transition-all ${currentSessionNumber === sNum
+                      className={`px-3 sm:px-5 py-2 sm:py-3 border font-bold text-[11px] sm:text-[12px] tracking-[1px] sm:tracking-[2px] transition-all ${currentSessionNumber === sNum
                         ? 'border-gold bg-gold/20 text-gold'
                         : 'border-gold/20 text-white/50 hover:border-gold/50'
                         }`}
@@ -384,7 +384,6 @@ export default function CustomerDetailPage() {
                       ref={frontInputRef}
                       type="file"
                       accept="image/*"
-                      capture="environment"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handlePhotoSelect(file);
@@ -394,7 +393,7 @@ export default function CustomerDetailPage() {
                     />
                     <button
                       onClick={() => frontInputRef.current?.click()}
-                      className="w-full aspect-[3/4] border-2 border-dashed border-gold/30 hover:border-gold/60 transition-all flex flex-col items-center justify-center gap-3 group relative overflow-hidden"
+                      className="w-full aspect-square sm:aspect-[3/4] border-2 border-dashed border-gold/30 hover:border-gold/60 transition-all flex flex-col items-center justify-center gap-2 sm:gap-3 group relative overflow-hidden"
                     >
                       {selectedPhoto ? (
                         <div className="absolute inset-0">
@@ -422,7 +421,7 @@ export default function CustomerDetailPage() {
                 <button
                   onClick={handleFiveViewAnalysis}
                   disabled={analyzing || !selectedPhoto}
-                  className="w-full mt-6 px-8 py-5 bg-gold text-charcoal font-bold text-[13px] tracking-[2px] uppercase hover:bg-gold/90 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                  className="w-full mt-4 sm:mt-6 px-6 sm:px-8 py-4 sm:py-5 bg-gold text-charcoal font-bold text-[12px] sm:text-[13px] tracking-[2px] uppercase hover:bg-gold/90 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 >
                   {analyzing ? "AI 종합 분석 중..." : "AI 종합 분석 시작"}
                 </button>
@@ -459,7 +458,7 @@ export default function CustomerDetailPage() {
                 )}
               </AnimatePresence>
 
-              <div className="border border-gold/10 p-16 text-center">
+              <div className="border border-gold/10 p-8 sm:p-16 text-center">
                 <p className="font-heading text-[24px] font-light text-white/40 mb-2">
                   AI 종합 분석 결과
                 </p>
@@ -471,9 +470,9 @@ export default function CustomerDetailPage() {
           </TabsContent>
 
           {/* Tab 2: AI 스타일 시뮬레이션 */}
-          <TabsContent value="style" className="mt-6 space-y-6">
+          <TabsContent value="style" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
             {!fiveViewAnalysisResult ? (
-              <div className="border border-gold/10 p-16 text-center">
+              <div className="border border-gold/10 p-8 sm:p-16 text-center">
                 <p className="font-heading text-[24px] font-light text-white/40 mb-2">
                   AI 스타일 시뮬레이션
                 </p>
@@ -769,7 +768,7 @@ export default function CustomerDetailPage() {
 
 
           {/* Tab 3: 시술 히스토리 */}
-          <TabsContent value="history" className="mt-6 space-y-6">
+          <TabsContent value="history" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-[12px] tracking-[4px] uppercase text-gold font-bold">
