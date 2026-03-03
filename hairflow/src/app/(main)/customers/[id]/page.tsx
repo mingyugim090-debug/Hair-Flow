@@ -582,8 +582,8 @@ export default function CustomerDetailPage() {
                         <div
                           key={style.id}
                           className={`border cursor-pointer transition-all ${selectedStyle?.id === style.id
-                              ? 'border-gold bg-gold/10 ring-2 ring-gold/40'
-                              : 'border-gold/20 hover:border-gold/50'
+                            ? 'border-gold bg-gold/10 ring-2 ring-gold/40'
+                            : 'border-gold/20 hover:border-gold/50'
                             }`}
                           onClick={() => setSelectedStyle(style)}
                         >
@@ -792,11 +792,19 @@ export default function CustomerDetailPage() {
 
                       const hasAnalysis = sessionData.some(c => c.treatmentType === 'five-view-analysis');
                       const hasRecipe = sessionData.some(c => c.treatmentType === 'style-based-recipe');
-                      const hasTimeline = sessionData.some(c => c.treatmentType === 'post-treatment-timeline');
+                      const hasStyleRec = sessionData.some(c => c.treatmentType === 'style-recommendation');
 
-                      // 결정된 스타일 (레시피 생성된 스타일) 추출
+                      // 결정된 스타일 (레시피 생성된 스타일) 추출 → 없으면 스타일 추천 이미지 fallback
                       const recipeConsultation = sessionData.find(c => c.treatmentType === 'style-based-recipe');
                       const decidedStyle = recipeConsultation?.styleBasedRecipe?.selectedStyle;
+
+                      // 스타일 추천 이미지 (결정 전 생성된 이미지) fallback
+                      const styleRecConsultation = sessionData.find(c => c.treatmentType === 'style-recommendation');
+                      const firstRecImage = styleRecConsultation?.styleRecommendations?.recommendations?.find(
+                        (r: StyleRecommendation) => r.imageUrl
+                      );
+                      const displayImage = decidedStyle?.imageUrl || firstRecImage?.imageUrl;
+                      const displayName = decidedStyle?.name || firstRecImage?.name;
 
                       return (
                         <motion.div
@@ -806,14 +814,14 @@ export default function CustomerDetailPage() {
                           className="border border-gold/20 bg-gold/5 overflow-hidden hover:border-gold/50 transition-colors"
                         >
                           <div className="flex">
-                            {/* 결정된 스타일 이미지 */}
+                            {/* 스타일 이미지 (결정 스타일 > 추천 이미지 fallback) */}
                             <div className="w-32 sm:w-40 flex-shrink-0">
-                              {decidedStyle?.imageUrl ? (
+                              {displayImage ? (
                                 <div className="aspect-[3/4] w-full overflow-hidden">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
-                                    src={decidedStyle.imageUrl}
-                                    alt={decidedStyle.name}
+                                    src={displayImage}
+                                    alt={displayName || '스타일'}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
@@ -843,15 +851,16 @@ export default function CustomerDetailPage() {
                                     {latestDate.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
                                   </span>
                                 </div>
-                                {decidedStyle?.name && (
+                                {displayName && (
                                   <p className="text-[14px] text-white/80 font-medium mb-2">
-                                    {decidedStyle.name}
+                                    {displayName}
+                                    {!hasRecipe && hasStyleRec && <span className="text-[11px] text-white/30 ml-2">(미결정)</span>}
                                   </p>
                                 )}
                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                   {hasAnalysis && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">종합 분석</Badge>}
+                                  {hasStyleRec && !hasRecipe && <Badge className="bg-amber-800/30 text-amber-300 border-amber-500/20 text-[10px]">스타일 추천</Badge>}
                                   {hasRecipe && <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px]">레시피 완료</Badge>}
-                                  {hasTimeline && <Badge className="bg-charcoal text-white/60 border-white/10 text-[10px]">미래 예측</Badge>}
                                 </div>
                               </div>
                             </div>
