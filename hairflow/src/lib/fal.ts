@@ -169,7 +169,15 @@ export async function generateHairImageFromFace(
         const result = await fal.subscribe('fal-ai/flux-pro/kontext', {
             input: {
                 image_url: accessibleUrl,
-                prompt: `Change this person's hairstyle to: ${hairStylePrompt}. Keep the face, facial features, expression, skin tone, clothing, and background exactly the same. Only modify the hair.`,
+                prompt: `Edit ONLY the hair in this photo to: ${hairStylePrompt}. `
+                    + `CRITICAL RULES: `
+                    + `1. The person's face, eyes, nose, mouth, jawline, ears, eyebrows, skin tone, and all facial features must remain COMPLETELY IDENTICAL and UNCHANGED. `
+                    + `2. Do NOT alter the face shape, facial expression, makeup, or skin texture in ANY way. `
+                    + `3. Keep the clothing, accessories, background, lighting, and camera angle exactly the same. `
+                    + `4. ONLY modify the hair style, hair length, hair texture, and hair volume. `
+                    + `5. The new hairstyle should look natural and realistic, as if photographed in a professional salon. `
+                    + `6. Maintain the same photo quality, resolution, and color tone as the original image.`,
+                seed: 42,
             },
         });
 

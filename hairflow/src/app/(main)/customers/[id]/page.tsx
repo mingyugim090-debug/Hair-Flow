@@ -245,7 +245,8 @@ export default function CustomerDetailPage() {
 
     if (result.data) {
       setStyleRecipe(result.data.recipe);
-      // fetchData() 호출 제거: restoreSession이 DB에서 레시피를 못 찾으면 null로 초기화하는 race condition 방지
+      // 히스토리 즉시 갱신: 레시피가 DB에 저장되었으므로 fetchData로 최신 데이터 로드
+      await fetchData();
     } else if (result.error?.code === "USAGE_LIMIT") {
       setLimitMessage(result.error.message);
       setShowLimitModal(true);
@@ -576,12 +577,15 @@ export default function CustomerDetailPage() {
                     )}
 
                     {/* 생성된 이미지 */}
-                    <div className="max-w-lg mx-auto">
+                    <div className="max-w-lg mx-auto space-y-4">
                       {styleRecommendations.recommendations.map((style) => (
                         <div
                           key={style.id}
-                          className="border border-gold/20 cursor-pointer hover:border-gold/50 transition-all"
-                          onClick={() => handleStyleSelect(style)}
+                          className={`border cursor-pointer transition-all ${selectedStyle?.id === style.id
+                              ? 'border-gold bg-gold/10 ring-2 ring-gold/40'
+                              : 'border-gold/20 hover:border-gold/50'
+                            }`}
+                          onClick={() => setSelectedStyle(style)}
                         >
                           {style.imageUrl ? (
                             <div className="aspect-square w-full overflow-hidden">
@@ -636,6 +640,26 @@ export default function CustomerDetailPage() {
                         </div>
                       ))}
                     </div>
+
+                    {/* 결정 버튼 */}
+                    {selectedStyle && !styleRecipe && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-lg mx-auto"
+                      >
+                        <button
+                          onClick={() => handleStyleSelect(selectedStyle)}
+                          disabled={loadingRecipe}
+                          className="w-full px-8 py-5 bg-gold text-charcoal font-bold text-[14px] tracking-[2px] uppercase hover:bg-gold/90 transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                        >
+                          {loadingRecipe ? '레시피 생성 중...' : `✂️ ${selectedStyle.name} 스타일로 결정`}
+                        </button>
+                        <p className="text-[11px] text-white/25 font-light mt-2 text-center">
+                          결정하면 시술 레시피가 생성되고 히스토리에 기록됩니다
+                        </p>
+                      </motion.div>
+                    )}
 
                     {styleRecommendations.faceShapeNote && (
                       <div className="border border-gold/10 p-4">
