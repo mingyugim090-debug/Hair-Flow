@@ -240,17 +240,24 @@ export async function POST(
     // 이미지 생성 실패 여부 체크
     const imageGenerationFailed = recommendationsWithImages.some(r => !r.imageUrl);
 
-    // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
-    const { data: latestSession } = await adminSupabase
-      .from('consultations')
-      .select('session_number')
-      .eq('customer_id', customerId)
-      .not('session_number', 'is', null) // Ensure we get a valid session
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    // 세션 번호: 요청에서 전달된 값 우선 사용
+    const requestedSessionNumber = body.sessionNumber as number | undefined;
+    let currentSessionNumber: number;
 
-    const currentSessionNumber = latestSession?.session_number ?? 1;
+    if (requestedSessionNumber && !isNaN(requestedSessionNumber)) {
+      currentSessionNumber = requestedSessionNumber;
+    } else {
+      const { data: latestSession } = await adminSupabase
+        .from('consultations')
+        .select('session_number')
+        .eq('customer_id', customerId)
+        .not('session_number', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      currentSessionNumber = latestSession?.session_number ?? 1;
+    }
 
     // 사용량 증가
     await incrementUsage(user.id);

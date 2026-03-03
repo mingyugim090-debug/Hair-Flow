@@ -194,6 +194,7 @@ export default function CustomerDetailPage() {
           frontPhotoUrl: frontPhotoUrl,
           selectedStyleName: style.name,
           selectedStyleNameEn: style.nameEn,
+          sessionNumber: currentSessionNumber !== 'new' ? currentSessionNumber : undefined,
         }),
       });
 
@@ -237,6 +238,7 @@ export default function CustomerDetailPage() {
         styleDescription: style.description,
         styleImageUrl: style.imageUrl,
         currentHairState: fiveViewAnalysisResult,
+        sessionNumber: currentSessionNumber !== 'new' ? currentSessionNumber : undefined,
       }),
     });
     const result = await res.json();

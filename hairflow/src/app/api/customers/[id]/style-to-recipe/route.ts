@@ -112,17 +112,24 @@ export async function POST(
     const { createAdminClient } = await import('@/lib/supabase/admin');
     const adminSupabase = createAdminClient();
 
-    // 현재 세션 번호 가져오기 (가장 최근 세션 번호)
-    const { data: latestSession } = await adminSupabase
-      .from('consultations')
-      .select('session_number')
-      .eq('customer_id', customerId)
-      .not('session_number', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    // 세션 번호: 요청에서 전달된 값 우선 사용
+    const requestedSessionNumber = body.sessionNumber as number | undefined;
+    let currentSessionNumber: number;
 
-    const currentSessionNumber = latestSession?.session_number ?? 1;
+    if (requestedSessionNumber && !isNaN(requestedSessionNumber)) {
+      currentSessionNumber = requestedSessionNumber;
+    } else {
+      const { data: latestSession } = await adminSupabase
+        .from('consultations')
+        .select('session_number')
+        .eq('customer_id', customerId)
+        .not('session_number', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      currentSessionNumber = latestSession?.session_number ?? 1;
+    }
 
     // consultations 테이블에 저장
     const { data: consultationRow, error: consultationError } = await adminSupabase
