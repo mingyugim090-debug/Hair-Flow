@@ -162,30 +162,33 @@ export async function generateHairImageFromFace(
 
     try {
         // Fal.ai가 직접 접근할 수 없는 URL(Supabase 등)을 Fal CDN으로 프록시
-        console.log('Fal CDN에 이미지 업로드 중...');
+        console.log('[Kontext] Fal CDN에 이미지 업로드 중...');
         const accessibleUrl = await uploadToFalCdn(faceImageUrl);
-        console.log('Fal CDN 업로드 완료:', accessibleUrl);
+        console.log('[Kontext] Fal CDN 업로드 완료:', accessibleUrl);
 
+        // Kontext Pro는 짧고 직접적인 프롬프트에서 최고 성능 발휘
+        // 긴 프롬프트는 얼굴 동일성을 해침
         const result = await fal.subscribe('fal-ai/flux-pro/kontext', {
             input: {
                 image_url: accessibleUrl,
-                prompt: `Edit ONLY the hair in this photo to: ${hairStylePrompt}. `
-                    + `CRITICAL RULES: `
-                    + `1. The person's face, eyes, nose, mouth, jawline, ears, eyebrows, skin tone, and all facial features must remain COMPLETELY IDENTICAL and UNCHANGED. `
-                    + `2. Do NOT alter the face shape, facial expression, makeup, or skin texture in ANY way. `
-                    + `3. Keep the clothing, accessories, background, lighting, and camera angle exactly the same. `
-                    + `4. ONLY modify the hair style, hair length, hair texture, and hair volume. `
-                    + `5. The new hairstyle should look natural and realistic, as if photographed in a professional salon. `
-                    + `6. Maintain the same photo quality, resolution, and color tone as the original image.`,
-                seed: 42,
+                prompt: `Give this exact same person a ${hairStylePrompt} hairstyle. Keep everything else identical.`,
+                guidance_scale: 4,
+                output_format: 'jpeg' as const,
             },
         });
 
+        console.log('[Kontext] 이미지 생성 완료');
         const data = result.data as FalResponse;
-        return data.images?.[0]?.url ?? '';
+        const imageUrl = data.images?.[0]?.url ?? '';
+
+        if (!imageUrl) {
+            console.warn('[Kontext] 이미지 URL 없음 — 응답:', JSON.stringify(data).substring(0, 200));
+        }
+
+        return imageUrl;
     } catch (error) {
         const userMessage = classifyFalError(error);
-        console.error('Kontext Pro 이미지 생성 실패:', userMessage, error);
+        console.error('[Kontext] 이미지 생성 실패:', userMessage, error);
         return '';
     }
 }
