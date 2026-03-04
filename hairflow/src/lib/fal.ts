@@ -97,14 +97,25 @@ export async function generateStyledFaceImage(
     }
 
     try {
+        // Fal.ai가 직접 접근할 수 없는 URL(Supabase 등)을 Fal CDN으로 프록시
+        console.log('[IP-Adapter] Fal CDN에 얼굴 이미지 업로드 중...');
+        const accessibleUrl = await uploadToFalCdn(faceImageUrl);
+        console.log('[IP-Adapter] Fal CDN 업로드 완료:', accessibleUrl);
+
+        // IP-Adapter FaceID: 얼굴 임베딩으로 identity를 수학적으로 고정
+        // - face_id_plus_weight: 0.8 → 얼굴 identity 강하게 고정 (핵심 파라미터)
+        // - ip_adapter_weight: 0.6 → IP-Adapter 조건 강도
+        // - 프롬프트는 헤어스타일 변화만 묘사 (얼굴 묘사 불필요 — 임베딩이 처리)
         const result = await fal.subscribe('fal-ai/ip-adapter-face-id', {
             input: {
-                prompt: `Professional salon portrait photograph. ${prompt}. Ultra-realistic, high quality, natural lighting, fashion magazine quality, no text, no watermarks`,
-                face_image_url: faceImageUrl,
+                prompt: `Same person with ${prompt}. Same face, identical facial features, professional salon portrait, ultra-realistic, high quality, natural lighting, fashion magazine quality, no text, no watermarks`,
+                face_image_url: accessibleUrl,
                 negative_prompt:
-                    'cartoon, illustration, painting, drawing, anime, unrealistic, deformed, blurry, low quality, text, watermark, logo, extra fingers, mutated hands, poorly drawn face, disfigured, oversaturated, cropped, out of frame',
+                    'different person, changed face, altered facial features, different identity, different face, different nose, different eyes, different jawline, cartoon, illustration, painting, drawing, anime, unrealistic, deformed, blurry, low quality, text, watermark, logo, extra fingers, mutated hands, poorly drawn face, disfigured, oversaturated, cropped, out of frame',
                 model_type: 'SDXL-v2-plus' as const,
-                num_inference_steps: 25,
+                face_id_plus_weight: 0.8,
+                ip_adapter_weight: 0.6,
+                num_inference_steps: 30,
                 guidance_scale: 7.5,
                 num_samples: 1,
                 width: 768,
@@ -166,15 +177,15 @@ export async function generateHairImageFromFace(
         const accessibleUrl = await uploadToFalCdn(faceImageUrl);
         console.log('[Kontext] Fal CDN 업로드 완료:', accessibleUrl);
 
-        // Kontext Pro 원본 보존 최적화 설정:
-        // - guidance_scale 2: 낮을수록 원본 이미지에 가까움 (기본 3.5 → 2로 낮춰 원본 최대 보존)
-        // - 프롬프트: 보존할 요소를 명시적으로 나열하여 헤어만 변경
+        // Kontext Pro 설정:
+        // - guidance_scale 3.5: 기본값 범위. 낮으면 프롬프트를 무시해 얼굴 유지 지시도 무시됨
+        // - 프롬프트: 최종 상태(desired state) 묘사로 모델이 delta가 아닌 결과를 목표로 함
         // - seed 고정: 일관된 결과 보장
         const result = await fal.subscribe('fal-ai/flux-pro/kontext', {
             input: {
                 image_url: accessibleUrl,
-                prompt: `Change ONLY the hairstyle of this person to ${hairStylePrompt}. Keep the exact same face, facial features, skin tone, expression, pose, body, clothing, background, and lighting. Do NOT alter anything except the hair. The result must look like the same photograph with only the hair restyled.`,
-                guidance_scale: 2,
+                prompt: `This person now has ${hairStylePrompt}. Identical face, identical skin tone, identical facial features, identical expression, identical clothing, identical background, identical lighting. Only the hairstyle has changed.`,
+                guidance_scale: 3.5,
                 output_format: 'jpeg' as const,
                 seed: 42,
             },
