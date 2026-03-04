@@ -166,14 +166,17 @@ export async function generateHairImageFromFace(
         const accessibleUrl = await uploadToFalCdn(faceImageUrl);
         console.log('[Kontext] Fal CDN 업로드 완료:', accessibleUrl);
 
-        // Kontext Pro는 짧고 직접적인 프롬프트에서 최고 성능 발휘
-        // 긴 프롬프트는 얼굴 동일성을 해침
+        // Kontext Pro 원본 보존 최적화 설정:
+        // - guidance_scale 2: 낮을수록 원본 이미지에 가까움 (기본 3.5 → 2로 낮춰 원본 최대 보존)
+        // - 프롬프트: 보존할 요소를 명시적으로 나열하여 헤어만 변경
+        // - seed 고정: 일관된 결과 보장
         const result = await fal.subscribe('fal-ai/flux-pro/kontext', {
             input: {
                 image_url: accessibleUrl,
-                prompt: `Give this exact same person a ${hairStylePrompt} hairstyle. Keep everything else identical.`,
-                guidance_scale: 4,
+                prompt: `Change ONLY the hairstyle of this person to ${hairStylePrompt}. Keep the exact same face, facial features, skin tone, expression, pose, body, clothing, background, and lighting. Do NOT alter anything except the hair. The result must look like the same photograph with only the hair restyled.`,
+                guidance_scale: 2,
                 output_format: 'jpeg' as const,
+                seed: 42,
             },
         });
 
