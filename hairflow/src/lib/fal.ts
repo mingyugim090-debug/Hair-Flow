@@ -106,13 +106,14 @@ export async function generateStyledFaceImage(
         // - face_id_plus_weight: 0.8 → 얼굴 identity 강하게 고정 (핵심 파라미터)
         // - ip_adapter_weight: 0.6 → IP-Adapter 조건 강도
         // - 프롬프트는 헤어스타일 변화만 묘사 (얼굴 묘사 불필요 — 임베딩이 처리)
-        const result = await fal.subscribe('fal-ai/ip-adapter-face-id', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await (fal.subscribe as any)('fal-ai/ip-adapter-face-id', {
             input: {
                 prompt: `Same person with ${prompt}. Same face, identical facial features, professional salon portrait, ultra-realistic, high quality, natural lighting, fashion magazine quality, no text, no watermarks`,
                 face_image_url: accessibleUrl,
                 negative_prompt:
                     'different person, changed face, altered facial features, different identity, different face, different nose, different eyes, different jawline, cartoon, illustration, painting, drawing, anime, unrealistic, deformed, blurry, low quality, text, watermark, logo, extra fingers, mutated hands, poorly drawn face, disfigured, oversaturated, cropped, out of frame',
-                model_type: 'SDXL-v2-plus' as const,
+                model_type: 'SDXL-v2-plus',
                 face_id_plus_weight: 0.8,
                 ip_adapter_weight: 0.6,
                 num_inference_steps: 30,
