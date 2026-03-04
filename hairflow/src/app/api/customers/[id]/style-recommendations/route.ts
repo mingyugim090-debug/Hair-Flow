@@ -140,8 +140,8 @@ export async function POST(
 
     const styleRecommendation: StyleRecommendationResponse = JSON.parse(content);
 
-    // 이미지 생성: 얼굴 사진이 있으면 IP-Adapter FaceID (얼굴 임베딩으로 identity 고정), 없으면 FLUX Pro
-    const { generateHairImage, generateStyledFaceImage } = await import('@/lib/fal');
+    // 이미지 생성: 얼굴 사진이 있으면 Kontext Pro (기존 사진 편집, 배경/옷/자세 100% 보존), 없으면 FLUX Pro
+    const { generateHairImage, generateHairImageFromFace } = await import('@/lib/fal');
     const { cacheGeneratedImage } = await import('@/lib/storage');
     // Admin Client 초기화 (한 번만)
     const { createAdminClient } = await import('@/lib/supabase/admin');
@@ -176,7 +176,7 @@ export async function POST(
             }
 
             generatedImageUrl = await Promise.race<string>([
-              generateStyledFaceImage(accessibleFrontUrl, imagePromptToUse),
+              generateHairImageFromFace(accessibleFrontUrl, imagePromptToUse),
               new Promise<string>((resolve) => setTimeout(() => resolve(''), 45000)),
             ]);
           } else {

@@ -179,14 +179,15 @@ export async function generateHairImageFromFace(
         console.log('[Kontext] Fal CDN 업로드 완료:', accessibleUrl);
 
         // Kontext Pro 설정:
-        // - guidance_scale 3.5: 기본값 범위. 낮으면 프롬프트를 무시해 얼굴 유지 지시도 무시됨
-        // - 프롬프트: 최종 상태(desired state) 묘사로 모델이 delta가 아닌 결과를 목표로 함
+        // - guidance_scale 4: 헤어만 변경하는 지시를 정확히 따르면서도 원본을 최대한 보존
+        //   (2는 너무 낮아 지시 무시, 6+ 이상은 과도한 변형 가능성)
+        // - 프롬프트: 변경할 것(헤어)과 유지할 것(얼굴/옷/배경/자세)을 명확히 분리
         // - seed 고정: 일관된 결과 보장
         const result = await fal.subscribe('fal-ai/flux-pro/kontext', {
             input: {
                 image_url: accessibleUrl,
-                prompt: `This person now has ${hairStylePrompt}. Identical face, identical skin tone, identical facial features, identical expression, identical clothing, identical background, identical lighting. Only the hairstyle has changed.`,
-                guidance_scale: 3.5,
+                prompt: `Change only the hairstyle to ${hairStylePrompt}. Keep the face, facial features, skin tone, expression, body pose, clothing, and background pixel-perfect identical. Only the hair changes.`,
+                guidance_scale: 4,
                 output_format: 'jpeg' as const,
                 seed: 42,
             },
